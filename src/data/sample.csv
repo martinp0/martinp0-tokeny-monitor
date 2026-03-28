@@ -1,0 +1,69 @@
+generation_id,created_at,cost_total,cost_web_search,cost_cache,cost_file_processing,byok_usage_inference,tokens_prompt,tokens_completion,tokens_reasoning,tokens_cached,model_permaslug,provider_name,variant,cancelled,streamed,user,finish_reason_raw,finish_reason_normalized,generation_time_ms,time_to_first_token_ms,app_name,api_key_name
+gen-1774717534-RBv1klIJCCZ14FwKKGbf,2026-03-28 17:05:34.844,0.003334,,,,0,66626,9,0,0,openai/gpt-5-nano-2025-08-07,OpenAI,standard,false,true,,completed,stop,2733,2647,OpenClaw,rpi5
+gen-1774717529-yijNgfK7yc6lQfGdg5UN,2026-03-28 17:05:29.036,0.41604,,,0,0,82863,69,0,0,anthropic/claude-4.6-opus-20260205,Google,standard,false,true,,tool_use,tool_calls,4652,4212,OpenClaw,rpi5
+gen-1774716547-g9fD1FJhcjXMfOOjzAqi,2026-03-28 16:49:07.077,0.002007,,-0.002977,,0,66937,4096,3008,66176,openai/gpt-5-nano-2025-08-07,OpenAI,standard,false,true,,max_output_tokens,length,29145,23628,OpenClaw,rpi5
+gen-1774716527-YXU2Eet6a3rRiGtnYXjA,2026-03-28 16:48:47.909,0.001386,,-0.00292,,0,66223,2490,1856,64896,openai/gpt-5-nano-2025-08-07,OpenAI,standard,false,true,,completed,stop,17431,14599,OpenClaw,rpi5
+gen-1774716498-MAGIr0QN9ickW44Um0gS,2026-03-28 16:48:17.825,0.002175,,-0.002712,,0,65003,4096,2944,60288,openai/gpt-5-nano-2025-08-07,OpenAI,standard,false,true,,max_output_tokens,length,27465,22993,OpenClaw,rpi5
+gen-1774716487-VJTyxHY4x94h0RyPLuCw,2026-03-28 16:48:07.528,0.388415,,,0,0,75888,359,0,0,anthropic/claude-4.6-opus-20260205,Google,standard,false,true,,tool_use,tool_calls,8618,3437,OpenClaw,rpi5
+gen-1774716485-SnntCO1bTmLQe8NUZSa3,2026-03-28 16:48:05.214,0.00034,,-0.002695,,0,60419,37,0,59904,openai/gpt-5-nano-2025-08-07,OpenAI,standard,false,true,,completed,tool_calls,1389,1177,OpenClaw,rpi5
+gen-1774716470-rn4nh38QcLlj5iYOosGe,2026-03-28 16:47:50.266,0.000795,,-0.00262,,0,60013,1040,832,58240,openai/gpt-5-nano-2025-08-07,OpenAI,standard,false,true,,completed,tool_calls,14243,14096,OpenClaw,rpi5
+gen-1774716460-J7XZcxdVJEGdITJncU1G,2026-03-28 16:47:40.729,0.3761,,,0,0,74070,230,0,0,anthropic/claude-4.6-opus-20260205,Google,standard,false,true,,end_turn,stop,8164,3075,OpenClaw,rpi5
+gen-1774716436-orUiHk8ZtVkr0S9ikfNy,2026-03-28 16:47:16.437,0.37694,,,0,0,73133,451,0,0,anthropic/claude-4.6-opus-20260205,Google,standard,false,true,,tool_use,tool_calls,23068,5210,OpenClaw,rpi5
+gen-1774716402-1hoEcjgZxfnF6LIWhwMd,2026-03-28 16:46:42.632,0.00194,,-0.002615,,0,58342,4096,3392,58112,openai/gpt-5-nano-2025-08-07,OpenAI,standard,false,true,,max_output_tokens,length,31796,31110,OpenClaw,rpi5
+gen-1774716395-ZXsCcN2jbG4UBn4T7tfB,2026-03-28 16:46:35.165,0.000413,,-0.002592,,0,57991,266,0,57600,openai/gpt-5-nano-2025-08-07,OpenAI,standard,false,true,,completed,stop,5294,3957,OpenClaw,rpi5
+gen-1774716387-tKV3VYIwOn7YNeOpcsWy,2026-03-28 16:46:27.971,0.3657,,,0,0,71485,331,0,0,anthropic/claude-4.6-opus-20260205,Google,standard,false,true,,tool_use,tool_calls,6203,3087,OpenClaw,rpi5
+gen-1774716383-WCkQUsezkSoGq8MkXu6b,2026-03-28 16:46:23.520,0.00044,,-0.002551,,0,57309,318,0,56704,openai/gpt-5-nano-2025-08-07,OpenAI,standard,false,true,,completed,stop,2931,812,OpenClaw,rpi5
+gen-1774716370-hdFWkp01kZybe94s6of5,2026-03-28 16:46:10.645,0.000989,,-0.002482,,0,56839,1575,1088,55168,openai/gpt-5-nano-2025-08-07,OpenAI,standard,false,true,,completed,tool_calls,11941,9345,OpenClaw,rpi5
+gen-1774716338-31gsET2fOXkgidzjRq6E,2026-03-28 16:45:37.614,0.002174,,-0.002206,,0,55312,4038,2624,49024,openai/gpt-5-nano-2025-08-07,OpenAI,standard,false,true,,completed,stop,30209,22545,OpenClaw,rpi5
+gen-1774716327-Tk541d75J6661gd0EVaI,2026-03-28 16:45:27.183,0.328075,,,0,0,63225,478,0,0,anthropic/claude-4.6-opus-20260205,Google,standard,false,true,,tool_use,tool_calls,8925,3244,OpenClaw,rpi5
+gen-1774716315-yt5FmzSjlPPsSdoYBgVp,2026-03-28 16:45:15.074,0.3201,,,0,0,62680,268,0,0,anthropic/claude-4.6-opus-20260205,Google,standard,false,true,,end_turn,stop,10734,4244,OpenClaw,rpi5
+gen-1774716306-CPCYVh8xxK4mnTipBoHi,2026-03-28 16:45:06.486,0.317415,,,0,0,62463,204,0,0,anthropic/claude-4.6-opus-20260205,Google,standard,false,true,,tool_use,tool_calls,7568,2910,OpenClaw,rpi5
+gen-1774716272-NPIo6FEP0DZi93AenNPo,2026-03-28 16:44:32.624,0.001903,,-0.002188,,0,49074,4096,2752,48640,openai/gpt-5-nano-2025-08-07,OpenAI,standard,false,true,,max_output_tokens,length,32582,23312,OpenClaw,rpi5
+gen-1774716270-95jZAXR0sCFrU5n3SxZ6,2026-03-28 16:44:30.773,0.000292,,-0.00216,,0,48782,33,0,48000,openai/gpt-5-nano-2025-08-07,OpenAI,standard,false,true,,completed,tool_calls,1370,1234,OpenClaw,rpi5
+gen-1774716268-kcbUeMuKPUKNx3N9dnQt,2026-03-28 16:44:28.805,0.000285,,-0.002131,,0,48093,31,0,47360,openai/gpt-5-nano-2025-08-07,OpenAI,standard,false,true,,completed,tool_calls,1384,1183,OpenClaw,rpi5
+gen-1774716252-quEVrXURBAjx8JwrCdvH,2026-03-28 16:44:12.094,0.30734,,,0,0,58848,524,0,0,anthropic/claude-4.6-opus-20260205,Google,standard,false,true,,tool_use,tool_calls,16124,2586,OpenClaw,rpi5
+gen-1774716211-bggD6n2GSpbNSnzIlJEJ,2026-03-28 16:43:31.629,0.001891,,-0.002119,,0,47446,4096,3968,47104,openai/gpt-5-nano-2025-08-07,OpenAI,standard,false,true,,max_output_tokens,length,38821,38821,OpenClaw,rpi5
+gen-1774716208-VJDkPKZTyJYweBnSpjUc,2026-03-28 16:43:28.178,0.000258,,-0.002113,,0,47145,37,0,46976,openai/gpt-5-nano-2025-08-07,OpenAI,standard,false,true,,completed,tool_calls,2698,2543,OpenClaw,rpi5
+gen-1774716206-4OTz76ZTzQGvPo1KyPce,2026-03-28 16:43:26.203,0.00026,,-0.002108,,0,47056,39,0,46848,openai/gpt-5-nano-2025-08-07,OpenAI,standard,false,true,,completed,tool_calls,1292,1064,OpenClaw,rpi5
+gen-1774716204-Q0xVl8qv2Iq5SBtI1X8x,2026-03-28 16:43:24.452,0.000287,,-0.002073,,0,46932,37,0,46080,openai/gpt-5-nano-2025-08-07,OpenAI,standard,false,true,,completed,tool_calls,1218,1019,OpenClaw,rpi5
+gen-1774716191-xsgnouDeQxH9WvwWal1s,2026-03-28 16:43:11.914,0.29602,,,0,0,57204,400,0,0,anthropic/claude-4.6-opus-20260205,Google,standard,false,true,,tool_use,tool_calls,11801,2618,OpenClaw,rpi5
+gen-1774716190-YSy1XbyNAJs4DrAo4rMe,2026-03-28 16:43:10.079,0.000512,,-0.001814,,0,46195,42,0,40320,openai/gpt-5-nano-2025-08-07,OpenAI,standard,false,true,,completed,tool_calls,1336,1067,OpenClaw,rpi5
+gen-1774716173-nj0mkZMk2fj28vKLA7j7,2026-03-28 16:42:52.597,0.000762,,-0.001808,,0,40414,1376,1152,40192,openai/gpt-5-nano-2025-08-07,OpenAI,standard,false,true,,completed,tool_calls,14419,14262,OpenClaw,rpi5
+gen-1774716169-mZsTHTScSQLHBjRiNYIa,2026-03-28 16:42:49.639,0.000223,,-0.001808,,0,40320,40,0,40192,openai/gpt-5-nano-2025-08-07,OpenAI,standard,false,true,,completed,tool_calls,2098,1945,OpenClaw,rpi5
+gen-1774716152-8OrqBuYTiWfvHlmYEEZ0,2026-03-28 16:42:32.782,0.00081,,-0.001693,,0,40238,1230,1152,37632,openai/gpt-5-nano-2025-08-07,OpenAI,standard,false,true,,completed,tool_calls,15973,15860,OpenClaw,rpi5
+gen-1774716139-sooWEqdmm2Pa9XbRVRXL,2026-03-28 16:42:19.184,0.25134,,,0,0,48638,326,0,0,anthropic/claude-4.6-opus-20260205,Google,standard,false,true,,tool_use,tool_calls,13018,4576,OpenClaw,rpi5
+gen-1774716128-mBTIKm65GJ4eByqiJGiv,2026-03-28 16:42:08.298,0.23359,,,0,0,46333,77,0,0,anthropic/claude-4.6-opus-20260205,Google,standard,false,true,,tool_use,tool_calls,3276,2656,OpenClaw,rpi5
+gen-1774716098-6zpU3dM66Umoc5XHk5wg,2026-03-28 16:41:38.977,0.002998,,,,0,37692,2784,2304,0,openai/gpt-5-nano-2025-08-07,OpenAI,standard,false,true,,completed,stop,27338,26598,OpenClaw,rpi5
+gen-1774716094-brEylBLh2wiIbKkKI0IZ,2026-03-28 16:41:34.430,0.22944,,,0,0,45413,95,0,0,anthropic/claude-4.6-opus-20260205,Google,standard,false,true,,tool_use,tool_calls,3709,2440,OpenClaw,rpi5
+gen-1774715772-LmJVXvbnVUBeZFjXXzF5,2026-03-28 16:36:12.926,0.00024,,-0.000934,,0,11444,78,0,10388,google/gemini-2.5-flash-lite,Google,standard,false,true,,STOP,stop,974,653,OpenClaw,rpi5
+gen-1774715771-yyKZlbg8qXbMlzxmlbVs,2026-03-28 16:36:11.671,0.000179,,-0.000932,,0,11086,10,0,10364,google/gemini-2.5-flash-lite,Google,standard,false,true,,STOP,tool_calls,717,644,OpenClaw,rpi5
+gen-1774715760-lFs7DP8A8BUYA83lP0Rm,2026-03-28 16:36:00.005,0.00019,,-0.000931,,0,10921,74,0,10348,google/gemini-2.5-flash-lite,Google,standard,false,true,,STOP,stop,1563,1249,OpenClaw,rpi5
+gen-1774715758-yJRCcagMcoHMJVCP7Tge,2026-03-28 16:35:58.400,0.001072,,,,0,10709,5,0,0,google/gemini-2.5-flash-lite,Google,standard,false,true,,STOP,tool_calls,913,879,OpenClaw,rpi5
+gen-1774715745-IlyzlHLNi0XrcGip3aE3,2026-03-28 16:35:45.829,0.074945,,,0,0,13729,252,0,0,anthropic/claude-4.6-opus-20260205,Google,standard,false,true,,end_turn,stop,8546,1763,OpenClaw,rpi5
+gen-1774715742-w5FDvkTek1bUrcpnwSA8,2026-03-28 16:35:42.410,0.067075,,,0,0,12780,127,0,0,anthropic/claude-4.6-opus-20260205,Google,standard,false,true,,tool_use,tool_calls,1899,904,OpenClaw,rpi5
+gen-1774715738-eZ4SSkAf4gH2uvPxmYjr,2026-03-28 16:35:38.528,0.001094,,,,0,9162,445,439,0,google/gemini-2.5-flash-lite,Google,standard,false,true,,STOP,tool_calls,3281,3251,OpenClaw,rpi5
+gen-1774706764-BwELvfzb0vxWIcugVbD2,2026-03-28 14:06:04.273,0.001287,,,,0,12846,6,0,0,google/gemini-2.5-flash-lite,Google,standard,false,true,,STOP,stop,935,820,OpenClaw,
+gen-1774706762-8GOkH8NoTFZCs5X7HCCg,2026-03-28 14:06:02.234,0.00132,,,,0,12761,112,91,0,google/gemini-2.5-flash-lite,Google,standard,false,true,,STOP,tool_calls,1194,1191,OpenClaw,
+gen-1774704962-qdYzRtwRnp1glHUDdCxq,2026-03-28 13:36:02.168,0.001368,,,,0,12761,231,225,0,google/gemini-2.5-flash-lite,Google,standard,false,true,,STOP,stop,2368,2341,OpenClaw,
+gen-1774703163-2M4hMoSxiUcl0pEOMhMD,2026-03-28 13:06:03.868,0.000163,,-0.001133,,0,12844,30,0,12589,google/gemini-2.5-flash-lite,Google,standard,false,true,,STOP,stop,958,818,OpenClaw,
+gen-1774703162-5XXqdkhxVVLOU4S5aSyG,2026-03-28 13:06:02.161,0.001284,,,,0,12761,21,0,0,google/gemini-2.5-flash-lite,Google,standard,false,true,,STOP,tool_calls,925,895,OpenClaw,
+gen-1774701362-YZepDVOluzpvZ3vp1u9h,2026-03-28 12:36:02.173,0.001313,,,,0,12761,94,88,0,google/gemini-2.5-flash-lite,Google,standard,false,true,,STOP,stop,1862,1832,OpenClaw,
+gen-1774699563-3btZzLJIStnh7XZ1JesT,2026-03-28 12:06:03.444,0.000164,,-0.001133,,0,12843,32,0,12589,google/gemini-2.5-flash-lite,Google,standard,false,true,,STOP,stop,1443,1280,OpenClaw,
+gen-1774699561-4EJ4Nth3JINsxxhe6CFv,2026-03-28 12:06:01.728,0.001284,,,,0,12761,21,0,0,google/gemini-2.5-flash-lite,Google,standard,false,true,,STOP,tool_calls,862,828,OpenClaw,
+gen-1774697765-Z5keL247ZPNwBNP9tjX1,2026-03-28 11:36:05.881,0.000214,,-0.001059,,0,12590,37,0,11767,google/gemini-2.5-flash-lite,Google,standard,false,true,,STOP,stop,880,702,OpenClaw,
+gen-1774697762-tNlaRH8b07cTZtxWE4o1,2026-03-28 11:36:02.635,0.001381,,,,0,12508,326,305,0,google/gemini-2.5-flash-lite,Google,standard,false,true,,STOP,tool_calls,2451,2425,OpenClaw,
+gen-1774618876-bBFMoIoMA4vY3c5qGtB1,2026-03-27 13:41:16.007,0,,,0,0,116296,423,30,2649,z-ai/glm-4.5-air,Z.AI,free,false,true,,stop,stop,58809,44084,OpenClaw,
+gen-1774618855-SgAehRhPeI7pRhJOOAfr,2026-03-27 13:40:55.538,0,,,0,0,109189,299,259,105088,stepfun/step-3.5-flash,StepFun,free,false,true,,tool_calls,tool_calls,8333,5556,OpenClaw,
+gen-1774618816-1tyFbtAmb0wW1zFotq0k,2026-03-27 13:40:16.303,0,,,0,0,99873,87,0,0,arcee-ai/trinity-large-preview,Arcee AI,free,false,true,,stop,stop,31711,12022,OpenClaw,
+gen-1774618807-b42WHCFLMINJY7QmNNrV,2026-03-27 13:40:07.024,0,,,0,0,141821,266,218,0,nvidia/nemotron-3-nano-30b-a3b,Nvidia,free,false,true,,stop,stop,5686,4710,OpenClaw,
+gen-1774618797-h7HsrSDHVriVTDouvEi5,2026-03-27 13:39:56.998,0,,,0,0,141588,501,505,0,nvidia/nemotron-3-nano-30b-a3b,Nvidia,free,false,true,,stop,stop,7232,4759,OpenClaw,
+gen-1774618771-DdMwUc0NY37gB6OLrcPL,2026-03-27 13:39:31.485,0,,,0,0,99656,376,255,0,arcee-ai/trinity-mini-20251201,Arcee AI,free,false,true,,stop,stop,22309,3923,OpenClaw,
+gen-1774618741-rYYoBGsCVlb9bsmahCo8,2026-03-27 13:39:01.675,0,,,0,0,98703,59,0,0,arcee-ai/trinity-large-preview,Arcee AI,free,false,true,,tool_calls,tool_calls,24958,12355,OpenClaw,
+gen-1774618700-UaKWHx25N4rtloOFI3Gz,2026-03-27 13:38:20.046,0,,,0,0,140599,139,102,0,nvidia/nemotron-3-super-120b-a12b-20230311,Nvidia,free,false,true,,tool_calls,tool_calls,37483,14908,OpenClaw,
+gen-1774618677-zuAvncVUuUBO7WR9lLDt,2026-03-27 13:37:56.847,0,,,0,0,98345,24,0,0,arcee-ai/trinity-large-preview,Arcee AI,free,false,true,,tool_calls,tool_calls,19426,18981,OpenClaw,
+gen-1774618550-ttz6jwJhmt8uTUsQyJ7O,2026-03-27 13:35:50.463,0,,,0,0,97794,355,276,0,arcee-ai/trinity-mini-20251201,Arcee AI,free,false,true,,stop,stop,21890,4468,OpenClaw,
+gen-1774618515-29482nCoCt0bz7opFMbT,2026-03-27 13:35:15.855,0,,,0,0,97498,429,343,0,arcee-ai/trinity-mini-20251201,Arcee AI,free,false,true,,stop,stop,25099,3895,OpenClaw,
+gen-1774618476-Wg7ra73Jp94EfVSSSK8s,2026-03-27 13:34:36.760,0,,,0,0,97184,537,449,0,arcee-ai/trinity-mini-20251201,Arcee AI,free,false,true,,stop,stop,30100,4227,OpenClaw,
+gen-1774618460-zmGdvbF02A9AvTjpvPa5,2026-03-27 13:34:20.379,0,,,0,0,95957,27,0,0,arcee-ai/trinity-large-preview,Arcee AI,free,false,true,,tool_calls,tool_calls,12751,8223,OpenClaw,
+gen-1774602355-b3WGXvNdFS2WHLi33eep,2026-03-27 09:05:55.597,0,,,0,0,213,84,84,0,stepfun/step-3.5-flash,StepFun,free,false,true,,tool_calls,tool_calls,2186,1317,,
+gen-1774601532-J8URp66y7UGvsL44nvzV,2026-03-27 08:52:12.723,0,,,0,0,213,58,51,0,stepfun/step-3.5-flash,StepFun,free,false,true,,tool_calls,tool_calls,1125,555,,
