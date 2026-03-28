@@ -1,4 +1,6 @@
+import { useRef } from "react";
 import { useDashboardData } from "@/hooks/useDashboardData";
+import { useExport } from "@/hooks/useExport";
 import { KpiCards } from "@/components/dashboard/KpiCards";
 import { CostTimeChart } from "@/components/dashboard/CostTimeChart";
 import { TokensChart } from "@/components/dashboard/TokensChart";
@@ -7,14 +9,18 @@ import { ProviderChart } from "@/components/dashboard/ProviderChart";
 import { SpeedChart } from "@/components/dashboard/SpeedChart";
 import { RequestsTable } from "@/components/dashboard/RequestsTable";
 import { CsvUpload } from "@/components/dashboard/CsvUpload";
-import { Activity } from "lucide-react";
+import { Activity, Download, Image, FileText } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 
 const Index = () => {
+  const dashboardRef = useRef<HTMLDivElement>(null);
   const {
-    filteredData, fileName, selectedModel, setSelectedModel, loadCSV,
+    data, filteredData, fileName, selectedModel, setSelectedModel, loadCSV,
     totalCost, totalRequests, totalTokens, avgGenTime, dateRange,
     costByModel, costByProvider, timeSeries,
   } = useDashboardData();
+  const { exportPNG, exportPDF } = useExport(dashboardRef);
 
   return (
     <div className="min-h-screen bg-background">
@@ -38,12 +44,30 @@ const Index = () => {
             )}
             <span className="text-xs font-mono text-muted-foreground truncate max-w-[200px]">{fileName}</span>
             <CsvUpload onUpload={loadCSV} />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-2 border-border hover:bg-secondary hover:text-foreground font-mono text-xs">
+                  <Download className="h-3.5 w-3.5" />
+                  Export
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="bg-popover border-border">
+                <DropdownMenuItem onClick={exportPNG} className="gap-2 font-mono text-xs cursor-pointer">
+                  <Image className="h-3.5 w-3.5" />
+                  Export as PNG
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => exportPDF(data, totalCost, totalRequests, totalTokens, avgGenTime)} className="gap-2 font-mono text-xs cursor-pointer">
+                  <FileText className="h-3.5 w-3.5" />
+                  Export as PDF
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </header>
 
       {/* Dashboard */}
-      <main className="p-6 space-y-4 max-w-[1600px] mx-auto">
+      <main ref={dashboardRef} className="p-6 space-y-4 max-w-[1600px] mx-auto">
         <KpiCards totalCost={totalCost} totalRequests={totalRequests} totalTokens={totalTokens} avgGenTime={avgGenTime} />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
