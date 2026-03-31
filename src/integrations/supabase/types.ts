@@ -14,7 +14,90 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      activity_rows: {
+        Row: {
+          api_key_name: string
+          app_name: string
+          byok_usage_inference: number
+          cancelled: boolean
+          cost_cache: number
+          cost_file_processing: number
+          cost_total: number
+          cost_web_search: number
+          created_at: string
+          finish_reason_normalized: string
+          finish_reason_raw: string
+          generation_id: string
+          generation_time_ms: number
+          id: string
+          inserted_at: string
+          model_permaslug: string
+          provider_name: string
+          streamed: boolean
+          time_to_first_token_ms: number
+          tokens_cached: number
+          tokens_completion: number
+          tokens_prompt: number
+          tokens_reasoning: number
+          user: string
+          variant: string
+        }
+        Insert: {
+          api_key_name?: string
+          app_name?: string
+          byok_usage_inference?: number
+          cancelled?: boolean
+          cost_cache?: number
+          cost_file_processing?: number
+          cost_total?: number
+          cost_web_search?: number
+          created_at: string
+          finish_reason_normalized?: string
+          finish_reason_raw?: string
+          generation_id: string
+          generation_time_ms?: number
+          id?: string
+          inserted_at?: string
+          model_permaslug?: string
+          provider_name?: string
+          streamed?: boolean
+          time_to_first_token_ms?: number
+          tokens_cached?: number
+          tokens_completion?: number
+          tokens_prompt?: number
+          tokens_reasoning?: number
+          user?: string
+          variant?: string
+        }
+        Update: {
+          api_key_name?: string
+          app_name?: string
+          byok_usage_inference?: number
+          cancelled?: boolean
+          cost_cache?: number
+          cost_file_processing?: number
+          cost_total?: number
+          cost_web_search?: number
+          created_at?: string
+          finish_reason_normalized?: string
+          finish_reason_raw?: string
+          generation_id?: string
+          generation_time_ms?: number
+          id?: string
+          inserted_at?: string
+          model_permaslug?: string
+          provider_name?: string
+          streamed?: boolean
+          time_to_first_token_ms?: number
+          tokens_cached?: number
+          tokens_completion?: number
+          tokens_prompt?: number
+          tokens_reasoning?: number
+          user?: string
+          variant?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
