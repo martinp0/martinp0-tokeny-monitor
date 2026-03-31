@@ -19,7 +19,7 @@ interface Props {
 }
 
 export function ModelCostChart({ data, onModelClick, selectedModel }: Props) {
-  const { currency } = useCurrency();
+  const { currency, exchangeRate } = useCurrency();
 
   return (
     <Card className="bg-card border-border/50">
