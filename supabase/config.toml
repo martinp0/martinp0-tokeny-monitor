@@ -2,3 +2,6 @@ project_id = "cfjusewixhycahgxoylm"
 
 [functions.process-email-queue]
 verify_jwt = true
+
+[functions.fun-ai]
+verify_jwt = false
