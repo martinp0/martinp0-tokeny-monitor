@@ -69,16 +69,7 @@ const Index = () => {
             </div>
             <DateRangePicker value={dateFilter} onChange={setDateFilter} />
             <span className="text-xs font-mono text-muted-foreground truncate max-w-[200px]">{fileName}</span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={syncFromAPI}
-              disabled={syncing}
-              className="gap-2 border-border hover:bg-secondary hover:text-foreground font-mono text-xs"
-            >
-              <RefreshCw className={`h-3.5 w-3.5 ${syncing ? "animate-spin" : ""}`} />
-              {syncing ? "Syncing..." : "Sync API"}
-            </Button>
+            
             <CsvUpload onUpload={loadCSV} />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
