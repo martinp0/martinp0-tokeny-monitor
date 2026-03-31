@@ -9,6 +9,7 @@ export function useDashboardData() {
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
   const [syncing, setSyncing] = useState(false);
   const [syncError, setSyncError] = useState<string | null>(null);
+  const [dateFilter, setDateFilter] = useState<{ from: Date; to: Date } | null>(null);
 
   // Load data from DB, fall back to sample CSV
   useEffect(() => {
@@ -146,22 +147,32 @@ export function useDashboardData() {
     }
   }, []);
 
-  const filteredData = selectedModel
-    ? data.filter((r) => r.model_permaslug === selectedModel)
+  // Apply date filter first, then model filter
+  const dateFiltered = dateFilter
+    ? data.filter((r) => {
+        const d = r.created_at.substring(0, 10);
+        const from = dateFilter.from.toISOString().substring(0, 10);
+        const to = dateFilter.to.toISOString().substring(0, 10);
+        return d >= from && d <= to;
+      })
     : data;
 
-  const models = [...new Set(data.map((r) => r.model_permaslug))];
-  const providers = [...new Set(data.map((r) => r.provider_name))];
+  const filteredData = selectedModel
+    ? dateFiltered.filter((r) => r.model_permaslug === selectedModel)
+    : dateFiltered;
 
-  const totalCost = data.reduce((s, r) => s + r.cost_total, 0);
-  const totalRequests = data.length;
-  const totalTokens = data.reduce(
+  const models = [...new Set(dateFiltered.map((r) => r.model_permaslug))];
+  const providers = [...new Set(dateFiltered.map((r) => r.provider_name))];
+
+  const totalCost = dateFiltered.reduce((s, r) => s + r.cost_total, 0);
+  const totalRequests = dateFiltered.length;
+  const totalTokens = dateFiltered.reduce(
     (s, r) => s + r.tokens_prompt + r.tokens_completion + r.tokens_reasoning,
     0
   );
   const avgGenTime =
-    data.length > 0
-      ? data.reduce((s, r) => s + r.generation_time_ms, 0) / data.length
+    dateFiltered.length > 0
+      ? dateFiltered.reduce((s, r) => s + r.generation_time_ms, 0) / dateFiltered.length
       : 0;
 
   const dateRange = data.length > 0
@@ -174,13 +185,13 @@ export function useDashboardData() {
   const costByModel = models.map((m) => ({
     model: m.split("/").pop() || m,
     fullModel: m,
-    cost: data.filter((r) => r.model_permaslug === m).reduce((s, r) => s + r.cost_total, 0),
+    cost: dateFiltered.filter((r) => r.model_permaslug === m).reduce((s, r) => s + r.cost_total, 0),
   })).sort((a, b) => b.cost - a.cost);
 
   const costByProvider = providers.map((p) => ({
     provider: p,
-    cost: data.filter((r) => r.provider_name === p).reduce((s, r) => s + r.cost_total, 0),
-    requests: data.filter((r) => r.provider_name === p).length,
+    cost: dateFiltered.filter((r) => r.provider_name === p).reduce((s, r) => s + r.cost_total, 0),
+    requests: dateFiltered.filter((r) => r.provider_name === p).length,
   })).sort((a, b) => b.cost - a.cost);
 
   const timeSeries = [...filteredData]
@@ -204,6 +215,8 @@ export function useDashboardData() {
     fileName,
     selectedModel,
     setSelectedModel,
+    dateFilter,
+    setDateFilter,
     loadCSV,
     syncFromAPI,
     syncing,
