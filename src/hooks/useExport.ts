@@ -44,7 +44,7 @@ export function useExport(dashboardRef: React.RefObject<HTMLElement | null>) {
     doc.setFontSize(11);
     doc.setTextColor(60);
     const kpis = [
-      `Naklady: ${fmtCost(totalCost, 4, currency)}`,
+      `Naklady: ${fmtCost(totalCost, 4, currency, exchangeRate)}`,
       `Pozadavky: ${fmtNum(totalRequests, currency)}`,
       `Prum. odpoved: ${(avgGenTime / 1000).toFixed(1)}s`,
       `Tokeny: ${fmtNum(totalTokens, currency)}`,
