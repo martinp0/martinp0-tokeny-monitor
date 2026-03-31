@@ -76,10 +76,10 @@ function RequestDetailModal({ row, open, onClose }: { row: ActivityRow | null; o
           <div>
             <h4 className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Tokens</h4>
             <div className="bg-secondary/50 rounded-md px-3 py-1">
-              <DetailRow label="Prompt" value={fmtNum(row.tokens_prompt)} color="text-chart-2" />
-              <DetailRow label="Completion" value={fmtNum(row.tokens_completion)} color="text-primary" />
-              <DetailRow label="Reasoning" value={fmtNum(row.tokens_reasoning)} color="text-chart-4" />
-              <DetailRow label="Cached" value={fmtNum(row.tokens_cached)} color="text-chart-3" />
+              <DetailRow label="Prompt" value={fmtNum(row.tokens_prompt, currency)} color="text-chart-2" />
+              <DetailRow label="Completion" value={fmtNum(row.tokens_completion, currency)} color="text-primary" />
+              <DetailRow label="Reasoning" value={fmtNum(row.tokens_reasoning, currency)} color="text-chart-4" />
+              <DetailRow label="Cached" value={fmtNum(row.tokens_cached, currency)} color="text-chart-3" />
             </div>
           </div>
 
