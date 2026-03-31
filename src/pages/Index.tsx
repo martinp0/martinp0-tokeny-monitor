@@ -10,6 +10,7 @@ import { ModelCostChart } from "@/components/dashboard/ModelCostChart";
 import { ProviderChart } from "@/components/dashboard/ProviderChart";
 import { SpeedChart } from "@/components/dashboard/SpeedChart";
 import { RequestsTable } from "@/components/dashboard/RequestsTable";
+import { RealLifeComparison } from "@/components/dashboard/RealLifeComparison";
 import { CsvUpload } from "@/components/dashboard/CsvUpload";
 import { DateRangePicker } from "@/components/dashboard/DateRangePicker";
 import { Activity, Download, Image, FileText, RefreshCw, AlertCircle, LogOut } from "lucide-react";
