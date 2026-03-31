@@ -3,11 +3,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Activity, LogIn, UserPlus } from "lucide-react";
+import { Activity, LogIn, UserPlus, Mail, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 
+type View = "login" | "register" | "forgot";
+
 export default function Auth() {
-  const [isLogin, setIsLogin] = useState(true);
+  const [view, setView] = useState<View>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
@@ -18,11 +20,11 @@ export default function Auth() {
     setLoading(true);
 
     try {
-      if (isLogin) {
+      if (view === "login") {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         toast.success("Přihlášení úspěšné");
-      } else {
+      } else if (view === "register") {
         const { error } = await supabase.auth.signUp({
           email,
           password,
@@ -33,13 +35,22 @@ export default function Auth() {
         });
         if (error) throw error;
         toast.success("Registrace úspěšná!");
+      } else {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/reset-password`,
+        });
+        if (error) throw error;
+        toast.success("Email s odkazem na reset hesla byl odeslán");
+        setView("login");
       }
     } catch (error: any) {
-      toast.error(error.message || "Chyba při přihlášení");
+      toast.error(error.message || "Došlo k chybě");
     } finally {
       setLoading(false);
     }
   };
+
+  const title = view === "login" ? "Přihlášení" : view === "register" ? "Registrace" : "Reset hesla";
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -49,13 +60,11 @@ export default function Auth() {
             <Activity className="h-8 w-8 text-primary" />
             <span className="text-xl font-bold text-foreground">OpenRouter Monitor</span>
           </div>
-          <CardTitle className="text-lg text-foreground">
-            {isLogin ? "Přihlášení" : "Registrace"}
-          </CardTitle>
+          <CardTitle className="text-lg text-foreground">{title}</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            {!isLogin && (
+            {view === "register" && (
               <Input
                 type="text"
                 placeholder="Jméno"
@@ -72,27 +81,64 @@ export default function Auth() {
               required
               className="bg-secondary border-border font-mono"
             />
-            <Input
-              type="password"
-              placeholder="Heslo"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={6}
-              className="bg-secondary border-border font-mono"
-            />
+            {view !== "forgot" && (
+              <Input
+                type="password"
+                placeholder="Heslo"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={6}
+                className="bg-secondary border-border font-mono"
+              />
+            )}
             <Button type="submit" disabled={loading} className="w-full gap-2 font-mono">
-              {isLogin ? <LogIn className="h-4 w-4" /> : <UserPlus className="h-4 w-4" />}
-              {loading ? "Načítání..." : isLogin ? "Přihlásit se" : "Zaregistrovat se"}
+              {view === "login" && <LogIn className="h-4 w-4" />}
+              {view === "register" && <UserPlus className="h-4 w-4" />}
+              {view === "forgot" && <Mail className="h-4 w-4" />}
+              {loading
+                ? "Načítání..."
+                : view === "login"
+                ? "Přihlásit se"
+                : view === "register"
+                ? "Zaregistrovat se"
+                : "Odeslat reset email"}
             </Button>
           </form>
-          <div className="mt-4 text-center">
-            <button
-              onClick={() => setIsLogin(!isLogin)}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors font-mono"
-            >
-              {isLogin ? "Nemáte účet? Zaregistrujte se" : "Máte účet? Přihlaste se"}
-            </button>
+          <div className="mt-4 text-center space-y-2">
+            {view === "login" && (
+              <>
+                <button
+                  onClick={() => setView("forgot")}
+                  className="block w-full text-sm text-muted-foreground hover:text-foreground transition-colors font-mono"
+                >
+                  Zapomenuté heslo?
+                </button>
+                <button
+                  onClick={() => setView("register")}
+                  className="block w-full text-sm text-muted-foreground hover:text-foreground transition-colors font-mono"
+                >
+                  Nemáte účet? Zaregistrujte se
+                </button>
+              </>
+            )}
+            {view === "register" && (
+              <button
+                onClick={() => setView("login")}
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors font-mono"
+              >
+                Máte účet? Přihlaste se
+              </button>
+            )}
+            {view === "forgot" && (
+              <button
+                onClick={() => setView("login")}
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors font-mono flex items-center justify-center gap-1 w-full"
+              >
+                <ArrowLeft className="h-3 w-3" />
+                Zpět na přihlášení
+              </button>
+            )}
           </div>
         </CardContent>
       </Card>
