@@ -30,15 +30,17 @@ const Index = () => {
   const { signOut } = useAuth();
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background bg-mesh">
       {/* Header */}
-      <header className="border-b border-border/50 px-6 py-3">
+      <header className="border-b border-white/[0.06] px-6 py-3 glass">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Activity className="h-6 w-6 text-primary" />
-            <h1 className="text-lg font-bold text-foreground tracking-tight">OpenRouter Monitor</h1>
+            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+              <Activity className="h-4 w-4 text-white" />
+            </div>
+            <h1 className="text-lg font-bold gradient-text tracking-tight">OpenRouter Monitor</h1>
             {selectedModel && (
-              <span className="text-xs font-mono bg-primary/15 text-primary px-2 py-0.5 rounded">
+              <span className="text-xs font-mono bg-primary/15 text-primary px-2 py-0.5 rounded-full">
                 {selectedModel.split("/").pop()}
               </span>
             )}

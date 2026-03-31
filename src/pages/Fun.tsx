@@ -2,7 +2,7 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Activity, Laugh, Image, Loader2, ArrowLeft } from "lucide-react";
+import { Activity, Laugh, Image, Loader2, ArrowLeft, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -50,33 +50,35 @@ export default function Fun() {
   };
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-8">
+    <div className="min-h-screen bg-background bg-mesh p-4 md:p-8">
       <div className="max-w-2xl mx-auto space-y-8">
         {/* Header */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 animate-fade-in">
           <Link to="/">
-            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
+            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground glass">
               <ArrowLeft className="h-5 w-5" />
             </Button>
           </Link>
-          <div className="flex items-center gap-2">
-            <Activity className="h-6 w-6 text-primary" />
-            <h1 className="text-2xl font-bold text-foreground font-mono">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+              <Sparkles className="h-5 w-5 text-white" />
+            </div>
+            <h1 className="text-2xl font-bold gradient-text">
               AI Zábava 🎉
             </h1>
           </div>
         </div>
 
         {/* Joke Section */}
-        <Card className="bg-card border-border/50">
+        <Card className="glass glow-sm animate-fade-in" style={{ animationDelay: "100ms", animationFillMode: "forwards" }}>
           <CardContent className="p-6 space-y-4">
-            <div className="flex items-center gap-2 text-primary">
-              <Laugh className="h-5 w-5" />
-              <h2 className="text-lg font-semibold font-mono">Generátor vtipů</h2>
+            <div className="flex items-center gap-2">
+              <span className="text-2xl">😂</span>
+              <h2 className="text-lg font-semibold font-mono gradient-text">Generátor vtipů</h2>
             </div>
 
             {joke && (
-              <div className="bg-secondary/50 rounded-lg p-4 border border-border/30">
+              <div className="glass rounded-xl p-4 animate-fade-in">
                 <p className="text-foreground font-mono text-sm leading-relaxed whitespace-pre-wrap">
                   {joke}
                 </p>
@@ -86,24 +88,24 @@ export default function Fun() {
             <Button
               onClick={generateJoke}
               disabled={loadingJoke}
-              className="gap-2 font-mono"
+              className="gap-2 font-mono bg-gradient-to-r from-primary to-[hsl(320,90%,65%)] hover:opacity-90 border-0"
             >
               {loadingJoke ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 <Laugh className="h-4 w-4" />
               )}
-              {loadingJoke ? "Přemýšlím..." : "Vygeneruj vtip 😂"}
+              {loadingJoke ? "Přemýšlím... 🧠" : "Dej vtip! 🎲"}
             </Button>
           </CardContent>
         </Card>
 
         {/* Image Section */}
-        <Card className="bg-card border-border/50">
+        <Card className="glass glow-sm animate-fade-in" style={{ animationDelay: "200ms", animationFillMode: "forwards" }}>
           <CardContent className="p-6 space-y-4">
-            <div className="flex items-center gap-2 text-accent">
-              <Image className="h-5 w-5" />
-              <h2 className="text-lg font-semibold font-mono">Generátor obrázků</h2>
+            <div className="flex items-center gap-2">
+              <span className="text-2xl">🎨</span>
+              <h2 className="text-lg font-semibold font-mono gradient-text">Generátor obrázků</h2>
             </div>
 
             {loadingImage && (
@@ -111,14 +113,14 @@ export default function Fun() {
                 <div className="text-center space-y-3">
                   <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
                   <p className="text-muted-foreground font-mono text-sm">
-                    Maluji něco šíleného...
+                    Maluji masterpiece... 🖌️
                   </p>
                 </div>
               </div>
             )}
 
             {image && !loadingImage && (
-              <div className="rounded-lg overflow-hidden border border-border/30">
+              <div className="rounded-xl overflow-hidden gradient-border animate-fade-in">
                 <img
                   src={image}
                   alt="AI vygenerovaný obrázek"
@@ -131,20 +133,20 @@ export default function Fun() {
               onClick={generateImage}
               disabled={loadingImage}
               variant="outline"
-              className="gap-2 font-mono border-accent/30 text-accent hover:bg-accent/10"
+              className="gap-2 font-mono glass glass-hover border-accent/30 text-accent"
             >
               {loadingImage ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 <Image className="h-4 w-4" />
               )}
-              {loadingImage ? "Kreslím..." : "Vygeneruj obrázek 🎨"}
+              {loadingImage ? "Kreslím... ✏️" : "Generuj obrázek! 🖼️"}
             </Button>
           </CardContent>
         </Card>
 
-        <p className="text-center text-muted-foreground font-mono text-xs">
-          Poháněno AI • Každý výsledek je unikátní
+        <p className="text-center text-muted-foreground font-mono text-xs animate-fade-in" style={{ animationDelay: "300ms", animationFillMode: "forwards" }}>
+          ✨ Poháněno AI • Každý výsledek je unikátní ✨
         </p>
       </div>
     </div>
