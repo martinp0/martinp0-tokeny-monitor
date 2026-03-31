@@ -179,9 +179,9 @@ export function RequestsTable({ data }: Props) {
                     <TableCell className="text-muted-foreground">{row.created_at.substring(11, 19)}</TableCell>
                     <TableCell className="text-foreground max-w-[200px] truncate">{row.model_permaslug.split("/").pop()}</TableCell>
                     <TableCell className="text-muted-foreground">{row.provider_name}</TableCell>
-                    <TableCell className="text-right text-chart-1">{fmtCost(row.cost_total, 4)}</TableCell>
-                    <TableCell className="text-right text-chart-2">{fmtNum(row.tokens_prompt + row.tokens_completion)}</TableCell>
-                    <TableCell className="text-right text-chart-3">{fmtNum(row.generation_time_ms)}</TableCell>
+                    <TableCell className="text-right text-chart-1">{fmtCost(row.cost_total, 4, currency)}</TableCell>
+                    <TableCell className="text-right text-chart-2">{fmtNum(row.tokens_prompt + row.tokens_completion, currency)}</TableCell>
+                    <TableCell className="text-right text-chart-3">{fmtNum(row.generation_time_ms, currency)}</TableCell>
                     <TableCell>
                       <span className={`px-1.5 py-0.5 rounded text-[10px] uppercase font-bold ${
                         row.finish_reason_normalized === "stop" ? "bg-primary/20 text-primary" :
