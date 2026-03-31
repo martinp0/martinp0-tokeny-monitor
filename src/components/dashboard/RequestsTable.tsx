@@ -24,6 +24,7 @@ function DetailRow({ label, value, color }: { label: string; value: string | num
 }
 
 function RequestDetailModal({ row, open, onClose }: { row: ActivityRow | null; open: boolean; onClose: () => void }) {
+  const { currency } = useCurrency();
   if (!row) return null;
 
   return (
