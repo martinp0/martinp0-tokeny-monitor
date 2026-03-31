@@ -2,6 +2,7 @@ import { useRef } from "react";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { useExport } from "@/hooks/useExport";
 import { useCurrency } from "@/hooks/useCurrency";
+import { useAuth } from "@/hooks/useAuth";
 import { KpiCards } from "@/components/dashboard/KpiCards";
 import { CostTimeChart } from "@/components/dashboard/CostTimeChart";
 import { TokensChart } from "@/components/dashboard/TokensChart";
