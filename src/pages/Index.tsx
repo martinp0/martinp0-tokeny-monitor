@@ -26,6 +26,7 @@ const Index = () => {
   } = useDashboardData();
   const { exportPNG, exportPDF } = useExport(dashboardRef);
   const { currency, toggle: toggleCurrency, exchangeRate, rateDate } = useCurrency();
+  const { signOut } = useAuth();
 
   return (
     <div className="min-h-screen bg-background">
