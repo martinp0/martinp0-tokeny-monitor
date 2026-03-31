@@ -5,6 +5,7 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { type ActivityRow } from "@/lib/csv-parser";
 import { fmtCost, fmtNum } from "@/lib/format";
+import { useCurrency } from "@/hooks/useCurrency";
 import { ArrowUpDown, Search } from "lucide-react";
 
 interface Props {
