@@ -7,7 +7,7 @@ import { useCurrency } from "@/hooks/useCurrency";
 
 export function useExport(dashboardRef: React.RefObject<HTMLElement | null>) {
   const exporting = useRef(false);
-  const { currency } = useCurrency();
+  const { currency, exchangeRate } = useCurrency();
 
   const exportPNG = useCallback(async () => {
     if (!dashboardRef.current || exporting.current) return;
