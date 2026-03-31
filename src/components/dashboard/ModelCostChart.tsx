@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { fmtCost } from "@/lib/format";
+import { useCurrency } from "@/hooks/useCurrency";
 
 const COLORS = [
   "hsl(160, 100%, 50%)",
@@ -18,6 +19,8 @@ interface Props {
 }
 
 export function ModelCostChart({ data, onModelClick, selectedModel }: Props) {
+  const { currency } = useCurrency();
+
   return (
     <Card className="bg-card border-border/50">
       <CardHeader className="pb-2">
@@ -52,7 +55,7 @@ export function ModelCostChart({ data, onModelClick, selectedModel }: Props) {
             </Pie>
             <Tooltip
               contentStyle={{ backgroundColor: "hsl(232, 40%, 12%)", border: "1px solid hsl(232, 25%, 18%)", borderRadius: 8, fontFamily: "JetBrains Mono", fontSize: 12 }}
-              formatter={(value: number) => [fmtCost(value, 6), "Náklady"]}
+              formatter={(value: number) => [fmtCost(value, 6, currency), "Náklady"]}
             />
             <Legend wrapperStyle={{ fontSize: 11, fontFamily: "JetBrains Mono" }} />
           </PieChart>
