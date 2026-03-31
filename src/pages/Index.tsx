@@ -9,6 +9,7 @@ import { ProviderChart } from "@/components/dashboard/ProviderChart";
 import { SpeedChart } from "@/components/dashboard/SpeedChart";
 import { RequestsTable } from "@/components/dashboard/RequestsTable";
 import { CsvUpload } from "@/components/dashboard/CsvUpload";
+import { DateRangePicker } from "@/components/dashboard/DateRangePicker";
 import { Activity, Download, Image, FileText, RefreshCw, AlertCircle } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
@@ -17,7 +18,7 @@ const Index = () => {
   const dashboardRef = useRef<HTMLDivElement>(null);
   const {
     data, filteredData, fileName, selectedModel, setSelectedModel, loadCSV,
-    syncFromAPI, syncing, syncError,
+    syncFromAPI, syncing, syncError, dateFilter, setDateFilter,
     totalCost, totalRequests, totalTokens, avgGenTime, dateRange,
     costByModel, costByProvider, timeSeries,
   } = useDashboardData();
@@ -44,11 +45,7 @@ const Index = () => {
                 {syncError}
               </span>
             )}
-            {dateRange && (
-              <span className="text-xs font-mono text-muted-foreground">
-                {dateRange.from.substring(0, 10)} → {dateRange.to.substring(0, 10)}
-              </span>
-            )}
+            <DateRangePicker value={dateFilter} onChange={setDateFilter} />
             <span className="text-xs font-mono text-muted-foreground truncate max-w-[200px]">{fileName}</span>
             <Button
               variant="outline"

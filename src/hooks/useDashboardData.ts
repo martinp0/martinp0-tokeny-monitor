@@ -215,6 +215,8 @@ export function useDashboardData() {
     fileName,
     selectedModel,
     setSelectedModel,
+    dateFilter,
+    setDateFilter,
     loadCSV,
     syncFromAPI,
     syncing,
