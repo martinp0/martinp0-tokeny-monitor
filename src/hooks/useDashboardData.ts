@@ -1,17 +1,149 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { parseCSV, type ActivityRow } from "@/lib/csv-parser";
 import sampleCSV from "@/data/sample.csv?raw";
 
 export function useDashboardData() {
-  const [data, setData] = useState<ActivityRow[]>(() => parseCSV(sampleCSV));
-  const [fileName, setFileName] = useState<string>("openrouter_activity_2026-03-28.csv");
+  const [data, setData] = useState<ActivityRow[]>([]);
+  const [fileName, setFileName] = useState<string>("Loading...");
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
+  const [syncing, setSyncing] = useState(false);
+  const [syncError, setSyncError] = useState<string | null>(null);
 
-  const loadCSV = useCallback((text: string, name: string) => {
+  // Load data from DB, fall back to sample CSV
+  useEffect(() => {
+    async function loadFromDB() {
+      const { data: rows, error } = await supabase
+        .from("activity_rows")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (!error && rows && rows.length > 0) {
+        const mapped: ActivityRow[] = rows.map((r) => ({
+          generation_id: r.generation_id,
+          created_at: r.created_at,
+          cost_total: r.cost_total,
+          cost_web_search: r.cost_web_search,
+          cost_cache: r.cost_cache,
+          cost_file_processing: r.cost_file_processing,
+          byok_usage_inference: r.byok_usage_inference,
+          tokens_prompt: r.tokens_prompt,
+          tokens_completion: r.tokens_completion,
+          tokens_reasoning: r.tokens_reasoning,
+          tokens_cached: r.tokens_cached,
+          model_permaslug: r.model_permaslug,
+          provider_name: r.provider_name,
+          variant: r.variant,
+          cancelled: r.cancelled,
+          streamed: r.streamed,
+          user: r.user,
+          finish_reason_raw: r.finish_reason_raw,
+          finish_reason_normalized: r.finish_reason_normalized,
+          generation_time_ms: r.generation_time_ms,
+          time_to_first_token_ms: r.time_to_first_token_ms,
+          app_name: r.app_name,
+          api_key_name: r.api_key_name,
+        }));
+        setData(mapped);
+        setFileName(`Cloud DB (${mapped.length} rows)`);
+      } else {
+        // Fall back to sample CSV
+        const parsed = parseCSV(sampleCSV);
+        setData(parsed);
+        setFileName("openrouter_activity_2026-03-28.csv (sample)");
+      }
+    }
+    loadFromDB();
+  }, []);
+
+  // Upload CSV → save to DB
+  const loadCSV = useCallback(async (text: string, name: string) => {
     const parsed = parseCSV(text);
     setData(parsed);
     setFileName(name);
     setSelectedModel(null);
+
+    // Upsert to DB in batches
+    const batchSize = 100;
+    for (let i = 0; i < parsed.length; i += batchSize) {
+      const batch = parsed.slice(i, i + batchSize).map((r) => ({
+        generation_id: r.generation_id,
+        created_at: r.created_at,
+        cost_total: r.cost_total,
+        cost_web_search: r.cost_web_search,
+        cost_cache: r.cost_cache,
+        cost_file_processing: r.cost_file_processing,
+        byok_usage_inference: r.byok_usage_inference,
+        tokens_prompt: r.tokens_prompt,
+        tokens_completion: r.tokens_completion,
+        tokens_reasoning: r.tokens_reasoning,
+        tokens_cached: r.tokens_cached,
+        model_permaslug: r.model_permaslug,
+        provider_name: r.provider_name,
+        variant: r.variant,
+        cancelled: r.cancelled,
+        streamed: r.streamed,
+        user: r.user,
+        finish_reason_raw: r.finish_reason_raw,
+        finish_reason_normalized: r.finish_reason_normalized,
+        generation_time_ms: r.generation_time_ms,
+        time_to_first_token_ms: r.time_to_first_token_ms,
+        app_name: r.app_name,
+        api_key_name: r.api_key_name,
+      }));
+      await supabase.from("activity_rows").upsert(batch, { onConflict: "generation_id" });
+    }
+  }, []);
+
+  // Sync from OpenRouter API via edge function
+  const syncFromAPI = useCallback(async () => {
+    setSyncing(true);
+    setSyncError(null);
+    try {
+      const { data: result, error } = await supabase.functions.invoke("sync-openrouter");
+      if (error) throw error;
+      if (result?.error) throw new Error(result.error);
+
+      // Reload from DB after sync
+      const { data: rows } = await supabase
+        .from("activity_rows")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (rows && rows.length > 0) {
+        const mapped: ActivityRow[] = rows.map((r) => ({
+          generation_id: r.generation_id,
+          created_at: r.created_at,
+          cost_total: r.cost_total,
+          cost_web_search: r.cost_web_search,
+          cost_cache: r.cost_cache,
+          cost_file_processing: r.cost_file_processing,
+          byok_usage_inference: r.byok_usage_inference,
+          tokens_prompt: r.tokens_prompt,
+          tokens_completion: r.tokens_completion,
+          tokens_reasoning: r.tokens_reasoning,
+          tokens_cached: r.tokens_cached,
+          model_permaslug: r.model_permaslug,
+          provider_name: r.provider_name,
+          variant: r.variant,
+          cancelled: r.cancelled,
+          streamed: r.streamed,
+          user: r.user,
+          finish_reason_raw: r.finish_reason_raw,
+          finish_reason_normalized: r.finish_reason_normalized,
+          generation_time_ms: r.generation_time_ms,
+          time_to_first_token_ms: r.time_to_first_token_ms,
+          app_name: r.app_name,
+          api_key_name: r.api_key_name,
+        }));
+        setData(mapped);
+        setFileName(`Cloud DB (${mapped.length} rows) — synced`);
+      }
+    } catch (err) {
+      setSyncError(err instanceof Error ? err.message : "Sync failed");
+    } finally {
+      setSyncing(false);
+    }
   }, []);
 
   const filteredData = selectedModel
@@ -39,21 +171,18 @@ export function useDashboardData() {
       }
     : null;
 
-  // Cost per model
   const costByModel = models.map((m) => ({
     model: m.split("/").pop() || m,
     fullModel: m,
     cost: data.filter((r) => r.model_permaslug === m).reduce((s, r) => s + r.cost_total, 0),
   })).sort((a, b) => b.cost - a.cost);
 
-  // Cost per provider
   const costByProvider = providers.map((p) => ({
     provider: p,
     cost: data.filter((r) => r.provider_name === p).reduce((s, r) => s + r.cost_total, 0),
     requests: data.filter((r) => r.provider_name === p).length,
   })).sort((a, b) => b.cost - a.cost);
 
-  // Time series data (sorted by time)
   const timeSeries = [...filteredData]
     .sort((a, b) => a.created_at.localeCompare(b.created_at))
     .map((r) => ({
@@ -76,6 +205,9 @@ export function useDashboardData() {
     selectedModel,
     setSelectedModel,
     loadCSV,
+    syncFromAPI,
+    syncing,
+    syncError,
     models,
     providers,
     totalCost,
