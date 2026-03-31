@@ -164,15 +164,15 @@ export function useDashboardData() {
   const models = [...new Set(dateFiltered.map((r) => r.model_permaslug))];
   const providers = [...new Set(dateFiltered.map((r) => r.provider_name))];
 
-  const totalCost = data.reduce((s, r) => s + r.cost_total, 0);
-  const totalRequests = data.length;
-  const totalTokens = data.reduce(
+  const totalCost = dateFiltered.reduce((s, r) => s + r.cost_total, 0);
+  const totalRequests = dateFiltered.length;
+  const totalTokens = dateFiltered.reduce(
     (s, r) => s + r.tokens_prompt + r.tokens_completion + r.tokens_reasoning,
     0
   );
   const avgGenTime =
-    data.length > 0
-      ? data.reduce((s, r) => s + r.generation_time_ms, 0) / data.length
+    dateFiltered.length > 0
+      ? dateFiltered.reduce((s, r) => s + r.generation_time_ms, 0) / dateFiltered.length
       : 0;
 
   const dateRange = data.length > 0
@@ -185,13 +185,13 @@ export function useDashboardData() {
   const costByModel = models.map((m) => ({
     model: m.split("/").pop() || m,
     fullModel: m,
-    cost: data.filter((r) => r.model_permaslug === m).reduce((s, r) => s + r.cost_total, 0),
+    cost: dateFiltered.filter((r) => r.model_permaslug === m).reduce((s, r) => s + r.cost_total, 0),
   })).sort((a, b) => b.cost - a.cost);
 
   const costByProvider = providers.map((p) => ({
     provider: p,
-    cost: data.filter((r) => r.provider_name === p).reduce((s, r) => s + r.cost_total, 0),
-    requests: data.filter((r) => r.provider_name === p).length,
+    cost: dateFiltered.filter((r) => r.provider_name === p).reduce((s, r) => s + r.cost_total, 0),
+    requests: dateFiltered.filter((r) => r.provider_name === p).length,
   })).sort((a, b) => b.cost - a.cost);
 
   const timeSeries = [...filteredData]
