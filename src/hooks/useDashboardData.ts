@@ -9,6 +9,7 @@ export function useDashboardData() {
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
   const [syncing, setSyncing] = useState(false);
   const [syncError, setSyncError] = useState<string | null>(null);
+  const [dateFilter, setDateFilter] = useState<{ from: Date; to: Date } | null>(null);
 
   // Load data from DB, fall back to sample CSV
   useEffect(() => {
