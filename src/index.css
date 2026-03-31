@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,51 +6,57 @@
 
 @layer base {
   :root {
-    --background: 232 47% 7%;
-    --foreground: 220 20% 90%;
+    --background: 260 25% 6%;
+    --foreground: 240 10% 93%;
 
-    --card: 232 40% 10%;
-    --card-foreground: 220 20% 90%;
+    --card: 260 20% 10%;
+    --card-foreground: 240 10% 93%;
 
-    --popover: 232 40% 12%;
-    --popover-foreground: 220 20% 90%;
+    --popover: 260 20% 12%;
+    --popover-foreground: 240 10% 93%;
 
-    --primary: 160 100% 50%;
-    --primary-foreground: 232 47% 7%;
+    --primary: 270 95% 65%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 232 30% 18%;
-    --secondary-foreground: 220 20% 85%;
+    --secondary: 260 18% 16%;
+    --secondary-foreground: 240 10% 88%;
 
-    --muted: 232 25% 15%;
-    --muted-foreground: 220 15% 55%;
+    --muted: 260 15% 14%;
+    --muted-foreground: 240 8% 50%;
 
-    --accent: 190 100% 50%;
-    --accent-foreground: 232 47% 7%;
+    --accent: 175 85% 55%;
+    --accent-foreground: 260 25% 6%;
 
-    --destructive: 0 85% 55%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 350 90% 60%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 232 25% 18%;
-    --input: 232 25% 18%;
-    --ring: 160 100% 50%;
+    --border: 260 15% 18%;
+    --input: 260 15% 18%;
+    --ring: 270 95% 65%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
-    --chart-1: 160 100% 50%;
-    --chart-2: 190 100% 50%;
-    --chart-3: 35 100% 55%;
-    --chart-4: 280 100% 65%;
-    --chart-5: 340 100% 60%;
-    --chart-6: 60 100% 55%;
+    --chart-1: 270 95% 65%;
+    --chart-2: 175 85% 55%;
+    --chart-3: 45 100% 60%;
+    --chart-4: 320 90% 65%;
+    --chart-5: 200 90% 60%;
+    --chart-6: 140 80% 55%;
 
-    --sidebar-background: 232 40% 8%;
-    --sidebar-foreground: 220 20% 85%;
-    --sidebar-primary: 160 100% 50%;
-    --sidebar-primary-foreground: 232 47% 7%;
-    --sidebar-accent: 232 30% 15%;
-    --sidebar-accent-foreground: 220 20% 85%;
-    --sidebar-border: 232 25% 18%;
-    --sidebar-ring: 160 100% 50%;
+    --sidebar-background: 260 20% 8%;
+    --sidebar-foreground: 240 10% 88%;
+    --sidebar-primary: 270 95% 65%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 260 18% 15%;
+    --sidebar-accent-foreground: 240 10% 88%;
+    --sidebar-border: 260 15% 18%;
+    --sidebar-ring: 270 95% 65%;
+
+    /* Gen Z custom tokens */
+    --glow-primary: 270 95% 65%;
+    --glow-accent: 175 85% 55%;
+    --gradient-start: 270 95% 65%;
+    --gradient-end: 320 90% 65%;
   }
 }
 
@@ -60,11 +66,66 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans;
-    font-family: 'Inter', sans-serif;
+    @apply bg-background text-foreground;
+    font-family: 'Space Grotesk', sans-serif;
   }
 
   .font-mono {
     font-family: 'JetBrains Mono', monospace;
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply bg-white/[0.04] backdrop-blur-xl border border-white/[0.08];
+  }
+
+  .glass-hover {
+    @apply hover:bg-white/[0.08] hover:border-white/[0.15] transition-all duration-300;
+  }
+
+  .glow-sm {
+    box-shadow: 0 0 15px -3px hsl(var(--primary) / 0.25);
+  }
+
+  .glow-md {
+    box-shadow: 0 0 30px -5px hsl(var(--primary) / 0.3);
+  }
+
+  .gradient-text {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-[hsl(270,95%,65%)] via-[hsl(320,90%,65%)] to-[hsl(175,85%,55%)];
+  }
+
+  .gradient-border {
+    position: relative;
+  }
+
+  .gradient-border::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, hsl(var(--primary) / 0.5), hsl(var(--accent) / 0.5));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+  }
+
+  .bg-mesh {
+    background-image:
+      radial-gradient(at 20% 80%, hsl(270 95% 65% / 0.08) 0, transparent 50%),
+      radial-gradient(at 80% 20%, hsl(175 85% 55% / 0.06) 0, transparent 50%),
+      radial-gradient(at 50% 50%, hsl(320 90% 65% / 0.04) 0, transparent 50%);
   }
 }
