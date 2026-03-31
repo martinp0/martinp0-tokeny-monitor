@@ -46,12 +46,7 @@ const Index = () => {
             )}
           </div>
           <div className="flex items-center gap-4">
-            {syncError && (
-              <span className="text-xs text-destructive flex items-center gap-1">
-                <AlertCircle className="h-3 w-3" />
-                {syncError}
-              </span>
-            )}
+            
             <div className="flex items-center gap-1.5">
               <Button
                 variant="outline"
