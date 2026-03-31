@@ -161,8 +161,8 @@ export function useDashboardData() {
     ? dateFiltered.filter((r) => r.model_permaslug === selectedModel)
     : dateFiltered;
 
-  const models = [...new Set(data.map((r) => r.model_permaslug))];
-  const providers = [...new Set(data.map((r) => r.provider_name))];
+  const models = [...new Set(dateFiltered.map((r) => r.model_permaslug))];
+  const providers = [...new Set(dateFiltered.map((r) => r.provider_name))];
 
   const totalCost = data.reduce((s, r) => s + r.cost_total, 0);
   const totalRequests = data.length;
