@@ -8,7 +8,7 @@ interface Props {
 }
 
 export function CostTimeChart({ data }: Props) {
-  const { currency } = useCurrency();
+  const { currency, exchangeRate } = useCurrency();
 
   return (
     <Card className="bg-card border-border/50">
