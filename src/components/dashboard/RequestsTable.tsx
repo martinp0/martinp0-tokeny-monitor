@@ -43,8 +43,8 @@ function RequestDetailModal({ row, open, onClose }: { row: ActivityRow | null; o
             <h4 className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Timing</h4>
             <div className="bg-secondary/50 rounded-md px-3 py-1">
               <DetailRow label="Created At" value={row.created_at} />
-              <DetailRow label="Generation Time" value={`${fmtNum(row.generation_time_ms)} ms`} color="text-chart-3" />
-              <DetailRow label="Time to First Token" value={`${fmtNum(row.time_to_first_token_ms)} ms`} color="text-chart-4" />
+              <DetailRow label="Generation Time" value={`${fmtNum(row.generation_time_ms, currency)} ms`} color="text-chart-3" />
+              <DetailRow label="Time to First Token" value={`${fmtNum(row.time_to_first_token_ms, currency)} ms`} color="text-chart-4" />
             </div>
           </div>
 
