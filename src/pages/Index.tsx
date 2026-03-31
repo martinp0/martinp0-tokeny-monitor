@@ -13,7 +13,7 @@ import { RequestsTable } from "@/components/dashboard/RequestsTable";
 import { RealLifeComparison } from "@/components/dashboard/RealLifeComparison";
 import { CsvUpload } from "@/components/dashboard/CsvUpload";
 import { DateRangePicker } from "@/components/dashboard/DateRangePicker";
-import { Activity, Download, Image, FileText, RefreshCw, AlertCircle, LogOut } from "lucide-react";
+import { Activity, Download, Image, FileText, LogOut } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 
