@@ -21,7 +21,7 @@ const Index = () => {
   const dashboardRef = useRef<HTMLDivElement>(null);
   const {
     data, filteredData, fileName, selectedModel, setSelectedModel, loadCSV,
-    syncFromAPI, syncing, syncError, dateFilter, setDateFilter,
+    dateFilter, setDateFilter,
     totalCost, totalRequests, totalTokens, avgGenTime, dateRange,
     costByModel, costByProvider, timeSeries,
   } = useDashboardData();
