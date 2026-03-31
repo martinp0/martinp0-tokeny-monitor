@@ -33,17 +33,19 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const fetchRate = async () => {
-      try {
-        const { data, error } = await supabase.functions.invoke("get-exchange-rate");
-        if (error) throw error;
-        if (data?.rate) {
-          setExchangeRate(data.rate);
-          setRateDate(data.date || null);
-          localStorage.setItem("exchangeRate", String(data.rate));
-          if (data.date) localStorage.setItem("exchangeRateDate", data.date);
-        }
-      } catch (e) {
-        console.warn("Failed to fetch exchange rate, using cached/fallback:", e);
+      // Try DB cache first (fast)
+      const { data: dbRate } = await supabase
+        .from("exchange_rates")
+        .select("rate, source_date")
+        .eq("currency_pair", "USD_CZK")
+        .single();
+
+      if (dbRate?.rate) {
+        const r = Number(dbRate.rate);
+        setExchangeRate(r);
+        setRateDate(dbRate.source_date || null);
+        localStorage.setItem("exchangeRate", String(r));
+        if (dbRate.source_date) localStorage.setItem("exchangeRateDate", dbRate.source_date);
       }
     };
     fetchRate();
