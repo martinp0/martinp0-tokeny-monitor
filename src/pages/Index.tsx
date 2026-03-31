@@ -124,6 +124,8 @@ const Index = () => {
           <SpeedChart data={timeSeries} />
         </div>
 
+        <RealLifeComparison totalCostCzk={totalCost * exchangeRate} />
+
         <RequestsTable data={filteredData} />
       </main>
     </div>
