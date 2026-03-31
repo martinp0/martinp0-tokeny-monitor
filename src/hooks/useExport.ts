@@ -2,6 +2,7 @@ import { useCallback, useRef } from "react";
 import { toPng } from "html-to-image";
 import jsPDF from "jspdf";
 import { type ActivityRow } from "@/lib/csv-parser";
+import { fmtCost, fmtNum } from "@/lib/format";
 
 export function useExport(dashboardRef: React.RefObject<HTMLElement | null>) {
   const exporting = useRef(false);
@@ -36,17 +37,17 @@ export function useExport(dashboardRef: React.RefObject<HTMLElement | null>) {
     y += 6;
     doc.setFontSize(9);
     doc.setTextColor(150);
-    doc.text(`Generated ${new Date().toLocaleString()} · ${data.length} requests`, m, y);
+    doc.text(`Vygenerováno ${new Date().toLocaleString("cs-CZ")} · ${fmtNum(data.length)} požadavků`, m, y);
     y += 12;
 
     // KPIs
     doc.setFontSize(11);
     doc.setTextColor(60);
     const kpis = [
-      `Total Cost: $${totalCost.toFixed(4)}`,
-      `Requests: ${totalRequests}`,
-      `Avg Response: ${(avgGenTime / 1000).toFixed(1)}s`,
-      `Total Tokens: ${totalTokens.toLocaleString()}`,
+      `Celkové náklady: ${fmtCost(totalCost)}`,
+      `Požadavky: ${fmtNum(totalRequests)}`,
+      `Prům. odpověď: ${(avgGenTime / 1000).toFixed(1)}s`,
+      `Celkem tokenů: ${fmtNum(totalTokens)}`,
     ];
     kpis.forEach((k, i) => {
       doc.text(k, m + i * 65, y);
@@ -58,8 +59,8 @@ export function useExport(dashboardRef: React.RefObject<HTMLElement | null>) {
     doc.rect(m, y - 4, w - m * 2, 8, "F");
     doc.setFontSize(8);
     doc.setTextColor(180);
-    const cols = ["Time", "Model", "Provider", "Cost ($)", "Tokens", "Gen Time (ms)", "Status"];
-    const colX = [m, m + 35, m + 100, m + 140, m + 170, m + 205, m + 240];
+    const cols = ["Čas", "Model", "Provider", "Náklady (Kč)", "Tokeny", "Gen Time (ms)", "Status"];
+    const colX = [m, m + 35, m + 100, m + 140, m + 175, m + 210, m + 240];
     cols.forEach((c, i) => doc.text(c, colX[i], y));
     y += 6;
 
@@ -75,9 +76,9 @@ export function useExport(dashboardRef: React.RefObject<HTMLElement | null>) {
         row.created_at.substring(11, 19),
         (row.model_permaslug.split("/").pop() || "").substring(0, 28),
         row.provider_name,
-        row.cost_total.toFixed(6),
-        (row.tokens_prompt + row.tokens_completion).toLocaleString(),
-        row.generation_time_ms.toLocaleString(),
+        fmtCost(row.cost_total, 4),
+        fmtNum(row.tokens_prompt + row.tokens_completion),
+        fmtNum(row.generation_time_ms),
         row.finish_reason_normalized,
       ];
       vals.forEach((v, i) => doc.text(v, colX[i], y));

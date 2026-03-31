@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { type ActivityRow } from "@/lib/csv-parser";
+import { fmtCost, fmtNum } from "@/lib/format";
 import { ArrowUpDown, Search } from "lucide-react";
 
 interface Props {
@@ -40,8 +41,8 @@ function RequestDetailModal({ row, open, onClose }: { row: ActivityRow | null; o
             <h4 className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Timing</h4>
             <div className="bg-secondary/50 rounded-md px-3 py-1">
               <DetailRow label="Created At" value={row.created_at} />
-              <DetailRow label="Generation Time" value={`${row.generation_time_ms.toLocaleString()} ms`} color="text-chart-3" />
-              <DetailRow label="Time to First Token" value={`${row.time_to_first_token_ms.toLocaleString()} ms`} color="text-chart-4" />
+              <DetailRow label="Generation Time" value={`${fmtNum(row.generation_time_ms)} ms`} color="text-chart-3" />
+              <DetailRow label="Time to First Token" value={`${fmtNum(row.time_to_first_token_ms)} ms`} color="text-chart-4" />
             </div>
           </div>
 
@@ -61,11 +62,11 @@ function RequestDetailModal({ row, open, onClose }: { row: ActivityRow | null; o
           <div>
             <h4 className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Costs</h4>
             <div className="bg-secondary/50 rounded-md px-3 py-1">
-              <DetailRow label="Total Cost" value={`$${row.cost_total.toFixed(6)}`} color="text-chart-1" />
-              <DetailRow label="Web Search" value={`$${row.cost_web_search.toFixed(6)}`} />
-              <DetailRow label="Cache" value={`$${row.cost_cache.toFixed(6)}`} />
-              <DetailRow label="File Processing" value={`$${row.cost_file_processing.toFixed(6)}`} />
-              <DetailRow label="BYOK Inference" value={`$${row.byok_usage_inference.toFixed(6)}`} />
+              <DetailRow label="Celkové náklady" value={fmtCost(row.cost_total, 6)} color="text-chart-1" />
+              <DetailRow label="Web Search" value={fmtCost(row.cost_web_search, 6)} />
+              <DetailRow label="Cache" value={fmtCost(row.cost_cache, 6)} />
+              <DetailRow label="File Processing" value={fmtCost(row.cost_file_processing, 6)} />
+              <DetailRow label="BYOK Inference" value={fmtCost(row.byok_usage_inference, 6)} />
             </div>
           </div>
 
@@ -73,10 +74,10 @@ function RequestDetailModal({ row, open, onClose }: { row: ActivityRow | null; o
           <div>
             <h4 className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Tokens</h4>
             <div className="bg-secondary/50 rounded-md px-3 py-1">
-              <DetailRow label="Prompt" value={row.tokens_prompt.toLocaleString()} color="text-chart-2" />
-              <DetailRow label="Completion" value={row.tokens_completion.toLocaleString()} color="text-primary" />
-              <DetailRow label="Reasoning" value={row.tokens_reasoning.toLocaleString()} color="text-chart-4" />
-              <DetailRow label="Cached" value={row.tokens_cached.toLocaleString()} color="text-chart-3" />
+              <DetailRow label="Prompt" value={fmtNum(row.tokens_prompt)} color="text-chart-2" />
+              <DetailRow label="Completion" value={fmtNum(row.tokens_completion)} color="text-primary" />
+              <DetailRow label="Reasoning" value={fmtNum(row.tokens_reasoning)} color="text-chart-4" />
+              <DetailRow label="Cached" value={fmtNum(row.tokens_cached)} color="text-chart-3" />
             </div>
           </div>
 
@@ -175,9 +176,9 @@ export function RequestsTable({ data }: Props) {
                     <TableCell className="text-muted-foreground">{row.created_at.substring(11, 19)}</TableCell>
                     <TableCell className="text-foreground max-w-[200px] truncate">{row.model_permaslug.split("/").pop()}</TableCell>
                     <TableCell className="text-muted-foreground">{row.provider_name}</TableCell>
-                    <TableCell className="text-right text-chart-1">${row.cost_total.toFixed(6)}</TableCell>
-                    <TableCell className="text-right text-chart-2">{(row.tokens_prompt + row.tokens_completion).toLocaleString()}</TableCell>
-                    <TableCell className="text-right text-chart-3">{row.generation_time_ms.toLocaleString()}</TableCell>
+                    <TableCell className="text-right text-chart-1">{fmtCost(row.cost_total, 4)}</TableCell>
+                    <TableCell className="text-right text-chart-2">{fmtNum(row.tokens_prompt + row.tokens_completion)}</TableCell>
+                    <TableCell className="text-right text-chart-3">{fmtNum(row.generation_time_ms)}</TableCell>
                     <TableCell>
                       <span className={`px-1.5 py-0.5 rounded text-[10px] uppercase font-bold ${
                         row.finish_reason_normalized === "stop" ? "bg-primary/20 text-primary" :
