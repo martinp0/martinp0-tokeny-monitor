@@ -1,6 +1,7 @@
 import { useRef } from "react";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { useExport } from "@/hooks/useExport";
+import { useCurrency } from "@/hooks/useCurrency";
 import { KpiCards } from "@/components/dashboard/KpiCards";
 import { CostTimeChart } from "@/components/dashboard/CostTimeChart";
 import { TokensChart } from "@/components/dashboard/TokensChart";
@@ -23,6 +24,7 @@ const Index = () => {
     costByModel, costByProvider, timeSeries,
   } = useDashboardData();
   const { exportPNG, exportPDF } = useExport(dashboardRef);
+  const { currency, toggle: toggleCurrency } = useCurrency();
 
   return (
     <div className="min-h-screen bg-background">
@@ -45,6 +47,14 @@ const Index = () => {
                 {syncError}
               </span>
             )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={toggleCurrency}
+              className="gap-1.5 border-border hover:bg-secondary hover:text-foreground font-mono text-xs min-w-[60px]"
+            >
+              {currency === "CZK" ? "Kč" : "$"}
+            </Button>
             <DateRangePicker value={dateFilter} onChange={setDateFilter} />
             <span className="text-xs font-mono text-muted-foreground truncate max-w-[200px]">{fileName}</span>
             <Button
