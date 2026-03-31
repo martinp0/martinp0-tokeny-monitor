@@ -85,7 +85,7 @@ export function useExport(dashboardRef: React.RefObject<HTMLElement | null>) {
     }
 
     doc.save(`openrouter-report-${new Date().toISOString().slice(0, 10)}.pdf`);
-  }, [currency]);
+  }, [currency, exchangeRate]);
 
   return { exportPNG, exportPDF };
 }
