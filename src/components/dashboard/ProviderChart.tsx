@@ -19,7 +19,7 @@ export function ProviderChart({ data }: Props) {
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} layout="vertical">
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(232, 25%, 18%)" horizontal={false} />
-            <XAxis type="number" stroke="hsl(220, 15%, 55%)" fontSize={11} fontFamily="JetBrains Mono" tickFormatter={(v) => fmtCostShort(v, currency)} />
+            <XAxis type="number" stroke="hsl(220, 15%, 55%)" fontSize={11} fontFamily="JetBrains Mono" tickFormatter={(v) => fmtCostShort(v, currency, exchangeRate)} />
             <YAxis type="category" dataKey="provider" stroke="hsl(220, 15%, 55%)" fontSize={11} fontFamily="JetBrains Mono" width={80} />
             <Tooltip
               contentStyle={{ backgroundColor: "hsl(232, 40%, 12%)", border: "1px solid hsl(232, 25%, 18%)", borderRadius: 8, fontFamily: "JetBrains Mono", fontSize: 12 }}
