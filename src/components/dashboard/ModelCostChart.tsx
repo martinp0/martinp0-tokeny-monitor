@@ -19,7 +19,7 @@ interface Props {
 }
 
 export function ModelCostChart({ data, onModelClick, selectedModel }: Props) {
-  const { currency } = useCurrency();
+  const { currency, exchangeRate } = useCurrency();
 
   return (
     <Card className="bg-card border-border/50">
@@ -55,7 +55,7 @@ export function ModelCostChart({ data, onModelClick, selectedModel }: Props) {
             </Pie>
             <Tooltip
               contentStyle={{ backgroundColor: "hsl(232, 40%, 12%)", border: "1px solid hsl(232, 25%, 18%)", borderRadius: 8, fontFamily: "JetBrains Mono", fontSize: 12 }}
-              formatter={(value: number) => [fmtCost(value, 6, currency), "Náklady"]}
+              formatter={(value: number) => [fmtCost(value, 6, currency, exchangeRate), "Náklady"]}
             />
             <Legend wrapperStyle={{ fontSize: 11, fontFamily: "JetBrains Mono" }} />
           </PieChart>

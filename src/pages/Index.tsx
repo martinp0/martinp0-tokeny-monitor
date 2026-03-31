@@ -24,7 +24,7 @@ const Index = () => {
     costByModel, costByProvider, timeSeries,
   } = useDashboardData();
   const { exportPNG, exportPDF } = useExport(dashboardRef);
-  const { currency, toggle: toggleCurrency } = useCurrency();
+  const { currency, toggle: toggleCurrency, exchangeRate, rateDate } = useCurrency();
 
   return (
     <div className="min-h-screen bg-background">
@@ -47,14 +47,21 @@ const Index = () => {
                 {syncError}
               </span>
             )}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={toggleCurrency}
-              className="gap-1.5 border-border hover:bg-secondary hover:text-foreground font-mono text-xs min-w-[60px]"
-            >
-              {currency === "CZK" ? "Kč" : "$"}
-            </Button>
+            <div className="flex items-center gap-1.5">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={toggleCurrency}
+                className="gap-1.5 border-border hover:bg-secondary hover:text-foreground font-mono text-xs min-w-[60px]"
+              >
+                {currency === "CZK" ? "Kč" : "$"}
+              </Button>
+              {currency === "CZK" && (
+                <span className="text-[10px] text-muted-foreground font-mono" title={rateDate || undefined}>
+                  1 USD = {exchangeRate.toFixed(2)} CZK
+                </span>
+              )}
+            </div>
             <DateRangePicker value={dateFilter} onChange={setDateFilter} />
             <span className="text-xs font-mono text-muted-foreground truncate max-w-[200px]">{fileName}</span>
             <Button

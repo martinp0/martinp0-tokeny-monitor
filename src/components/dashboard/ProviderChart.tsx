@@ -8,7 +8,7 @@ interface Props {
 }
 
 export function ProviderChart({ data }: Props) {
-  const { currency } = useCurrency();
+  const { currency, exchangeRate } = useCurrency();
 
   return (
     <Card className="bg-card border-border/50">
@@ -19,11 +19,11 @@ export function ProviderChart({ data }: Props) {
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} layout="vertical">
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(232, 25%, 18%)" horizontal={false} />
-            <XAxis type="number" stroke="hsl(220, 15%, 55%)" fontSize={11} fontFamily="JetBrains Mono" tickFormatter={(v) => fmtCostShort(v, currency)} />
+            <XAxis type="number" stroke="hsl(220, 15%, 55%)" fontSize={11} fontFamily="JetBrains Mono" tickFormatter={(v) => fmtCostShort(v, currency, exchangeRate)} />
             <YAxis type="category" dataKey="provider" stroke="hsl(220, 15%, 55%)" fontSize={11} fontFamily="JetBrains Mono" width={80} />
             <Tooltip
               contentStyle={{ backgroundColor: "hsl(232, 40%, 12%)", border: "1px solid hsl(232, 25%, 18%)", borderRadius: 8, fontFamily: "JetBrains Mono", fontSize: 12 }}
-              formatter={(value: number, name: string) => [name === "cost" ? fmtCost(value, 6, currency) : fmtNum(value, currency), name === "cost" ? "Náklady" : "Požadavky"]}
+              formatter={(value: number, name: string) => [name === "cost" ? fmtCost(value, 6, currency, exchangeRate) : fmtNum(value, currency), name === "cost" ? "Náklady" : "Požadavky"]}
             />
             <Bar dataKey="cost" fill="hsl(190, 100%, 50%)" radius={[0, 4, 4, 0]} />
           </BarChart>

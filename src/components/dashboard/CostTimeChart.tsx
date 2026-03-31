@@ -8,7 +8,7 @@ interface Props {
 }
 
 export function CostTimeChart({ data }: Props) {
-  const { currency } = useCurrency();
+  const { currency, exchangeRate } = useCurrency();
 
   return (
     <Card className="bg-card border-border/50">
@@ -26,12 +26,12 @@ export function CostTimeChart({ data }: Props) {
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(232, 25%, 18%)" />
             <XAxis dataKey="time" stroke="hsl(220, 15%, 55%)" fontSize={11} fontFamily="JetBrains Mono" />
-            <YAxis stroke="hsl(220, 15%, 55%)" fontSize={11} fontFamily="JetBrains Mono" tickFormatter={(v) => fmtCostShort(v, currency)} />
+            <YAxis stroke="hsl(220, 15%, 55%)" fontSize={11} fontFamily="JetBrains Mono" tickFormatter={(v) => fmtCostShort(v, currency, exchangeRate)} />
             <Tooltip
               contentStyle={{ backgroundColor: "hsl(232, 40%, 12%)", border: "1px solid hsl(232, 25%, 18%)", borderRadius: 8, fontFamily: "JetBrains Mono", fontSize: 12 }}
               labelStyle={{ color: "hsl(220, 20%, 90%)" }}
               itemStyle={{ color: "hsl(160, 100%, 50%)" }}
-              formatter={(value: number) => [fmtCost(value, 6, currency), "Náklady"]}
+              formatter={(value: number) => [fmtCost(value, 6, currency, exchangeRate), "Náklady"]}
             />
             <Area type="monotone" dataKey="cost" stroke="hsl(160, 100%, 50%)" fill="url(#costGrad)" strokeWidth={2} dot={false} />
           </AreaChart>

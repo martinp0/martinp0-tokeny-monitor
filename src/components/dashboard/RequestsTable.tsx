@@ -24,7 +24,7 @@ function DetailRow({ label, value, color }: { label: string; value: string | num
 }
 
 function RequestDetailModal({ row, open, onClose }: { row: ActivityRow | null; open: boolean; onClose: () => void }) {
-  const { currency } = useCurrency();
+  const { currency, exchangeRate } = useCurrency();
   if (!row) return null;
 
   return (
@@ -64,11 +64,11 @@ function RequestDetailModal({ row, open, onClose }: { row: ActivityRow | null; o
           <div>
             <h4 className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Costs</h4>
             <div className="bg-secondary/50 rounded-md px-3 py-1">
-              <DetailRow label="Celkové náklady" value={fmtCost(row.cost_total, 6, currency)} color="text-chart-1" />
-              <DetailRow label="Web Search" value={fmtCost(row.cost_web_search, 6, currency)} />
-              <DetailRow label="Cache" value={fmtCost(row.cost_cache, 6, currency)} />
-              <DetailRow label="File Processing" value={fmtCost(row.cost_file_processing, 6, currency)} />
-              <DetailRow label="BYOK Inference" value={fmtCost(row.byok_usage_inference, 6, currency)} />
+              <DetailRow label="Celkové náklady" value={fmtCost(row.cost_total, 6, currency, exchangeRate)} color="text-chart-1" />
+              <DetailRow label="Web Search" value={fmtCost(row.cost_web_search, 6, currency, exchangeRate)} />
+              <DetailRow label="Cache" value={fmtCost(row.cost_cache, 6, currency, exchangeRate)} />
+              <DetailRow label="File Processing" value={fmtCost(row.cost_file_processing, 6, currency, exchangeRate)} />
+              <DetailRow label="BYOK Inference" value={fmtCost(row.byok_usage_inference, 6, currency, exchangeRate)} />
             </div>
           </div>
 
@@ -101,7 +101,7 @@ function RequestDetailModal({ row, open, onClose }: { row: ActivityRow | null; o
 }
 
 export function RequestsTable({ data }: Props) {
-  const { currency } = useCurrency();
+  const { currency, exchangeRate } = useCurrency();
   const [search, setSearch] = useState("");
   const [sortKey, setSortKey] = useState<SortKey>("created_at");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
@@ -179,7 +179,7 @@ export function RequestsTable({ data }: Props) {
                     <TableCell className="text-muted-foreground">{row.created_at.substring(11, 19)}</TableCell>
                     <TableCell className="text-foreground max-w-[200px] truncate">{row.model_permaslug.split("/").pop()}</TableCell>
                     <TableCell className="text-muted-foreground">{row.provider_name}</TableCell>
-                    <TableCell className="text-right text-chart-1">{fmtCost(row.cost_total, 4, currency)}</TableCell>
+                    <TableCell className="text-right text-chart-1">{fmtCost(row.cost_total, 4, currency, exchangeRate)}</TableCell>
                     <TableCell className="text-right text-chart-2">{fmtNum(row.tokens_prompt + row.tokens_completion, currency)}</TableCell>
                     <TableCell className="text-right text-chart-3">{fmtNum(row.generation_time_ms, currency)}</TableCell>
                     <TableCell>

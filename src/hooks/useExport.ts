@@ -7,7 +7,7 @@ import { useCurrency } from "@/hooks/useCurrency";
 
 export function useExport(dashboardRef: React.RefObject<HTMLElement | null>) {
   const exporting = useRef(false);
-  const { currency } = useCurrency();
+  const { currency, exchangeRate } = useCurrency();
 
   const exportPNG = useCallback(async () => {
     if (!dashboardRef.current || exporting.current) return;
@@ -44,7 +44,7 @@ export function useExport(dashboardRef: React.RefObject<HTMLElement | null>) {
     doc.setFontSize(11);
     doc.setTextColor(60);
     const kpis = [
-      `Naklady: ${fmtCost(totalCost, 4, currency)}`,
+      `Naklady: ${fmtCost(totalCost, 4, currency, exchangeRate)}`,
       `Pozadavky: ${fmtNum(totalRequests, currency)}`,
       `Prum. odpoved: ${(avgGenTime / 1000).toFixed(1)}s`,
       `Tokeny: ${fmtNum(totalTokens, currency)}`,
@@ -75,7 +75,7 @@ export function useExport(dashboardRef: React.RefObject<HTMLElement | null>) {
         row.created_at.substring(11, 19),
         (row.model_permaslug.split("/").pop() || "").substring(0, 28),
         row.provider_name,
-        fmtCost(row.cost_total, 4, currency),
+        fmtCost(row.cost_total, 4, currency, exchangeRate),
         fmtNum(row.tokens_prompt + row.tokens_completion, currency),
         fmtNum(row.generation_time_ms, currency),
         row.finish_reason_normalized,
@@ -85,7 +85,7 @@ export function useExport(dashboardRef: React.RefObject<HTMLElement | null>) {
     }
 
     doc.save(`openrouter-report-${new Date().toISOString().slice(0, 10)}.pdf`);
-  }, [currency]);
+  }, [currency, exchangeRate]);
 
   return { exportPNG, exportPDF };
 }
