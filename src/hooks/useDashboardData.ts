@@ -147,9 +147,19 @@ export function useDashboardData() {
     }
   }, []);
 
-  const filteredData = selectedModel
-    ? data.filter((r) => r.model_permaslug === selectedModel)
+  // Apply date filter first, then model filter
+  const dateFiltered = dateFilter
+    ? data.filter((r) => {
+        const d = r.created_at.substring(0, 10);
+        const from = dateFilter.from.toISOString().substring(0, 10);
+        const to = dateFilter.to.toISOString().substring(0, 10);
+        return d >= from && d <= to;
+      })
     : data;
+
+  const filteredData = selectedModel
+    ? dateFiltered.filter((r) => r.model_permaslug === selectedModel)
+    : dateFiltered;
 
   const models = [...new Set(data.map((r) => r.model_permaslug))];
   const providers = [...new Set(data.map((r) => r.provider_name))];
