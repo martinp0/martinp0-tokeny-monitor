@@ -13,7 +13,7 @@ import { RequestsTable } from "@/components/dashboard/RequestsTable";
 import { RealLifeComparison } from "@/components/dashboard/RealLifeComparison";
 import { CsvUpload } from "@/components/dashboard/CsvUpload";
 import { DateRangePicker } from "@/components/dashboard/DateRangePicker";
-import { Activity, Download, Image, FileText, RefreshCw, AlertCircle, LogOut } from "lucide-react";
+import { Activity, Download, Image, FileText, LogOut } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 
@@ -21,7 +21,7 @@ const Index = () => {
   const dashboardRef = useRef<HTMLDivElement>(null);
   const {
     data, filteredData, fileName, selectedModel, setSelectedModel, loadCSV,
-    syncFromAPI, syncing, syncError, dateFilter, setDateFilter,
+    dateFilter, setDateFilter,
     totalCost, totalRequests, totalTokens, avgGenTime, dateRange,
     costByModel, costByProvider, timeSeries,
   } = useDashboardData();
@@ -46,12 +46,7 @@ const Index = () => {
             )}
           </div>
           <div className="flex items-center gap-4">
-            {syncError && (
-              <span className="text-xs text-destructive flex items-center gap-1">
-                <AlertCircle className="h-3 w-3" />
-                {syncError}
-              </span>
-            )}
+            
             <div className="flex items-center gap-1.5">
               <Button
                 variant="outline"
@@ -69,16 +64,7 @@ const Index = () => {
             </div>
             <DateRangePicker value={dateFilter} onChange={setDateFilter} />
             <span className="text-xs font-mono text-muted-foreground truncate max-w-[200px]">{fileName}</span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={syncFromAPI}
-              disabled={syncing}
-              className="gap-2 border-border hover:bg-secondary hover:text-foreground font-mono text-xs"
-            >
-              <RefreshCw className={`h-3.5 w-3.5 ${syncing ? "animate-spin" : ""}`} />
-              {syncing ? "Syncing..." : "Sync API"}
-            </Button>
+            
             <CsvUpload onUpload={loadCSV} />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
