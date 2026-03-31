@@ -31,7 +31,7 @@ export function CostTimeChart({ data }: Props) {
               contentStyle={{ backgroundColor: "hsl(232, 40%, 12%)", border: "1px solid hsl(232, 25%, 18%)", borderRadius: 8, fontFamily: "JetBrains Mono", fontSize: 12 }}
               labelStyle={{ color: "hsl(220, 20%, 90%)" }}
               itemStyle={{ color: "hsl(160, 100%, 50%)" }}
-              formatter={(value: number) => [fmtCost(value, 6, currency), "Náklady"]}
+              formatter={(value: number) => [fmtCost(value, 6, currency, exchangeRate), "Náklady"]}
             />
             <Area type="monotone" dataKey="cost" stroke="hsl(160, 100%, 50%)" fill="url(#costGrad)" strokeWidth={2} dot={false} />
           </AreaChart>

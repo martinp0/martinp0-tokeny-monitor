@@ -11,11 +11,11 @@ interface KpiCardsProps {
 }
 
 export function KpiCards({ totalCost, totalRequests, totalTokens, avgGenTime }: KpiCardsProps) {
-  const { currency } = useCurrency();
+  const { currency, exchangeRate } = useCurrency();
   const values = { cost: totalCost, requests: totalRequests, avgTime: avgGenTime, tokens: totalTokens };
 
   const kpis = [
-    { key: "cost" as const, label: "Celkové náklady", icon: DollarSign, format: (v: number) => fmtCost(v, 4, currency), color: "text-chart-1" },
+    { key: "cost" as const, label: "Celkové náklady", icon: DollarSign, format: (v: number) => fmtCost(v, 4, currency, exchangeRate), color: "text-chart-1" },
     { key: "requests" as const, label: "Požadavky", icon: Activity, format: (v: number) => fmtNum(v, currency), color: "text-chart-2" },
     { key: "avgTime" as const, label: "Prům. odpověď", icon: Clock, format: (v: number) => `${(v / 1000).toFixed(1)}s`, color: "text-chart-3" },
     { key: "tokens" as const, label: "Celkem tokenů", icon: Hash, format: (v: number) => fmtNumShort(v, currency), color: "text-chart-4" },
