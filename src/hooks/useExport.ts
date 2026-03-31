@@ -75,7 +75,7 @@ export function useExport(dashboardRef: React.RefObject<HTMLElement | null>) {
         row.created_at.substring(11, 19),
         (row.model_permaslug.split("/").pop() || "").substring(0, 28),
         row.provider_name,
-        fmtCost(row.cost_total, 4, currency),
+        fmtCost(row.cost_total, 4, currency, exchangeRate),
         fmtNum(row.tokens_prompt + row.tokens_completion, currency),
         fmtNum(row.generation_time_ms, currency),
         row.finish_reason_normalized,
