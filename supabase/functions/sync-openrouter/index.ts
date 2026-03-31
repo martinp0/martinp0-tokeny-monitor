@@ -1,5 +1,9 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
-import { corsHeaders } from "https://esm.sh/@supabase/supabase-js@2.49.4/cors";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
 
 const OPENROUTER_API = "https://openrouter.ai/api/v1/activity";
 
@@ -12,7 +16,7 @@ Deno.serve(async (req) => {
     const OPENROUTER_API_KEY = Deno.env.get("OPENROUTER_API_KEY");
     if (!OPENROUTER_API_KEY) {
       return new Response(
-        JSON.stringify({ error: "OPENROUTER_API_KEY is not configured" }),
+        JSON.stringify({ error: "OPENROUTER_API_KEY is not configured. Add it in Cloud → Secrets." }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -21,7 +25,6 @@ Deno.serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Fetch activity from OpenRouter (last 30 days aggregated by endpoint)
     const response = await fetch(OPENROUTER_API, {
       headers: { Authorization: `Bearer ${OPENROUTER_API_KEY}` },
     });
@@ -37,8 +40,6 @@ Deno.serve(async (req) => {
     const result = await response.json();
     const items = result.data || [];
 
-    // The /activity endpoint returns aggregated data per model/provider/date
-    // We store each item as a row
     let inserted = 0;
     let skipped = 0;
 
