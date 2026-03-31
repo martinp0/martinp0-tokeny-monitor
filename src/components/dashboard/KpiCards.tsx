@@ -1,5 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { DollarSign, Activity, Clock, Hash } from "lucide-react";
+import { fmtCost, fmtNum, fmtNumShort } from "@/lib/format";
 
 interface KpiCardsProps {
   totalCost: number;
@@ -9,10 +10,10 @@ interface KpiCardsProps {
 }
 
 const kpis = [
-  { key: "cost", label: "Total Cost", icon: DollarSign, format: (v: number) => `$${v.toFixed(4)}`, color: "text-chart-1" },
-  { key: "requests", label: "Requests", icon: Activity, format: (v: number) => v.toLocaleString(), color: "text-chart-2" },
-  { key: "avgTime", label: "Avg Response", icon: Clock, format: (v: number) => `${(v / 1000).toFixed(1)}s`, color: "text-chart-3" },
-  { key: "tokens", label: "Total Tokens", icon: Hash, format: (v: number) => v >= 1e6 ? `${(v / 1e6).toFixed(1)}M` : v >= 1e3 ? `${(v / 1e3).toFixed(0)}K` : v.toLocaleString(), color: "text-chart-4" },
+  { key: "cost", label: "Celkové náklady", icon: DollarSign, format: (v: number) => fmtCost(v), color: "text-chart-1" },
+  { key: "requests", label: "Požadavky", icon: Activity, format: (v: number) => fmtNum(v), color: "text-chart-2" },
+  { key: "avgTime", label: "Prům. odpověď", icon: Clock, format: (v: number) => `${(v / 1000).toFixed(1)}s`, color: "text-chart-3" },
+  { key: "tokens", label: "Celkem tokenů", icon: Hash, format: (v: number) => fmtNumShort(v), color: "text-chart-4" },
 ] as const;
 
 export function KpiCards({ totalCost, totalRequests, totalTokens, avgGenTime }: KpiCardsProps) {
