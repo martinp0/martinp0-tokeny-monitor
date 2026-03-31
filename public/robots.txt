@@ -10,5 +10,29 @@ Allow: /
 User-agent: facebookexternalhit
 Allow: /
 
+# AI Crawlers
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Bytespider
+Allow: /
+
+User-agent: CCBot
+Disallow: /
+
 User-agent: *
 Allow: /
+
+Sitemap: https://martinp0-tokeny-monitor.lovable.app/sitemap.xml
