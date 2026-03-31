@@ -24,7 +24,7 @@ const Index = () => {
     costByModel, costByProvider, timeSeries,
   } = useDashboardData();
   const { exportPNG, exportPDF } = useExport(dashboardRef);
-  const { currency, toggle: toggleCurrency } = useCurrency();
+  const { currency, toggle: toggleCurrency, exchangeRate, rateDate } = useCurrency();
 
   return (
     <div className="min-h-screen bg-background">
