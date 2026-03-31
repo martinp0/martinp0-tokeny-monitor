@@ -62,11 +62,11 @@ function RequestDetailModal({ row, open, onClose }: { row: ActivityRow | null; o
           <div>
             <h4 className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Costs</h4>
             <div className="bg-secondary/50 rounded-md px-3 py-1">
-              <DetailRow label="Total Cost" value={`$${row.cost_total.toFixed(6)}`} color="text-chart-1" />
-              <DetailRow label="Web Search" value={`$${row.cost_web_search.toFixed(6)}`} />
-              <DetailRow label="Cache" value={`$${row.cost_cache.toFixed(6)}`} />
-              <DetailRow label="File Processing" value={`$${row.cost_file_processing.toFixed(6)}`} />
-              <DetailRow label="BYOK Inference" value={`$${row.byok_usage_inference.toFixed(6)}`} />
+              <DetailRow label="Celkové náklady" value={fmtCost(row.cost_total, 6)} color="text-chart-1" />
+              <DetailRow label="Web Search" value={fmtCost(row.cost_web_search, 6)} />
+              <DetailRow label="Cache" value={fmtCost(row.cost_cache, 6)} />
+              <DetailRow label="File Processing" value={fmtCost(row.cost_file_processing, 6)} />
+              <DetailRow label="BYOK Inference" value={fmtCost(row.byok_usage_inference, 6)} />
             </div>
           </div>
 
