@@ -101,6 +101,7 @@ function RequestDetailModal({ row, open, onClose }: { row: ActivityRow | null; o
 }
 
 export function RequestsTable({ data }: Props) {
+  const { currency } = useCurrency();
   const [search, setSearch] = useState("");
   const [sortKey, setSortKey] = useState<SortKey>("created_at");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
