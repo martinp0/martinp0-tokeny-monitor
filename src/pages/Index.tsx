@@ -2,6 +2,7 @@ import { useRef } from "react";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { useExport } from "@/hooks/useExport";
 import { useCurrency } from "@/hooks/useCurrency";
+import { useAuth } from "@/hooks/useAuth";
 import { KpiCards } from "@/components/dashboard/KpiCards";
 import { CostTimeChart } from "@/components/dashboard/CostTimeChart";
 import { TokensChart } from "@/components/dashboard/TokensChart";
@@ -11,7 +12,7 @@ import { SpeedChart } from "@/components/dashboard/SpeedChart";
 import { RequestsTable } from "@/components/dashboard/RequestsTable";
 import { CsvUpload } from "@/components/dashboard/CsvUpload";
 import { DateRangePicker } from "@/components/dashboard/DateRangePicker";
-import { Activity, Download, Image, FileText, RefreshCw, AlertCircle } from "lucide-react";
+import { Activity, Download, Image, FileText, RefreshCw, AlertCircle, LogOut } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 
@@ -25,6 +26,7 @@ const Index = () => {
   } = useDashboardData();
   const { exportPNG, exportPDF } = useExport(dashboardRef);
   const { currency, toggle: toggleCurrency, exchangeRate, rateDate } = useCurrency();
+  const { signOut } = useAuth();
 
   return (
     <div className="min-h-screen bg-background">
@@ -93,6 +95,15 @@ const Index = () => {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={signOut}
+              className="gap-1.5 text-muted-foreground hover:text-foreground font-mono text-xs"
+              title="Odhlásit se"
+            >
+              <LogOut className="h-3.5 w-3.5" />
+            </Button>
           </div>
         </div>
       </header>
