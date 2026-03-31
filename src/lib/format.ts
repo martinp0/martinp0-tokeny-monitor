@@ -1,6 +1,6 @@
 import type { Currency } from "@/hooks/useCurrency";
 
-const USD_TO_CZK = 23.5;
+const FALLBACK_RATE = 23.5;
 
 const czFmt = new Intl.NumberFormat("cs-CZ");
 const enFmt = new Intl.NumberFormat("en-US");
@@ -8,9 +8,9 @@ const czFmtDec = (d: number) => new Intl.NumberFormat("cs-CZ", { minimumFraction
 const enFmtDec = (d: number) => new Intl.NumberFormat("en-US", { minimumFractionDigits: d, maximumFractionDigits: d });
 
 /** Format cost in given currency */
-export function fmtCost(usd: number, decimals = 4, currency: Currency = "CZK"): string {
+export function fmtCost(usd: number, decimals = 4, currency: Currency = "CZK", rate: number = FALLBACK_RATE): string {
   if (currency === "CZK") {
-    return `${czFmtDec(decimals).format(usd * USD_TO_CZK)} Kč`;
+    return `${czFmtDec(decimals).format(usd * rate)} Kč`;
   }
   return `$${enFmtDec(decimals).format(usd)}`;
 }
@@ -29,9 +29,9 @@ export function fmtNumShort(n: number, currency: Currency = "CZK"): string {
 }
 
 /** Format cost for chart axis (short) */
-export function fmtCostShort(usd: number, currency: Currency = "CZK"): string {
+export function fmtCostShort(usd: number, currency: Currency = "CZK", rate: number = FALLBACK_RATE): string {
   if (currency === "CZK") {
-    const czk = usd * USD_TO_CZK;
+    const czk = usd * rate;
     return czk >= 1 ? `${czFmtDec(0).format(czk)} Kč` : `${czFmtDec(2).format(czk)} Kč`;
   }
   return usd >= 1 ? `$${enFmtDec(0).format(usd)}` : `$${enFmtDec(2).format(usd)}`;
