@@ -49,10 +49,11 @@ export function RealLifeComparison({ totalCostCzk }: Props) {
           <span>🛒</span> Za tvoje AI tokeny bys koupil/a:
         </h3>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
-          {comparisons.map((item) => (
+          {comparisons.map((item, index) => (
             <div
               key={item.name}
-              className="bg-secondary/40 rounded-lg p-3 text-center border border-border/20 hover:border-primary/30 transition-colors"
+              className="bg-secondary/40 rounded-lg p-3 text-center border border-border/20 hover:border-primary/30 transition-all hover:scale-105 animate-fade-in opacity-0"
+              style={{ animationDelay: `${index * 60}ms`, animationFillMode: "forwards" }}
             >
               <div className="text-2xl mb-1">{item.emoji}</div>
               <div className="text-primary font-mono text-sm font-bold">
