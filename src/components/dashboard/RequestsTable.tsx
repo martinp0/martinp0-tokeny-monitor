@@ -64,11 +64,11 @@ function RequestDetailModal({ row, open, onClose }: { row: ActivityRow | null; o
           <div>
             <h4 className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Costs</h4>
             <div className="bg-secondary/50 rounded-md px-3 py-1">
-              <DetailRow label="Celkové náklady" value={fmtCost(row.cost_total, 6, currency)} color="text-chart-1" />
-              <DetailRow label="Web Search" value={fmtCost(row.cost_web_search, 6, currency)} />
-              <DetailRow label="Cache" value={fmtCost(row.cost_cache, 6, currency)} />
-              <DetailRow label="File Processing" value={fmtCost(row.cost_file_processing, 6, currency)} />
-              <DetailRow label="BYOK Inference" value={fmtCost(row.byok_usage_inference, 6, currency)} />
+              <DetailRow label="Celkové náklady" value={fmtCost(row.cost_total, 6, currency, exchangeRate)} color="text-chart-1" />
+              <DetailRow label="Web Search" value={fmtCost(row.cost_web_search, 6, currency, exchangeRate)} />
+              <DetailRow label="Cache" value={fmtCost(row.cost_cache, 6, currency, exchangeRate)} />
+              <DetailRow label="File Processing" value={fmtCost(row.cost_file_processing, 6, currency, exchangeRate)} />
+              <DetailRow label="BYOK Inference" value={fmtCost(row.byok_usage_inference, 6, currency, exchangeRate)} />
             </div>
           </div>
 
