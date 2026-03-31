@@ -1,3 +1,5 @@
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -11,15 +13,14 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Fetch rate from ČNB
     const res = await fetch(CNB_URL);
-    if (!res.ok) {
-      throw new Error(`CNB API returned ${res.status}`);
-    }
+    if (!res.ok) throw new Error(`CNB API returned ${res.status}`);
 
     const text = await res.text();
-    // Format: lines like "USA|dolar|1|USD|23,455"
     const lines = text.split("\n");
-    let rate = 23.5; // fallback
+    let rate = 23.5;
+    let sourceDate = lines[0]?.trim() || null;
 
     for (const line of lines) {
       const parts = line.split("|");
@@ -31,7 +32,19 @@ Deno.serve(async (req) => {
       }
     }
 
-    return new Response(JSON.stringify({ rate, date: lines[0]?.trim() }), {
+    // Store in DB
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    await supabase
+      .from("exchange_rates")
+      .upsert(
+        { currency_pair: "USD_CZK", rate, source_date: sourceDate, fetched_at: new Date().toISOString() },
+        { onConflict: "currency_pair" }
+      );
+
+    return new Response(JSON.stringify({ rate, date: sourceDate, cached: true }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });
@@ -40,7 +53,7 @@ Deno.serve(async (req) => {
     console.error("Error fetching CNB rate:", message);
     return new Response(JSON.stringify({ error: message, rate: 23.5 }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 200, // still return fallback
+      status: 200,
     });
   }
 });

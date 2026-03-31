@@ -98,6 +98,30 @@ export type Database = {
         }
         Relationships: []
       }
+      exchange_rates: {
+        Row: {
+          currency_pair: string
+          fetched_at: string
+          id: string
+          rate: number
+          source_date: string | null
+        }
+        Insert: {
+          currency_pair?: string
+          fetched_at?: string
+          id?: string
+          rate: number
+          source_date?: string | null
+        }
+        Update: {
+          currency_pair?: string
+          fetched_at?: string
+          id?: string
+          rate?: number
+          source_date?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
