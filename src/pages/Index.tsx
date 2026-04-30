@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { useExport } from "@/hooks/useExport";
@@ -14,21 +14,52 @@ import { RequestsTable } from "@/components/dashboard/RequestsTable";
 import { RealLifeComparison } from "@/components/dashboard/RealLifeComparison";
 import { CsvUpload } from "@/components/dashboard/CsvUpload";
 import { DateRangePicker } from "@/components/dashboard/DateRangePicker";
-import { Activity, Download, Image, FileText, LogOut, Home } from "lucide-react";
+import { ModelComparison } from "@/components/dashboard/ModelComparison";
+import { CostForecast } from "@/components/dashboard/CostForecast";
+import { AnomalyPanel } from "@/components/dashboard/AnomalyPanel";
+import { AiAgentChat, type AgentAction } from "@/components/dashboard/AiAgentChat";
+import { Activity, Download, Image, FileText, LogOut, Settings as SettingsIcon } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 const Index = () => {
   const dashboardRef = useRef<HTMLDivElement>(null);
   const {
     data, filteredData, fileName, selectedModel, setSelectedModel, loadCSV,
-    dateFilter, setDateFilter,
-    totalCost, totalRequests, totalTokens, avgGenTime, dateRange,
+    dateFilter, setDateFilter, models,
+    totalCost, totalRequests, totalTokens, avgGenTime,
     costByModel, costByProvider, timeSeries,
   } = useDashboardData();
   const { exportPNG, exportPDF } = useExport(dashboardRef);
-  const { currency, toggle: toggleCurrency, exchangeRate, rateDate } = useCurrency();
+  const { currency, toggle: toggleCurrency, setCurrency, exchangeRate, rateDate } = useCurrency();
   const { signOut } = useAuth();
+
+  const handleAgentAction = useCallback((a: AgentAction) => {
+    if (a.name === "apply_filters") {
+      if ("model" in a.args) {
+        if (a.args.model === null) setSelectedModel(null);
+        else if (typeof a.args.model === "string") {
+          // try to match by suffix or exact
+          const exact = models.find((m) => m === a.args.model);
+          const suffix = models.find((m) => m.endsWith("/" + a.args.model) || m.includes(a.args.model));
+          setSelectedModel(exact ?? suffix ?? a.args.model);
+        }
+      }
+      if (a.args.from_date && a.args.to_date) {
+        setDateFilter({ from: new Date(a.args.from_date), to: new Date(a.args.to_date) });
+      } else if (a.args.from_date === null && a.args.to_date === null) {
+        setDateFilter(null);
+      }
+      toast.success("Filtry aktualizovány AI agentem");
+    } else if (a.name === "set_currency") {
+      setCurrency(a.args.currency);
+      toast.success(`Měna: ${a.args.currency}`);
+    } else if (a.name === "export_data") {
+      if (a.args.format === "png") exportPNG();
+      else exportPDF(data, totalCost, totalRequests, totalTokens, avgGenTime);
+    }
+  }, [models, setSelectedModel, setDateFilter, setCurrency, exportPNG, exportPDF, data, totalCost, totalRequests, totalTokens, avgGenTime]);
 
   return (
     <div className="min-h-screen bg-background bg-mesh">
@@ -47,7 +78,6 @@ const Index = () => {
             )}
           </div>
           <div className="flex items-center gap-4">
-            
             <div className="flex items-center gap-1.5">
               <Button
                 variant="outline"
@@ -65,7 +95,7 @@ const Index = () => {
             </div>
             <DateRangePicker value={dateFilter} onChange={setDateFilter} />
             <span className="text-xs font-mono text-muted-foreground truncate max-w-[200px]">{fileName}</span>
-            
+
             <CsvUpload onUpload={loadCSV} />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -85,6 +115,11 @@ const Index = () => {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+            <Link to="/settings">
+              <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground hover:text-foreground font-mono text-xs" title="Nastavení">
+                <SettingsIcon className="h-3.5 w-3.5" />
+              </Button>
+            </Link>
             <Button
               variant="ghost"
               size="sm"
@@ -113,10 +148,19 @@ const Index = () => {
           <SpeedChart data={timeSeries} />
         </div>
 
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <CostForecast data={data} />
+          <AnomalyPanel data={data} />
+        </div>
+
+        <ModelComparison data={filteredData} />
+
         <RealLifeComparison totalCostCzk={totalCost * exchangeRate} />
 
         <RequestsTable data={filteredData} />
       </main>
+
+      <AiAgentChat onAction={handleAgentAction} />
     </div>
   );
 };

@@ -98,6 +98,42 @@ export type Database = {
         }
         Relationships: []
       }
+      budget_alerts: {
+        Row: {
+          created_at: string
+          enabled: boolean
+          id: string
+          last_notified_at: string | null
+          monthly_budget_usd: number
+          notify_email: string | null
+          threshold_pct: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          last_notified_at?: string | null
+          monthly_budget_usd?: number
+          notify_email?: string | null
+          threshold_pct?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          last_notified_at?: string | null
+          monthly_budget_usd?: number
+          notify_email?: string | null
+          threshold_pct?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       email_send_log: {
         Row: {
           created_at: string
@@ -206,6 +242,33 @@ export type Database = {
           id?: string
           rate?: number
           source_date?: string | null
+        }
+        Relationships: []
+      }
+      mcp_tokens: {
+        Row: {
+          created_at: string
+          id: string
+          last_used_at: string | null
+          name: string
+          token_hash: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_used_at?: string | null
+          name?: string
+          token_hash: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_used_at?: string | null
+          name?: string
+          token_hash?: string
+          user_id?: string
         }
         Relationships: []
       }
