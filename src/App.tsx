@@ -10,6 +10,7 @@ import Auth from "./pages/Auth.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import ResetPassword from "./pages/ResetPassword.tsx";
 import Fun from "./pages/Fun.tsx";
+import Landing from "./pages/Landing.tsx";
 
 const queryClient = new QueryClient();
 
@@ -57,10 +58,11 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
+            <Route path="/" element={<Landing />} />
             <Route path="/auth" element={<AuthRoute><Auth /></AuthRoute>} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/fun" element={<Fun />} />
-            <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+            <Route path="/dashboard" element={<ProtectedRoute><Index /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
