@@ -52,7 +52,7 @@ export function ModelComparison({ data }: Props) {
   const cheapest = stats[0];
   const fastest = [...stats].sort((a, b) => b.tokensPerSec - a.tokensPerSec)[0];
 
-  const fmt = (usd: number) => fmtCost(usd, currency, exchangeRate);
+  const fmt = (usd: number) => fmtCost(usd, 4, currency, exchangeRate);
 
   return (
     <Card className="glass border-white/[0.06]">
