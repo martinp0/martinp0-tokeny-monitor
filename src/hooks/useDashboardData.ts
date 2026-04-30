@@ -3,7 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { parseCSV, type ActivityRow } from "@/lib/csv-parser";
 import sampleCSV from "@/data/sample.csv?raw";
 
-export function useDashboardData() {
+export function useDashboardData(options: { demoMode?: boolean } = {}) {
+  const { demoMode = false } = options;
   const [data, setData] = useState<ActivityRow[]>([]);
   const [fileName, setFileName] = useState<string>("Loading...");
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
@@ -14,6 +15,14 @@ export function useDashboardData() {
   // Load data from DB, fall back to sample CSV
   useEffect(() => {
     async function loadFromDB() {
+      // Demo mode: load only sample CSV, skip DB calls (works without auth)
+      if (demoMode) {
+        const parsed = parseCSV(sampleCSV);
+        setData(parsed);
+        setFileName("demo data – openrouter sample");
+        return;
+      }
+
       const { data: rows, error } = await supabase
         .from("activity_rows")
         .select("*")
