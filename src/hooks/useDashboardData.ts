@@ -64,7 +64,7 @@ export function useDashboardData(options: { demoMode?: boolean } = {}) {
       }
     }
     loadFromDB();
-  }, []);
+  }, [demoMode]);
 
   // Upload CSV → save to DB
   const loadCSV = useCallback(async (text: string, name: string) => {
