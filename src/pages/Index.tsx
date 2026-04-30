@@ -1,4 +1,5 @@
 import { useRef } from "react";
+import { Link } from "react-router-dom";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { useExport } from "@/hooks/useExport";
 import { useCurrency } from "@/hooks/useCurrency";
@@ -13,7 +14,7 @@ import { RequestsTable } from "@/components/dashboard/RequestsTable";
 import { RealLifeComparison } from "@/components/dashboard/RealLifeComparison";
 import { CsvUpload } from "@/components/dashboard/CsvUpload";
 import { DateRangePicker } from "@/components/dashboard/DateRangePicker";
-import { Activity, Download, Image, FileText, LogOut } from "lucide-react";
+import { Activity, Download, Image, FileText, LogOut, Home } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 
@@ -35,9 +36,9 @@ const Index = () => {
       <header className="border-b border-white/[0.06] px-6 py-3 glass">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+            <Link to="/" className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center" title="Domů">
               <Activity className="h-4 w-4 text-white" />
-            </div>
+            </Link>
             <h1 className="text-lg font-bold gradient-text tracking-tight">OpenRouter Monitor</h1>
             {selectedModel && (
               <span className="text-xs font-mono bg-primary/15 text-primary px-2 py-0.5 rounded-full">
