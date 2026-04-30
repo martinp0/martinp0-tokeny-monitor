@@ -1,0 +1,307 @@
+import { useRef } from "react";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Activity,
+  ArrowRight,
+  BarChart3,
+  Upload,
+  DollarSign,
+  Zap,
+  Shield,
+  Sparkles,
+  LineChart,
+  Globe,
+  CheckCircle2,
+  Smartphone,
+} from "lucide-react";
+import { useDashboardData } from "@/hooks/useDashboardData";
+import { useCurrency } from "@/hooks/useCurrency";
+import { KpiCards } from "@/components/dashboard/KpiCards";
+import { CostTimeChart } from "@/components/dashboard/CostTimeChart";
+import { TokensChart } from "@/components/dashboard/TokensChart";
+import { ModelCostChart } from "@/components/dashboard/ModelCostChart";
+import { ProviderChart } from "@/components/dashboard/ProviderChart";
+import { SpeedChart } from "@/components/dashboard/SpeedChart";
+import { RequestsTable } from "@/components/dashboard/RequestsTable";
+import { useAuth } from "@/hooks/useAuth";
+
+const FEATURES = [
+  {
+    icon: DollarSign,
+    title: "Náklady v CZK i USD",
+    desc: "Přepínej měnu jedním klikem. Aktuální kurz ČNB se stahuje automaticky.",
+    color: "from-[hsl(270,95%,65%)] to-[hsl(320,90%,65%)]",
+  },
+  {
+    icon: BarChart3,
+    title: "Detailní grafy",
+    desc: "Spotřeba tokenů, výkon modelů, latence, providery — vše na jednom místě.",
+    color: "from-[hsl(175,85%,55%)] to-[hsl(200,90%,60%)]",
+  },
+  {
+    icon: Upload,
+    title: "Import z CSV",
+    desc: "Stáhni si activity export z OpenRouter a nahraj ho jedním tažením myši.",
+    color: "from-[hsl(45,100%,60%)] to-[hsl(320,90%,65%)]",
+  },
+  {
+    icon: Zap,
+    title: "Real-life srovnání",
+    desc: "Kolik espress, piv nebo pizz by se za tvoje API náklady dalo koupit?",
+    color: "from-[hsl(140,80%,55%)] to-[hsl(175,85%,55%)]",
+  },
+  {
+    icon: Shield,
+    title: "Bezpečné a privátní",
+    desc: "Tvoje data zůstávají v šifrovaném cloudu, viditelná jen tobě.",
+    color: "from-[hsl(270,95%,65%)] to-[hsl(200,90%,60%)]",
+  },
+  {
+    icon: Smartphone,
+    title: "Funguje všude",
+    desc: "Web, mobil, tablet i jako nativní app pro iOS a Android.",
+    color: "from-[hsl(320,90%,65%)] to-[hsl(45,100%,60%)]",
+  },
+];
+
+export default function Landing() {
+  const { session } = useAuth();
+  const dashRef = useRef<HTMLDivElement>(null);
+  const {
+    filteredData, selectedModel, setSelectedModel,
+    totalCost, totalRequests, totalTokens, avgGenTime,
+    costByModel, costByProvider, timeSeries,
+  } = useDashboardData({ demoMode: true });
+  const { currency, toggle: toggleCurrency, exchangeRate } = useCurrency();
+
+  const ctaHref = session ? "/dashboard" : "/auth";
+  const ctaLabel = session ? "Otevřít dashboard" : "Začít zdarma";
+
+  return (
+    <div className="min-h-screen bg-background bg-mesh text-foreground">
+      {/* Nav */}
+      <header className="sticky top-0 z-50 border-b border-white/[0.06] glass">
+        <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-3">
+            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+              <Activity className="h-4 w-4 text-white" />
+            </div>
+            <span className="text-lg font-bold gradient-text tracking-tight">OpenRouter Monitor</span>
+          </Link>
+          <nav className="hidden md:flex items-center gap-8 text-sm font-mono text-muted-foreground">
+            <a href="#features" className="hover:text-foreground transition-colors">Featury</a>
+            <a href="#demo" className="hover:text-foreground transition-colors">Live demo</a>
+            <a href="#how" className="hover:text-foreground transition-colors">Jak to funguje</a>
+          </nav>
+          <div className="flex items-center gap-2">
+            {!session && (
+              <Link to="/auth">
+                <Button variant="ghost" size="sm" className="font-mono text-xs hidden sm:inline-flex">
+                  Přihlásit
+                </Button>
+              </Link>
+            )}
+            <Link to={ctaHref}>
+              <Button
+                size="sm"
+                className="gap-1.5 font-mono text-xs bg-gradient-to-r from-primary to-[hsl(320,90%,65%)] hover:opacity-90 transition-opacity border-0"
+              >
+                {ctaLabel}
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </header>
+
+      {/* Hero */}
+      <section className="relative px-6 pt-20 pb-16 max-w-7xl mx-auto text-center">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass border-white/[0.08] text-xs font-mono text-muted-foreground mb-8 animate-fade-in">
+          <Sparkles className="h-3 w-3 text-accent" />
+          Přehled nákladů AI tokenů v reálném čase
+        </div>
+        <h1 className="text-5xl md:text-7xl font-bold tracking-tight leading-[1.05] mb-6">
+          Zjisti, kolik tě <br className="hidden md:block" />
+          <span className="gradient-text">opravdu stojí AI</span>
+        </h1>
+        <p className="max-w-2xl mx-auto text-lg md:text-xl text-muted-foreground mb-10 font-mono">
+          Krásný dashboard pro tvoji OpenRouter aktivitu. Sleduj spotřebu, optimalizuj
+          modely a převáděj náklady do <span className="text-accent">CZK i USD</span>.
+        </p>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-4">
+          <Link to={ctaHref}>
+            <Button
+              size="lg"
+              className="gap-2 font-mono bg-gradient-to-r from-primary to-[hsl(320,90%,65%)] hover:opacity-90 transition-opacity border-0 glow-md"
+            >
+              {ctaLabel}
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          </Link>
+          <a href="#demo">
+            <Button size="lg" variant="outline" className="gap-2 font-mono glass glass-hover border-white/[0.08]">
+              <LineChart className="h-4 w-4" />
+              Vyzkoušet demo
+            </Button>
+          </a>
+        </div>
+        <div className="flex items-center justify-center gap-5 text-xs font-mono text-muted-foreground">
+          <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-accent" />Zdarma</span>
+          <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-accent" />Bez instalace</span>
+          <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-accent" />CZ rozhraní</span>
+        </div>
+      </section>
+
+      {/* Features */}
+      <section id="features" className="px-6 py-20 max-w-7xl mx-auto">
+        <div className="text-center mb-14">
+          <h2 className="text-3xl md:text-5xl font-bold mb-4">
+            Vše, co potřebuješ pro <span className="gradient-text">kontrolu AI nákladů</span>
+          </h2>
+          <p className="text-muted-foreground font-mono max-w-2xl mx-auto">
+            Žádné tabulky v Excelu. Žádné dohady. Jen čisté grafy a přehledná čísla.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {FEATURES.map(({ icon: Icon, title, desc, color }, i) => (
+            <Card
+              key={title}
+              className="glass glass-hover relative overflow-hidden group animate-fade-in opacity-0"
+              style={{ animationDelay: `${i * 80}ms`, animationFillMode: "forwards" }}
+            >
+              <div className={`absolute inset-0 bg-gradient-to-br ${color} opacity-0 group-hover:opacity-[0.08] transition-opacity duration-500`} />
+              <CardContent className="p-6 relative">
+                <div className={`h-10 w-10 rounded-lg bg-gradient-to-br ${color} flex items-center justify-center mb-4`}>
+                  <Icon className="h-5 w-5 text-white" />
+                </div>
+                <h3 className="text-lg font-bold mb-2">{title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      {/* Live Demo */}
+      <section id="demo" className="px-6 py-20 max-w-[1600px] mx-auto">
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/15 text-accent text-xs font-mono mb-4">
+            <Activity className="h-3 w-3" />
+            Live demo s ukázkovými daty
+          </div>
+          <h2 className="text-3xl md:text-5xl font-bold mb-4">
+            Takhle to <span className="gradient-text">vypadá uvnitř</span>
+          </h2>
+          <p className="text-muted-foreground font-mono max-w-2xl mx-auto mb-6">
+            Žádný login, žádná registrace. Hraj si s grafy hned teď.
+          </p>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={toggleCurrency}
+            className="gap-1.5 border-border hover:bg-secondary hover:text-foreground font-mono text-xs"
+          >
+            Přepnout do {currency === "CZK" ? "USD ($)" : "CZK (Kč)"}
+          </Button>
+        </div>
+
+        <div ref={dashRef} className="space-y-4 rounded-2xl glass border-white/[0.08] p-4 md:p-6 glow-sm">
+          <KpiCards
+            totalCost={totalCost}
+            totalRequests={totalRequests}
+            totalTokens={totalTokens}
+            avgGenTime={avgGenTime}
+          />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <CostTimeChart data={timeSeries} />
+            <TokensChart data={timeSeries} />
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <ModelCostChart data={costByModel} onModelClick={setSelectedModel} selectedModel={selectedModel} />
+            <ProviderChart data={costByProvider} />
+            <SpeedChart data={timeSeries} />
+          </div>
+          <RequestsTable data={filteredData} />
+        </div>
+
+        <div className="mt-10 text-center">
+          <p className="text-sm text-muted-foreground font-mono mb-4">
+            Líbí se ti to? Nahraj svoje vlastní data a sleduj <span className="text-accent">opravdové náklady</span>.
+          </p>
+          <Link to={ctaHref}>
+            <Button
+              size="lg"
+              className="gap-2 font-mono bg-gradient-to-r from-primary to-[hsl(320,90%,65%)] hover:opacity-90 transition-opacity border-0 glow-md"
+            >
+              {ctaLabel}
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          </Link>
+        </div>
+      </section>
+
+      {/* How it works */}
+      <section id="how" className="px-6 py-20 max-w-5xl mx-auto">
+        <h2 className="text-3xl md:text-5xl font-bold mb-12 text-center">
+          3 kroky k <span className="gradient-text">dokonalému přehledu</span>
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {[
+            { n: "01", t: "Vytvoř si účet", d: "Registrace přes email nebo Google. Trvá to 10 vteřin." },
+            { n: "02", t: "Nahraj CSV", d: "Stáhni activity export z openrouter.ai/activity a nahraj." },
+            { n: "03", t: "Sleduj a optimalizuj", d: "Filtry podle modelů, datumů a providerů. Export do PNG/PDF." },
+          ].map(({ n, t, d }) => (
+            <Card key={n} className="glass border-white/[0.08]">
+              <CardContent className="p-6">
+                <div className="text-5xl font-mono font-bold gradient-text mb-3">{n}</div>
+                <h3 className="text-lg font-bold mb-2">{t}</h3>
+                <p className="text-sm text-muted-foreground">{d}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      {/* Final CTA */}
+      <section className="px-6 py-24 max-w-4xl mx-auto text-center">
+        <div className="rounded-3xl glass border-white/[0.08] p-12 glow-md relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10 pointer-events-none" />
+          <Globe className="h-12 w-12 text-accent mx-auto mb-6 relative" />
+          <h2 className="text-3xl md:text-5xl font-bold mb-4 relative">
+            Připraven/a převzít <span className="gradient-text">kontrolu nad AI náklady?</span>
+          </h2>
+          <p className="text-muted-foreground font-mono mb-8 relative">
+            Začni během minuty. Žádná kreditka.
+          </p>
+          <div className="relative">
+            <Link to={ctaHref}>
+              <Button
+                size="lg"
+                className="gap-2 font-mono bg-gradient-to-r from-primary to-[hsl(320,90%,65%)] hover:opacity-90 transition-opacity border-0"
+              >
+                {ctaLabel}
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="border-t border-white/[0.06] px-6 py-8">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-xs font-mono text-muted-foreground">
+          <div className="flex items-center gap-2">
+            <Activity className="h-3.5 w-3.5" />
+            <span>OpenRouter Monitor · {new Date().getFullYear()}</span>
+          </div>
+          <div className="flex items-center gap-6">
+            <Link to="/auth" className="hover:text-foreground transition-colors">Přihlášení</Link>
+            <a href="https://openrouter.ai" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">OpenRouter</a>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}
