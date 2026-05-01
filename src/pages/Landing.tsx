@@ -68,6 +68,33 @@ const FEATURES = [
   },
 ];
 
+const FAQS = [
+  {
+    q: "Jak importuju CSV z OpenRouteru?",
+    a: "Přihlas se na openrouter.ai, otevři stránku Activity a klikni na Export → CSV. Stažený soubor pak v Tokeny Monitoru přetáhneš do uploaderu na dashboardu (nebo klikneš a vybereš). Parser automaticky rozpozná všechny sloupce — modely, providery, tokeny, latenci i cenu v USD. Můžeš nahrávat opakovaně, duplicity se přeskakují podle ID requestu.",
+  },
+  {
+    q: "Proč není automatická synchronizace s OpenRouter API?",
+    a: "OpenRouter zatím nenabízí veřejné API pro historii activity — dostupný je jen real-time generation endpoint. Jakmile veřejné API spustí, doplníme auto-sync. Do té doby je CSV import nejspolehlivější cesta a trvá ~10 vteřin.",
+  },
+  {
+    q: "Jak převádíte tokeny a USD na CZK?",
+    a: "Náklady přicházejí v USD (tak je vrací OpenRouter). V dashboardu si jedním klikem přepneš zobrazení mezi USD a CZK. Kurz tahá automatický CRON job z oficiálního API České národní banky (denně), takže máš vždy aktuální oficiální devizový kurz. Konverze se počítá per-request, ne paušálně, aby seděla na den, kdy request proběhl.",
+  },
+  {
+    q: "Jak funguje zabezpečení dat?",
+    a: "Tvoje data leží v šifrované databázi (Postgres + AES-256 at rest, TLS in transit). Každý řádek má vazbu na tvoje user_id a Row-Level Security politiky garantují, že vidíš a upravuješ jen vlastní data — i kdyby někdo získal API klíč, RLS to zablokuje na úrovni databáze. Zápisy do databáze jdou výhradně přes ověřené Edge Functions s service-role klíčem, nikdy přímo z prohlížeče.",
+  },
+  {
+    q: "Stojí to něco? Je tam nějaký freemium / limit?",
+    a: "Aktuálně zdarma. Žádná kreditka, žádný trial. Cílem je být užitečný nástroj pro indie devs a malé týmy — pokud v budoucnu přijde placený tier (např. týmové sdílení, pokročilé alerty), free plan zůstane.",
+  },
+  {
+    q: "Co to je MCP server a k čemu mi je?",
+    a: "MCP (Model Context Protocol) je standard od Anthropicu, kterým si AI klient (Claude Desktop, Cursor, Zed…) může připojit externí nástroje. Tokeny Monitor exposuje MCP endpoint s nástroji jako get_total_cost, get_top_models nebo delete_request. V /settings si vygeneruješ token, vložíš do konfigurace klienta a můžeš se Claudea ptát „kolik jsem utratil za Sonnet minulý týden?" přímo v chatu.",
+  },
+];
+
 export default function Landing() {
   const { session } = useAuth();
   const dashRef = useRef<HTMLDivElement>(null);
