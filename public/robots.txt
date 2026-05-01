@@ -35,4 +35,4 @@ Disallow: /
 User-agent: *
 Allow: /
 
-Sitemap: https://martinp0-tokeny-monitor.lovable.app/sitemap.xml
+Sitemap: https://tokeny.pohl.uk/sitemap.xml
