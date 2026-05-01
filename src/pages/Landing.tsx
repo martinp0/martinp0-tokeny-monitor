@@ -91,7 +91,7 @@ const FAQS = [
   },
   {
     q: "Co to je MCP server a k čemu mi je?",
-    a: "MCP (Model Context Protocol) je standard od Anthropicu, kterým si AI klient (Claude Desktop, Cursor, Zed…) může připojit externí nástroje. Tokeny Monitor exposuje MCP endpoint s nástroji jako get_total_cost, get_top_models nebo delete_request. V /settings si vygeneruješ token, vložíš do konfigurace klienta a můžeš se Claudea ptát „kolik jsem utratil za Sonnet minulý týden?" přímo v chatu.",
+    a: "MCP (Model Context Protocol) je standard od Anthropicu, kterým si AI klient (Claude Desktop, Cursor, Zed…) může připojit externí nástroje. Tokeny Monitor exposuje MCP endpoint s nástroji jako get_total_cost, get_top_models nebo delete_request. V /settings si vygeneruješ token, vložíš do konfigurace klienta a můžeš se Claudea ptát „kolik jsem utratil za Sonnet minulý týden?“ přímo v chatu.",
   },
 ];
 
