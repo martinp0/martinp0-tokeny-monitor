@@ -29,13 +29,14 @@
     <meta name="twitter:description" content="Sledujte náklady, spotřebu tokenů a výkon AI modelů na OpenRouter v reálném čase." />
     <meta name="twitter:image" content="https://martinp0-tokeny-monitor.lovable.app/og-image.png" />
 
-    <!-- JSON-LD Structured Data -->
+    <!-- JSON-LD: WebApplication -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "WebApplication",
       "name": "OpenRouter Monitor",
-      "url": "https://martinp0-tokeny-monitor.lovable.app/",
+      "alternateName": "Tokeny Monitor",
+      "url": "https://tokeny.pohl.uk/",
       "description": "Dashboard pro sledování nákladů, spotřeby tokenů a výkonu AI modelů na OpenRouter.",
       "applicationCategory": "BusinessApplication",
       "operatingSystem": "Web",
@@ -45,13 +46,47 @@
         "price": "0",
         "priceCurrency": "CZK"
       },
+      "creator": {
+        "@type": "Person",
+        "@id": "https://martin.pohl.uk/#person",
+        "name": "Martin Pohl",
+        "url": "https://martin.pohl.uk",
+        "jobTitle": "IT Engineer · Apple MDM · Identity & SSO · Indie Maker",
+        "sameAs": [
+          "https://martin.pohl.uk"
+        ]
+      },
+      "author": {
+        "@type": "Person",
+        "@id": "https://martin.pohl.uk/#person"
+      },
+      "isPartOf": {
+        "@type": "WebSite",
+        "name": "Martin Pohl",
+        "url": "https://martin.pohl.uk"
+      },
       "featureList": [
         "Sledování nákladů v CZK a USD",
         "Analýza spotřeby tokenů",
         "Přehled výkonu AI modelů",
         "Import dat z CSV",
-        "Synchronizace s OpenRouter API"
+        "AI agent a MCP server"
       ]
+    }
+    </script>
+
+    <!-- JSON-LD: Person (autor) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "@id": "https://martin.pohl.uk/#person",
+      "name": "Martin Pohl",
+      "url": "https://martin.pohl.uk",
+      "jobTitle": "IT Engineer & Indie Maker",
+      "description": "Apple MDM, Identity & SSO, automation a indie web projekty.",
+      "knowsAbout": ["Apple MDM", "Jamf", "Kandji", "Okta", "Entra ID", "SCIM", "Google Workspace", "FinOps", "AI tooling"],
+      "sameAs": ["https://martin.pohl.uk"]
     }
     </script>
   </head>
