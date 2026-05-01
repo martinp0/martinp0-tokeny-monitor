@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://martinp0-tokeny-monitor.lovable.app/</loc>
+    <loc>https://tokeny.pohl.uk/</loc>
     <lastmod>2026-03-31</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://martinp0-tokeny-monitor.lovable.app/auth</loc>
+    <loc>https://tokeny.pohl.uk/auth</loc>
     <lastmod>2026-03-31</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
