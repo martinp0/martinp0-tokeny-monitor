@@ -2,6 +2,7 @@ import { useRef } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import {
   Activity,
   ArrowRight,
@@ -67,6 +68,33 @@ const FEATURES = [
   },
 ];
 
+const FAQS = [
+  {
+    q: "Jak importuju CSV z OpenRouteru?",
+    a: "Přihlas se na openrouter.ai, otevři stránku Activity a klikni na Export → CSV. Stažený soubor pak v Tokeny Monitoru přetáhneš do uploaderu na dashboardu (nebo klikneš a vybereš). Parser automaticky rozpozná všechny sloupce — modely, providery, tokeny, latenci i cenu v USD. Můžeš nahrávat opakovaně, duplicity se přeskakují podle ID requestu.",
+  },
+  {
+    q: "Proč není automatická synchronizace s OpenRouter API?",
+    a: "OpenRouter zatím nenabízí veřejné API pro historii activity — dostupný je jen real-time generation endpoint. Jakmile veřejné API spustí, doplníme auto-sync. Do té doby je CSV import nejspolehlivější cesta a trvá ~10 vteřin.",
+  },
+  {
+    q: "Jak převádíte tokeny a USD na CZK?",
+    a: "Náklady přicházejí v USD (tak je vrací OpenRouter). V dashboardu si jedním klikem přepneš zobrazení mezi USD a CZK. Kurz tahá automatický CRON job z oficiálního API České národní banky (denně), takže máš vždy aktuální oficiální devizový kurz. Konverze se počítá per-request, ne paušálně, aby seděla na den, kdy request proběhl.",
+  },
+  {
+    q: "Jak funguje zabezpečení dat?",
+    a: "Tvoje data leží v šifrované databázi (Postgres + AES-256 at rest, TLS in transit). Každý řádek má vazbu na tvoje user_id a Row-Level Security politiky garantují, že vidíš a upravuješ jen vlastní data — i kdyby někdo získal API klíč, RLS to zablokuje na úrovni databáze. Zápisy do databáze jdou výhradně přes ověřené Edge Functions s service-role klíčem, nikdy přímo z prohlížeče.",
+  },
+  {
+    q: "Stojí to něco? Je tam nějaký freemium / limit?",
+    a: "Aktuálně zdarma. Žádná kreditka, žádný trial. Cílem je být užitečný nástroj pro indie devs a malé týmy — pokud v budoucnu přijde placený tier (např. týmové sdílení, pokročilé alerty), free plan zůstane.",
+  },
+  {
+    q: "Co to je MCP server a k čemu mi je?",
+    a: "MCP (Model Context Protocol) je standard od Anthropicu, kterým si AI klient (Claude Desktop, Cursor, Zed…) může připojit externí nástroje. Tokeny Monitor exposuje MCP endpoint s nástroji jako get_total_cost, get_top_models nebo delete_request. V /settings si vygeneruješ token, vložíš do konfigurace klienta a můžeš se Claudea ptát „kolik jsem utratil za Sonnet minulý týden?“ přímo v chatu.",
+  },
+];
+
 export default function Landing() {
   const { session } = useAuth();
   const dashRef = useRef<HTMLDivElement>(null);
@@ -95,6 +123,7 @@ export default function Landing() {
             <a href="#features" className="hover:text-foreground transition-colors">Featury</a>
             <a href="#demo" className="hover:text-foreground transition-colors">Live demo</a>
             <a href="#how" className="hover:text-foreground transition-colors">Jak to funguje</a>
+            <a href="#faq" className="hover:text-foreground transition-colors">FAQ</a>
           </nav>
           <div className="flex items-center gap-2">
             {!session && (
@@ -263,6 +292,38 @@ export default function Landing() {
             </Card>
           ))}
         </div>
+      </section>
+
+      {/* FAQ */}
+      <section id="faq" className="px-6 py-20 max-w-4xl mx-auto">
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/15 text-primary text-xs font-mono mb-4">
+            <Sparkles className="h-3 w-3" />
+            Nejčastější dotazy
+          </div>
+          <h2 className="text-3xl md:text-5xl font-bold mb-4">
+            Co lidi <span className="gradient-text">nejvíc zajímá</span>
+          </h2>
+          <p className="text-muted-foreground font-mono">
+            Krátké odpovědi na otázky, které dostávám pořád.
+          </p>
+        </div>
+        <Accordion type="single" collapsible className="space-y-3">
+          {FAQS.map((item, i) => (
+            <AccordionItem
+              key={i}
+              value={`faq-${i}`}
+              className="glass border-white/[0.08] rounded-xl px-5 data-[state=open]:glow-sm transition-shadow"
+            >
+              <AccordionTrigger className="text-left font-bold hover:no-underline py-5">
+                {item.q}
+              </AccordionTrigger>
+              <AccordionContent className="text-sm text-muted-foreground leading-relaxed pb-5">
+                {item.a}
+              </AccordionContent>
+            </AccordionItem>
+          ))}
+        </Accordion>
       </section>
 
       {/* Maker — nenápadné propojení s martin.pohl.uk */}
