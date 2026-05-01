@@ -89,6 +89,64 @@
       "sameAs": ["https://martin.pohl.uk"]
     }
     </script>
+
+    <!-- JSON-LD: FAQ -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Jak importuju CSV z OpenRouteru?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Přihlas se na openrouter.ai, otevři stránku Activity a klikni na Export → CSV. Stažený soubor pak v Tokeny Monitoru přetáhneš do uploaderu na dashboardu. Parser automaticky rozpozná modely, providery, tokeny, latenci i cenu v USD. Duplicity se přeskakují podle ID requestu."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Proč není automatická synchronizace s OpenRouter API?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "OpenRouter zatím nenabízí veřejné API pro historii activity — dostupný je jen real-time generation endpoint. Jakmile veřejné API spustí, doplníme auto-sync. Do té doby je CSV import nejspolehlivější cesta."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Jak převádíte tokeny a USD na CZK?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Náklady přicházejí v USD. V dashboardu přepneš zobrazení mezi USD a CZK jedním klikem. Kurz tahá automatický CRON job z oficiálního API České národní banky denně, takže máš vždy aktuální oficiální devizový kurz. Konverze se počítá per-request podle dne, kdy request proběhl."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Jak funguje zabezpečení dat?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Data leží v šifrované Postgres databázi (AES-256 at rest, TLS in transit). Každý řádek má vazbu na user_id a Row-Level Security politiky garantují, že vidíš jen vlastní data. Zápisy jdou výhradně přes ověřené Edge Functions s service-role klíčem, nikdy přímo z prohlížeče."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Stojí to něco?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Aktuálně zdarma. Žádná kreditka, žádný trial. Pokud v budoucnu přijde placený tier (týmové sdílení, pokročilé alerty), free plan zůstane."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Co to je MCP server a k čemu mi je?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "MCP (Model Context Protocol) je standard od Anthropicu, kterým si AI klient (Claude Desktop, Cursor, Zed) připojí externí nástroje. Tokeny Monitor exposuje MCP endpoint s nástroji jako get_total_cost, get_top_models, delete_request. V /settings vygeneruješ token, vložíš do konfigurace klienta a ptáš se Claudea přímo na svoje data."
+          }
+        }
+      ]
+    }
+    </script>
   </head>
 
   <body>
