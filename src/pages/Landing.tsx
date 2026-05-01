@@ -294,6 +294,38 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* FAQ */}
+      <section id="faq" className="px-6 py-20 max-w-4xl mx-auto">
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/15 text-primary text-xs font-mono mb-4">
+            <Sparkles className="h-3 w-3" />
+            Nejčastější dotazy
+          </div>
+          <h2 className="text-3xl md:text-5xl font-bold mb-4">
+            Co lidi <span className="gradient-text">nejvíc zajímá</span>
+          </h2>
+          <p className="text-muted-foreground font-mono">
+            Krátké odpovědi na otázky, které dostávám pořád.
+          </p>
+        </div>
+        <Accordion type="single" collapsible className="space-y-3">
+          {FAQS.map((item, i) => (
+            <AccordionItem
+              key={i}
+              value={`faq-${i}`}
+              className="glass border-white/[0.08] rounded-xl px-5 data-[state=open]:glow-sm transition-shadow"
+            >
+              <AccordionTrigger className="text-left font-bold hover:no-underline py-5">
+                {item.q}
+              </AccordionTrigger>
+              <AccordionContent className="text-sm text-muted-foreground leading-relaxed pb-5">
+                {item.a}
+              </AccordionContent>
+            </AccordionItem>
+          ))}
+        </Accordion>
+      </section>
+
       {/* Maker — nenápadné propojení s martin.pohl.uk */}
       <section id="maker" className="px-6 py-16 max-w-5xl mx-auto">
         <a
