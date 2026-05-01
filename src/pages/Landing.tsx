@@ -265,6 +265,43 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* Maker — nenápadné propojení s martin.pohl.uk */}
+      <section id="maker" className="px-6 py-16 max-w-5xl mx-auto">
+        <a
+          href="https://martin.pohl.uk?utm_source=tokeny.pohl.uk&utm_medium=landing&utm_campaign=maker_card"
+          target="_blank"
+          rel="noopener author"
+          className="block group"
+        >
+          <Card className="glass glass-hover border-white/[0.08] overflow-hidden">
+            <CardContent className="p-8 md:p-10 flex flex-col md:flex-row items-start md:items-center gap-6 md:gap-10">
+              <div className="flex items-center gap-4">
+                <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-primary via-[hsl(320,90%,65%)] to-accent flex items-center justify-center text-xl font-bold text-white shrink-0 glow-sm">
+                  MP
+                </div>
+                <div>
+                  <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-muted-foreground mb-1">
+                    Indie maker
+                  </div>
+                  <div className="text-lg font-bold">Martin Pohl</div>
+                </div>
+              </div>
+              <div className="flex-1">
+                <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
+                  Tokeny Monitor staví <span className="text-foreground font-medium">Martin</span> —
+                  IT engineer za <span className="text-foreground">Apple MDM, Identity & SSO</span> rolloutsy
+                  a indie web projekty. Mrkni na jeho práci a další experimenty.
+                </p>
+              </div>
+              <div className="flex items-center gap-2 text-sm font-mono text-accent group-hover:gap-3 transition-all shrink-0">
+                martin.pohl.uk
+                <ExternalLink className="h-4 w-4" />
+              </div>
+            </CardContent>
+          </Card>
+        </a>
+      </section>
+
       {/* Final CTA */}
       <section className="px-6 py-24 max-w-4xl mx-auto text-center">
         <div className="rounded-3xl glass border-white/[0.08] p-12 glow-md relative overflow-hidden">
@@ -295,9 +332,27 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-xs font-mono text-muted-foreground">
           <div className="flex items-center gap-2">
             <Activity className="h-3.5 w-3.5" />
-            <span>OpenRouter Monitor · {new Date().getFullYear()}</span>
+            <span>
+              OpenRouter Monitor · {new Date().getFullYear()} · crafted by{" "}
+              <a
+                href="https://martin.pohl.uk?utm_source=tokeny.pohl.uk&utm_medium=footer"
+                target="_blank"
+                rel="noopener author"
+                className="text-foreground hover:text-accent transition-colors underline-offset-4 hover:underline"
+              >
+                Martin Pohl
+              </a>
+            </span>
           </div>
           <div className="flex items-center gap-6">
+            <a
+              href="https://martin.pohl.uk?utm_source=tokeny.pohl.uk&utm_medium=footer_nav"
+              target="_blank"
+              rel="noopener author"
+              className="hover:text-foreground transition-colors"
+            >
+              martin.pohl.uk
+            </a>
             <Link to="/auth" className="hover:text-foreground transition-colors">Přihlášení</Link>
             <a href="https://openrouter.ai" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">OpenRouter</a>
           </div>
