@@ -96,6 +96,7 @@ export default function Landing() {
             <a href="#features" className="hover:text-foreground transition-colors">Featury</a>
             <a href="#demo" className="hover:text-foreground transition-colors">Live demo</a>
             <a href="#how" className="hover:text-foreground transition-colors">Jak to funguje</a>
+            <a href="#faq" className="hover:text-foreground transition-colors">FAQ</a>
           </nav>
           <div className="flex items-center gap-2">
             {!session && (
