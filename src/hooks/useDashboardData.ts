@@ -6,6 +6,7 @@ import sampleCSV from "@/data/sample.csv?raw";
 
 export function useDashboardData(options: { demoMode?: boolean } = {}) {
   const { demoMode = false } = options;
+  const { session } = useAuth();
   const [data, setData] = useState<ActivityRow[]>([]);
   const [fileName, setFileName] = useState<string>("Loading...");
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
