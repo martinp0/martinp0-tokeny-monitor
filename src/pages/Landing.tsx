@@ -376,6 +376,36 @@ export default function Landing() {
         </a>
       </section>
 
+      {/* Support — Buy Me a Coffee */}
+      <section className="px-6 py-12 max-w-3xl mx-auto text-center">
+        <div className="glass rounded-2xl border-white/[0.08] p-8 md:p-10">
+          <div className="h-12 w-12 rounded-full bg-gradient-to-br from-[hsl(35,100%,60%)] to-[hsl(20,90%,55%)] flex items-center justify-center mx-auto mb-5">
+            <Coffee className="h-6 w-6 text-white" />
+          </div>
+          <h3 className="text-xl md:text-2xl font-bold mb-3">
+            Podpoř vývoj <span className="gradient-text">kávou</span>
+          </h3>
+          <p className="text-sm text-muted-foreground font-mono max-w-lg mx-auto mb-6 leading-relaxed">
+            Tokeny Monitor je zdarma a open-source. Pokud ti šetří čas nebo peníze, můžeš
+            poděkovat symbolickým kafem. Každá podpora motivuje k dalšímu vylepšování. 💜
+          </p>
+          <a
+            href="https://buymeacoffee.com/martinpohlp"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Button
+              size="lg"
+              className="gap-2 font-mono bg-gradient-to-r from-[hsl(35,100%,60%)] to-[hsl(20,90%,55%)] hover:opacity-90 transition-opacity border-0 text-white"
+            >
+              <Heart className="h-4 w-4" />
+              Buy Me a Coffee
+              <ExternalLink className="h-3.5 w-3.5 opacity-60" />
+            </Button>
+          </a>
+        </div>
+      </section>
+
       {/* Final CTA */}
       <section className="px-6 py-24 max-w-4xl mx-auto text-center">
         <div className="rounded-3xl glass border-white/[0.08] p-12 glow-md relative overflow-hidden">
