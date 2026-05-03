@@ -1,10 +1,12 @@
 import { useState, useCallback, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import { parseCSV, type ActivityRow } from "@/lib/csv-parser";
 import sampleCSV from "@/data/sample.csv?raw";
 
 export function useDashboardData(options: { demoMode?: boolean } = {}) {
   const { demoMode = false } = options;
+  const { session } = useAuth();
   const [data, setData] = useState<ActivityRow[]>([]);
   const [fileName, setFileName] = useState<string>("Loading...");
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
@@ -100,10 +102,11 @@ export function useDashboardData(options: { demoMode?: boolean } = {}) {
         time_to_first_token_ms: r.time_to_first_token_ms,
         app_name: r.app_name,
         api_key_name: r.api_key_name,
+        user_id: session?.user?.id,
       }));
       await supabase.from("activity_rows").upsert(batch, { onConflict: "generation_id" });
     }
-  }, []);
+  }, [session]);
 
   // Sync from OpenRouter API via edge function
   const syncFromAPI = useCallback(async () => {
