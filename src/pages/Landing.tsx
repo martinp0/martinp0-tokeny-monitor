@@ -17,6 +17,8 @@ import {
   CheckCircle2,
   Smartphone,
   ExternalLink,
+  Heart,
+  Coffee,
 } from "lucide-react";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { useCurrency } from "@/hooks/useCurrency";
