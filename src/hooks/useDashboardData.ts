@@ -102,6 +102,7 @@ export function useDashboardData(options: { demoMode?: boolean } = {}) {
         time_to_first_token_ms: r.time_to_first_token_ms,
         app_name: r.app_name,
         api_key_name: r.api_key_name,
+        user_id: session?.user?.id,
       }));
       await supabase.from("activity_rows").upsert(batch, { onConflict: "generation_id" });
     }
