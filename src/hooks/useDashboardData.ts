@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import { parseCSV, type ActivityRow } from "@/lib/csv-parser";
 import sampleCSV from "@/data/sample.csv?raw";
 
