@@ -184,6 +184,17 @@ export default function Landing() {
           <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-accent" />Bez instalace</span>
           <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-accent" />CZ rozhraní</span>
         </div>
+        <div className="mt-6">
+          <a
+            href="https://buymeacoffee.com/martinpohlp"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 text-xs font-mono text-muted-foreground/60 hover:text-accent transition-colors"
+          >
+            <Coffee className="h-3 w-3" />
+            Líbí se ti to? Kup mi kafe ☕
+          </a>
+        </div>
       </section>
 
       {/* Features */}
