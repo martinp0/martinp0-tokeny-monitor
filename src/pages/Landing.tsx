@@ -450,6 +450,15 @@ export default function Landing() {
           </div>
           <div className="flex items-center gap-6">
             <a
+              href="https://buymeacoffee.com/martinpohlp"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-foreground transition-colors flex items-center gap-1"
+            >
+              <Coffee className="h-3 w-3" />
+              Support
+            </a>
+            <a
               href="https://martin.pohl.uk?utm_source=tokeny.pohl.uk&utm_medium=footer_nav"
               target="_blank"
               rel="noopener author"
