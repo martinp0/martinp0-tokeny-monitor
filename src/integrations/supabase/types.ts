@@ -40,6 +40,7 @@ export type Database = {
           tokens_prompt: number
           tokens_reasoning: number
           user: string
+          user_id: string | null
           variant: string
         }
         Insert: {
@@ -67,6 +68,7 @@ export type Database = {
           tokens_prompt?: number
           tokens_reasoning?: number
           user?: string
+          user_id?: string | null
           variant?: string
         }
         Update: {
@@ -94,6 +96,7 @@ export type Database = {
           tokens_prompt?: number
           tokens_reasoning?: number
           user?: string
+          user_id?: string | null
           variant?: string
         }
         Relationships: []
