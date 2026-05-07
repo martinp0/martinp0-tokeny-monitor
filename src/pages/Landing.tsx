@@ -102,6 +102,7 @@ const FAQS = [
 
 export default function Landing() {
   const { session } = useAuth();
+  const { t } = useTranslation();
   const dashRef = useRef<HTMLDivElement>(null);
   const {
     filteredData, selectedModel, setSelectedModel,
@@ -111,7 +112,7 @@ export default function Landing() {
   const { currency, toggle: toggleCurrency, exchangeRate } = useCurrency();
 
   const ctaHref = session ? "/dashboard" : "/auth";
-  const ctaLabel = session ? "Otevřít dashboard" : "Začít zdarma";
+  const ctaLabel = session ? t("nav.openDashboard") : t("nav.startFree");
 
   return (
     <div className="min-h-screen bg-background bg-mesh text-foreground">
