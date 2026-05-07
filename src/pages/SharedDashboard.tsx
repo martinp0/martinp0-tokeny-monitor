@@ -67,39 +67,48 @@ export default function SharedDashboard() {
       modelMap[m] = (modelMap[m] || 0) + (r.cost_total || 0) * rate;
     });
     const costByModel = Object.entries(modelMap)
-      .map(([name, cost]) => ({ name, cost }))
+      .map(([fullModel, cost]) => ({ model: fullModel.split("/").pop() || fullModel, fullModel, cost }))
       .sort((a, b) => b.cost - a.cost);
 
     // Cost by provider
-    const provMap: Record<string, number> = {};
+    const provMap: Record<string, { cost: number; count: number }> = {};
     rows.forEach((r: any) => {
       const p = r.provider_name || "unknown";
-      provMap[p] = (provMap[p] || 0) + (r.cost_total || 0) * rate;
+      if (!provMap[p]) provMap[p] = { cost: 0, count: 0 };
+      provMap[p].cost += (r.cost_total || 0) * rate;
+      provMap[p].count += 1;
     });
     const costByProvider = Object.entries(provMap)
-      .map(([name, cost]) => ({ name, cost }))
+      .map(([provider, v]) => ({ provider, cost: v.cost, requests: v.count }))
       .sort((a, b) => b.cost - a.cost);
 
     // Time series
-    const dayMap: Record<string, { cost: number; tokens: number; speed: number; count: number }> = {};
+    const dayMap: Record<string, { cost: number; tp: number; tc: number; tr: number; tca: number; gen: number; ttft: number; count: number }> = {};
     rows.forEach((r: any) => {
       const d = (r.created_at || "").slice(0, 10);
       if (!d) return;
-      if (!dayMap[d]) dayMap[d] = { cost: 0, tokens: 0, speed: 0, count: 0 };
+      if (!dayMap[d]) dayMap[d] = { cost: 0, tp: 0, tc: 0, tr: 0, tca: 0, gen: 0, ttft: 0, count: 0 };
       dayMap[d].cost += (r.cost_total || 0) * rate;
-      dayMap[d].tokens += (r.tokens_prompt || 0) + (r.tokens_completion || 0);
-      dayMap[d].speed += r.generation_time_ms || 0;
+      dayMap[d].tp += r.tokens_prompt || 0;
+      dayMap[d].tc += r.tokens_completion || 0;
+      dayMap[d].tr += r.tokens_reasoning || 0;
+      dayMap[d].tca += r.tokens_cached || 0;
+      dayMap[d].gen += r.generation_time_ms || 0;
+      dayMap[d].ttft += r.time_to_first_token_ms || 0;
       dayMap[d].count += 1;
     });
     const timeSeries = Object.entries(dayMap)
       .sort(([a], [b]) => a.localeCompare(b))
-      .map(([date, v]) => ({
-        date,
+      .map(([time, v]) => ({
+        time,
         cost: v.cost,
-        tokens: v.tokens,
-        prompt_tokens: 0,
-        completion_tokens: 0,
-        speed: v.count ? v.speed / v.count : 0,
+        model: "",
+        tokens_prompt: v.tp,
+        tokens_completion: v.tc,
+        tokens_reasoning: v.tr,
+        tokens_cached: v.tca,
+        generation_time_ms: v.count ? v.gen / v.count : 0,
+        time_to_first_token_ms: v.count ? v.ttft / v.count : 0,
       }));
 
     return { totalCost, totalRequests, totalTokens, avgGenTime, costByModel, costByProvider, timeSeries, rows };
