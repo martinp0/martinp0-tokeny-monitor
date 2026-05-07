@@ -126,16 +126,17 @@ export default function Landing() {
             <span className="text-lg font-bold gradient-text tracking-tight">OpenRouter Monitor</span>
           </Link>
           <nav className="hidden md:flex items-center gap-8 text-sm font-mono text-muted-foreground">
-            <a href="#features" className="hover:text-foreground transition-colors">Featury</a>
-            <a href="#demo" className="hover:text-foreground transition-colors">Live demo</a>
-            <a href="#how" className="hover:text-foreground transition-colors">Jak to funguje</a>
-            <a href="#faq" className="hover:text-foreground transition-colors">FAQ</a>
+            <a href="#features" className="hover:text-foreground transition-colors">{t("nav.features")}</a>
+            <a href="#demo" className="hover:text-foreground transition-colors">{t("nav.demo")}</a>
+            <a href="#how" className="hover:text-foreground transition-colors">{t("nav.howItWorks")}</a>
+            <a href="#faq" className="hover:text-foreground transition-colors">{t("nav.faq")}</a>
           </nav>
           <div className="flex items-center gap-2">
+            <LanguageSwitcher />
             {!session && (
               <Link to="/auth">
                 <Button variant="ghost" size="sm" className="font-mono text-xs hidden sm:inline-flex">
-                  Přihlásit
+                  {t("nav.login")}
                 </Button>
               </Link>
             )}
