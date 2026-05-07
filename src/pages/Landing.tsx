@@ -407,6 +407,37 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* Open Source */}
+      <section className="px-6 py-12 max-w-3xl mx-auto text-center">
+        <div className="glass rounded-2xl border-white/[0.08] p-8 md:p-10 flex flex-col items-center">
+          <div className="h-12 w-12 rounded-full bg-gradient-to-br from-[hsl(0,0%,20%)] to-[hsl(0,0%,40%)] flex items-center justify-center mb-5">
+            <Github className="h-6 w-6 text-white" />
+          </div>
+          <h3 className="text-xl md:text-2xl font-bold mb-3">
+            100 % <span className="gradient-text">open-source</span>
+          </h3>
+          <p className="text-sm text-muted-foreground font-mono max-w-lg mx-auto mb-6 leading-relaxed">
+            Celý kód je veřejný na GitHubu. Forkni si repo, rozjeď lokálně přes Docker
+            a uprav si dashboard podle sebe. Pull requesty vítány!
+          </p>
+          <a
+            href="https://github.com/MartinPohlworworx/tokeny-monitor"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Button
+              size="lg"
+              className="gap-2 font-mono glass glass-hover border-white/[0.08]"
+              variant="outline"
+            >
+              <Github className="h-4 w-4" />
+              Zobrazit na GitHubu
+              <ExternalLink className="h-3.5 w-3.5 opacity-60" />
+            </Button>
+          </a>
+        </div>
+      </section>
+
       {/* Final CTA */}
       <section className="px-6 py-24 max-w-4xl mx-auto text-center">
         <div className="rounded-3xl glass border-white/[0.08] p-12 glow-md relative overflow-hidden">
