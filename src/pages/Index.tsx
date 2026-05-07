@@ -18,6 +18,7 @@ import { ModelComparison } from "@/components/dashboard/ModelComparison";
 import { CostForecast } from "@/components/dashboard/CostForecast";
 import { AnomalyPanel } from "@/components/dashboard/AnomalyPanel";
 import { AiAgentChat, type AgentAction } from "@/components/dashboard/AiAgentChat";
+import { ShareDashboardButton } from "@/components/dashboard/ShareDashboardButton";
 import { Activity, Download, Image, FileText, LogOut, Settings as SettingsIcon, User } from "lucide-react";
 import { ChangelogModal } from "@/components/ChangelogModal";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
