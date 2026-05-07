@@ -12,6 +12,7 @@ import ResetPassword from "./pages/ResetPassword.tsx";
 import Fun from "./pages/Fun.tsx";
 import Landing from "./pages/Landing.tsx";
 import Settings from "./pages/Settings.tsx";
+import Profile from "./pages/Profile.tsx";
 
 const queryClient = new QueryClient();
 
