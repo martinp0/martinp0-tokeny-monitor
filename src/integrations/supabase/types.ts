@@ -302,6 +302,36 @@ export type Database = {
         }
         Relationships: []
       }
+      shared_dashboards: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          filters: Json | null
+          id: string
+          label: string | null
+          share_token: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          filters?: Json | null
+          id?: string
+          label?: string | null
+          share_token?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          filters?: Json | null
+          id?: string
+          label?: string | null
+          share_token?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       suppressed_emails: {
         Row: {
           created_at: string
