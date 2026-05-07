@@ -21,7 +21,6 @@ import { AiAgentChat, type AgentAction } from "@/components/dashboard/AiAgentCha
 import { ShareDashboardButton } from "@/components/dashboard/ShareDashboardButton";
 import { Activity, Download, Image, FileText, LogOut, Settings as SettingsIcon, User } from "lucide-react";
 import { ChangelogModal } from "@/components/ChangelogModal";
-import { ShareDashboardButton } from "@/components/dashboard/ShareDashboardButton";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
