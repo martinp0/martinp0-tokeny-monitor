@@ -19,6 +19,7 @@ import {
   ExternalLink,
   Heart,
   Coffee,
+  Github,
 } from "lucide-react";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { useCurrency } from "@/hooks/useCurrency";
