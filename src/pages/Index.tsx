@@ -116,6 +116,12 @@ const Index = () => {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+            <ChangelogModal />
+            <Link to="/profile">
+              <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground hover:text-foreground font-mono text-xs" title="Profil">
+                <User className="h-3.5 w-3.5" />
+              </Button>
+            </Link>
             <Link to="/settings">
               <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground hover:text-foreground font-mono text-xs" title="Nastavení">
                 <SettingsIcon className="h-3.5 w-3.5" />
