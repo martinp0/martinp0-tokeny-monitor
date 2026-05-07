@@ -499,6 +499,15 @@ export default function Landing() {
               martin.pohl.uk
             </a>
             <Link to="/auth" className="hover:text-foreground transition-colors">Přihlášení</Link>
+            <a
+              href="https://github.com/MartinPohlworworx/tokeny-monitor"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-foreground transition-colors flex items-center gap-1"
+            >
+              <Github className="h-3 w-3" />
+              GitHub
+            </a>
             <a href="https://openrouter.ai" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">OpenRouter</a>
           </div>
         </div>
