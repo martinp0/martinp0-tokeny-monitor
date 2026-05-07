@@ -1,0 +1,122 @@
+{
+  "nav": {
+    "features": "Featury",
+    "demo": "Live demo",
+    "howItWorks": "Jak to funguje",
+    "faq": "FAQ",
+    "login": "Přihlásit",
+    "startFree": "Začít zdarma",
+    "openDashboard": "Otevřít dashboard"
+  },
+  "hero": {
+    "badge": "Přehled nákladů AI tokenů v reálném čase",
+    "title1": "Zjisti, kolik tě",
+    "title2": "opravdu stojí AI",
+    "subtitle": "Krásný dashboard pro tvoji OpenRouter aktivitu. Sleduj spotřebu, optimalizuj modely a převáděj náklady do",
+    "currencies": "CZK i USD",
+    "tryDemo": "Vyzkoušet demo",
+    "free": "Zdarma",
+    "noInstall": "Bez instalace",
+    "czInterface": "CZ rozhraní",
+    "buyMeCoffee": "Líbí se ti to? Kup mi kafe ☕"
+  },
+  "features": {
+    "title": "Vše, co potřebuješ pro",
+    "titleHighlight": "kontrolu AI nákladů",
+    "subtitle": "Žádné tabulky v Excelu. Žádné dohady. Jen čisté grafy a přehledná čísla.",
+    "costTitle": "Náklady v CZK i USD",
+    "costDesc": "Přepínej měnu jedním klikem. Aktuální kurz ČNB se stahuje automaticky.",
+    "chartsTitle": "Detailní grafy",
+    "chartsDesc": "Spotřeba tokenů, výkon modelů, latence, providery — vše na jednom místě.",
+    "csvTitle": "Import z CSV",
+    "csvDesc": "Stáhni si activity export z OpenRouter a nahraj ho jedním tažením myši.",
+    "realLifeTitle": "Real-life srovnání",
+    "realLifeDesc": "Kolik espress, piv nebo pizz by se za tvoje API náklady dalo koupit?",
+    "securityTitle": "Bezpečné a privátní",
+    "securityDesc": "Tvoje data zůstávají v šifrovaném cloudu, viditelná jen tobě.",
+    "mobileTitle": "Funguje všude",
+    "mobileDesc": "Web, mobil, tablet i jako nativní app pro iOS a Android."
+  },
+  "demo": {
+    "badge": "Live demo s ukázkovými daty",
+    "title": "Takhle to",
+    "titleHighlight": "vypadá uvnitř",
+    "subtitle": "Žádný login, žádná registrace. Hraj si s grafy hned teď.",
+    "switchCurrency": "Přepnout do",
+    "cta": "Líbí se ti to? Nahraj svoje vlastní data a sleduj",
+    "ctaHighlight": "opravdové náklady"
+  },
+  "howItWorks": {
+    "title": "3 kroky k",
+    "titleHighlight": "dokonalému přehledu",
+    "step1Title": "Vytvoř si účet",
+    "step1Desc": "Registrace přes email nebo Google. Trvá to 10 vteřin.",
+    "step2Title": "Nahraj CSV",
+    "step2Desc": "Stáhni activity export z openrouter.ai/activity a nahraj.",
+    "step3Title": "Sleduj a optimalizuj",
+    "step3Desc": "Filtry podle modelů, datumů a providerů. Export do PNG/PDF."
+  },
+  "faqSection": {
+    "badge": "Nejčastější dotazy",
+    "title": "Co lidi",
+    "titleHighlight": "nejvíc zajímá",
+    "subtitle": "Krátké odpovědi na otázky, které dostávám pořád."
+  },
+  "opensource": {
+    "title": "100 %",
+    "titleHighlight": "open-source",
+    "desc": "Celý kód je veřejný na GitHubu. Forkni si repo, rozjeď lokálně přes Docker a uprav si dashboard podle sebe. Pull requesty vítány!",
+    "button": "Zobrazit na GitHubu"
+  },
+  "support": {
+    "title": "Podpoř vývoj",
+    "titleHighlight": "kávou",
+    "desc": "Tokeny Monitor je zdarma a open-source. Pokud ti šetří čas nebo peníze, můžeš poděkovat symbolickým kafem. Každá podpora motivuje k dalšímu vylepšování. 💜"
+  },
+  "cta": {
+    "title": "Připraven/a převzít",
+    "titleHighlight": "kontrolu nad AI náklady?",
+    "subtitle": "Začni během minuty. Žádná kreditka."
+  },
+  "footer": {
+    "support": "Support",
+    "login": "Přihlášení"
+  },
+  "dashboard": {
+    "share": "Sdílet",
+    "export": "Export",
+    "logout": "Odhlásit se",
+    "settings": "Nastavení",
+    "profile": "Profil",
+    "whatsnew": "Co je nového",
+    "backToDashboard": "Zpět na dashboard"
+  },
+  "profile": {
+    "title": "Profil",
+    "basicInfo": "Základní údaje",
+    "email": "E-mail",
+    "displayName": "Zobrazované jméno",
+    "save": "Uložit",
+    "saving": "Ukládám…",
+    "changePassword": "Změna hesla",
+    "newPassword": "Nové heslo",
+    "confirmPassword": "Potvrzení hesla",
+    "minChars": "Min. 6 znaků",
+    "samePassword": "Znovu stejné heslo",
+    "exportData": "Export dat (GDPR)",
+    "exportDesc": "Stáhni si všechna svá data jako CSV soubor. Obsahuje kompletní historii activity rows.",
+    "exportButton": "Exportovat data",
+    "exporting": "Exportuji…",
+    "dangerZone": "Nebezpečná zóna",
+    "deleteDesc": "Smazání účtu je nevratné. Všechna tvá data (activity rows, profil, budget alerty, MCP tokeny) budou trvale odstraněna.",
+    "deleteAccount": "Smazat účet",
+    "deleting": "Mažu…",
+    "confirmDelete": "Opravdu smazat účet?",
+    "confirmDeleteDesc": "Tato akce je nevratná. Všechna data budou trvale smazána a nebude možné je obnovit.",
+    "cancel": "Zrušit",
+    "confirmYes": "Ano, smazat vše"
+  },
+  "lang": {
+    "switch": "EN"
+  }
+}
