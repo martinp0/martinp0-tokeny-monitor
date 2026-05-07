@@ -13,6 +13,7 @@ import Fun from "./pages/Fun.tsx";
 import Landing from "./pages/Landing.tsx";
 import Settings from "./pages/Settings.tsx";
 import Profile from "./pages/Profile.tsx";
+import SharedDashboard from "./pages/SharedDashboard.tsx";
 
 const queryClient = new QueryClient();
 
