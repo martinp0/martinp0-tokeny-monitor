@@ -421,7 +421,7 @@ export default function Landing() {
             a uprav si dashboard podle sebe. Pull requesty vítány!
           </p>
           <a
-            href="https://github.com/MartinPohlworworx/tokeny-monitor"
+            href="https://github.com/martinp0/martinp0-tokeny-monitor"
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -500,7 +500,7 @@ export default function Landing() {
             </a>
             <Link to="/auth" className="hover:text-foreground transition-colors">Přihlášení</Link>
             <a
-              href="https://github.com/MartinPohlworworx/tokeny-monitor"
+              href="https://github.com/martinp0/martinp0-tokeny-monitor"
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-foreground transition-colors flex items-center gap-1"
