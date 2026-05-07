@@ -12,6 +12,8 @@ import ResetPassword from "./pages/ResetPassword.tsx";
 import Fun from "./pages/Fun.tsx";
 import Landing from "./pages/Landing.tsx";
 import Settings from "./pages/Settings.tsx";
+import Profile from "./pages/Profile.tsx";
+import SharedDashboard from "./pages/SharedDashboard.tsx";
 
 const queryClient = new QueryClient();
 
@@ -65,6 +67,8 @@ const App = () => (
             <Route path="/fun" element={<Fun />} />
             <Route path="/dashboard" element={<ProtectedRoute><Index /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+            <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+            <Route path="/shared/:token" element={<SharedDashboard />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

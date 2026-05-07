@@ -1,35 +1,44 @@
 
-# OpenRouter Activity Dashboard (Grafana style)
+# Implementace 4 features
 
-## Vizuální styl
-- **Tmavé téma** – tmavě šedé/černé pozadí (#1a1a2e / #0f0f23), kartičky s jemným borderem
-- Neonové barvy grafů (zelená, cyan, oranžová, fialová)
-- Monospace font pro čísla, grid layout panelů
+## 1. Changelog modal (What's New)
+- Vytvořit `src/components/ChangelogModal.tsx` — modal s verzemi a změnami (hardcoded array)
+- Uložit `last_seen_version` do `localStorage` (není potřeba DB)
+- Zobrazit badge "New" na tlačítku v dashboardu, pokud uživatel ještě neviděl poslední verzi
+- Tlačítko v headeru dashboardu (ikona `Megaphone` nebo `Bell`)
 
-## Hlavní stránka – Dashboard
+## 2. User profil / účet (GDPR)
+- Vytvořit `src/pages/Profile.tsx` s:
+  - Změna hesla (Supabase `updateUser`)
+  - Změna display name (update profiles tabulky)
+  - Export dat — stáhne CSV se všemi `activity_rows` uživatele
+  - Smazání účtu — Edge Function s `service_role` key smaže data + auth user
+- Přidat route `/profile` do `App.tsx`
+- Edge Function `delete-account/index.ts` — smaže activity_rows + profil + auth.users záznam
 
-### Horní lišta
-- Logo "OpenRouter Monitor", CSV upload tlačítko (drag & drop dialog)
-- Zobrazení období dat (auto z CSV)
+## 3. Sdílené dashboardy (public read-only)
+- **Migrace:** Nová tabulka `shared_dashboards` (id, user_id, share_token, filters JSON, created_at, expires_at)
+  - RLS: uživatel vidí/vytváří/maže jen své sdílení
+  - Public SELECT policy pro čtení přes share_token (bez auth)
+- Tlačítko "Sdílet" v dashboardu → vygeneruje link `/shared/:token`
+- Nová stránka `src/pages/SharedDashboard.tsx` — read-only dashboard s daty z tokenu
+- Edge Function `get-shared-dashboard/index.ts` — načte data pro share_token (service_role, obejde RLS)
 
-### KPI karty (top row)
-- **Celkové náklady** ($), **Celkem requestů**, **Průměrný čas odpovědi**, **Celkem tokenů**
+## 4. i18n (EN/CZ)
+- Nainstalovat `i18next` + `react-i18next`
+- Vytvořit `src/i18n/` s `cs.json` a `en.json` překladovými soubory
+- Inicializace v `main.tsx`, default jazyk `cs`
+- Přepínač jazyka v headeru dashboardu + na landing page
+- Přeložit: Landing page, Dashboard labels, Settings, Auth stránky
 
-### Grafy a panely
+## Pořadí implementace
+1. Changelog modal (nejmenší, rychlé)
+2. User profil/účet + delete-account Edge Function
+3. Sdílené dashboardy (migrace + Edge Function + nová stránka)
+4. i18n (průřezová změna, nejlepší nakonec)
 
-1. **Náklady v čase** – line/area chart, osa X = čas, možnost filtrovat per model
-2. **Tokeny per request** – stacked bar chart (prompt / completion / reasoning / cached)
-3. **Rozložení nákladů per model** – donut/pie chart
-4. **Rozložení per provider** – horizontální bar chart (Anthropic, OpenAI, Google atd.)
-5. **Rychlost** – line chart generation_time_ms a time_to_first_token_ms v čase
-6. **Tabulka requestů** – sortovatelná tabulka se všemi sloupci, search/filter
-
-### Interakce
-- CSV upload přes file picker s drag & drop
-- Kliknutí na model v grafu filtruje ostatní panely
-- Tabulka s řazením a vyhledáváním
-
-## Technologie
-- **Recharts** pro grafy
-- **PapaParse** pro parsování CSV
-- Shadcn tabulka, karty, dialogy
+## Technické detaily
+- Changelog data jako TypeScript array (žádná DB tabulka)
+- Delete account Edge Function musí použít `supabase.auth.admin.deleteUser()`
+- Shared dashboard token: `crypto.randomUUID()`
+- i18n: `i18next` s `react-i18next`, detekce jazyka z `navigator.language`

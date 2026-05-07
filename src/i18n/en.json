@@ -1,0 +1,122 @@
+{
+  "nav": {
+    "features": "Features",
+    "demo": "Live demo",
+    "howItWorks": "How it works",
+    "faq": "FAQ",
+    "login": "Sign in",
+    "startFree": "Start free",
+    "openDashboard": "Open dashboard"
+  },
+  "hero": {
+    "badge": "Real-time AI token cost overview",
+    "title1": "Find out how much",
+    "title2": "AI really costs you",
+    "subtitle": "Beautiful dashboard for your OpenRouter activity. Track usage, optimize models and convert costs to",
+    "currencies": "CZK & USD",
+    "tryDemo": "Try demo",
+    "free": "Free",
+    "noInstall": "No install",
+    "czInterface": "CZ & EN",
+    "buyMeCoffee": "Like it? Buy me a coffee ☕"
+  },
+  "features": {
+    "title": "Everything you need for",
+    "titleHighlight": "AI cost control",
+    "subtitle": "No spreadsheets. No guessing. Just clean charts and clear numbers.",
+    "costTitle": "Costs in CZK & USD",
+    "costDesc": "Switch currency with one click. The CNB exchange rate updates automatically.",
+    "chartsTitle": "Detailed charts",
+    "chartsDesc": "Token usage, model performance, latency, providers — all in one place.",
+    "csvTitle": "CSV import",
+    "csvDesc": "Download your activity export from OpenRouter and drag it into the uploader.",
+    "realLifeTitle": "Real-life comparison",
+    "realLifeDesc": "How many espressos, beers or pizzas could your API costs buy?",
+    "securityTitle": "Secure & private",
+    "securityDesc": "Your data stays in an encrypted cloud, visible only to you.",
+    "mobileTitle": "Works everywhere",
+    "mobileDesc": "Web, mobile, tablet and as a native app for iOS and Android."
+  },
+  "demo": {
+    "badge": "Live demo with sample data",
+    "title": "This is what it",
+    "titleHighlight": "looks like inside",
+    "subtitle": "No login, no registration. Play with charts right now.",
+    "switchCurrency": "Switch to",
+    "cta": "Like it? Upload your own data and track",
+    "ctaHighlight": "real costs"
+  },
+  "howItWorks": {
+    "title": "3 steps to",
+    "titleHighlight": "perfect overview",
+    "step1Title": "Create account",
+    "step1Desc": "Sign up via email or Google. Takes 10 seconds.",
+    "step2Title": "Upload CSV",
+    "step2Desc": "Download activity export from openrouter.ai/activity and upload.",
+    "step3Title": "Track & optimize",
+    "step3Desc": "Filter by models, dates and providers. Export to PNG/PDF."
+  },
+  "faqSection": {
+    "badge": "Frequently asked questions",
+    "title": "What people",
+    "titleHighlight": "want to know most",
+    "subtitle": "Short answers to questions I get all the time."
+  },
+  "opensource": {
+    "title": "100%",
+    "titleHighlight": "open-source",
+    "desc": "The full codebase is public on GitHub. Fork the repo, run locally via Docker and customize the dashboard. Pull requests welcome!",
+    "button": "View on GitHub"
+  },
+  "support": {
+    "title": "Support development with",
+    "titleHighlight": "a coffee",
+    "desc": "Tokeny Monitor is free and open-source. If it saves you time or money, you can say thanks with a symbolic coffee. Every bit of support motivates further improvements. 💜"
+  },
+  "cta": {
+    "title": "Ready to take",
+    "titleHighlight": "control of AI costs?",
+    "subtitle": "Get started in a minute. No credit card."
+  },
+  "footer": {
+    "support": "Support",
+    "login": "Sign in"
+  },
+  "dashboard": {
+    "share": "Share",
+    "export": "Export",
+    "logout": "Sign out",
+    "settings": "Settings",
+    "profile": "Profile",
+    "whatsnew": "What's new",
+    "backToDashboard": "Back to dashboard"
+  },
+  "profile": {
+    "title": "Profile",
+    "basicInfo": "Basic info",
+    "email": "Email",
+    "displayName": "Display name",
+    "save": "Save",
+    "saving": "Saving…",
+    "changePassword": "Change password",
+    "newPassword": "New password",
+    "confirmPassword": "Confirm password",
+    "minChars": "Min. 6 characters",
+    "samePassword": "Same password again",
+    "exportData": "Export data (GDPR)",
+    "exportDesc": "Download all your data as a CSV file. Contains complete activity rows history.",
+    "exportButton": "Export data",
+    "exporting": "Exporting…",
+    "dangerZone": "Danger zone",
+    "deleteDesc": "Account deletion is irreversible. All your data (activity rows, profile, budget alerts, MCP tokens) will be permanently removed.",
+    "deleteAccount": "Delete account",
+    "deleting": "Deleting…",
+    "confirmDelete": "Really delete account?",
+    "confirmDeleteDesc": "This action is irreversible. All data will be permanently deleted and cannot be recovered.",
+    "cancel": "Cancel",
+    "confirmYes": "Yes, delete everything"
+  },
+  "lang": {
+    "switch": "CZ"
+  }
+}

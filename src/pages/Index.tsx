@@ -18,7 +18,10 @@ import { ModelComparison } from "@/components/dashboard/ModelComparison";
 import { CostForecast } from "@/components/dashboard/CostForecast";
 import { AnomalyPanel } from "@/components/dashboard/AnomalyPanel";
 import { AiAgentChat, type AgentAction } from "@/components/dashboard/AiAgentChat";
-import { Activity, Download, Image, FileText, LogOut, Settings as SettingsIcon } from "lucide-react";
+import { ShareDashboardButton } from "@/components/dashboard/ShareDashboardButton";
+import { Activity, Download, Image, FileText, LogOut, Settings as SettingsIcon, User } from "lucide-react";
+import { ChangelogModal } from "@/components/ChangelogModal";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -115,6 +118,14 @@ const Index = () => {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+            <ShareDashboardButton />
+            <ChangelogModal />
+            <LanguageSwitcher />
+            <Link to="/profile">
+              <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground hover:text-foreground font-mono text-xs" title="Profil">
+                <User className="h-3.5 w-3.5" />
+              </Button>
+            </Link>
             <Link to="/settings">
               <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground hover:text-foreground font-mono text-xs" title="Nastavení">
                 <SettingsIcon className="h-3.5 w-3.5" />
