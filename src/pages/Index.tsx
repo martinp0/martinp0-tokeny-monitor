@@ -120,6 +120,7 @@ const Index = () => {
             </DropdownMenu>
             <ShareDashboardButton />
             <ChangelogModal />
+            <LanguageSwitcher />
             <Link to="/profile">
               <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground hover:text-foreground font-mono text-xs" title="Profil">
                 <User className="h-3.5 w-3.5" />
