@@ -1,0 +1,38 @@
+# OpenRouter Monitor (Tokeny Monitor)
+
+> Webová aplikace pro sledování nákladů, spotřeby tokenů a výkonu AI modelů používaných přes OpenRouter. Import dat z CSV, dashboard v CZK i USD, AI agent a MCP server pro Claude / Cursor / Zed.
+
+Autor: Martin Pohl (https://martin.pohl.uk) — IT engineer, Apple MDM, Identity & SSO, indie maker.
+Hlavní doména: https://tokeny.pohl.uk
+Zdrojový kód (public repo): https://github.com/martinp0/martinp0-tokeny-monitor
+Jazyk obsahu: čeština (částečně EN). Měny: CZK, USD. Kurz: ČNB denní CRON.
+
+## Co aplikace dělá
+- Importuje CSV export z OpenRouter Activity (openrouter.ai → Activity → Export CSV).
+- Spočítá náklady per model, provider, den, request — s deduplikací podle generation_id.
+- Převádí USD → CZK podle oficiálního kurzu ČNB v den requestu.
+- Vizualizuje top modely, providery, časové řady, latenci, web search a cache náklady.
+- Porovnává náklady s reálnými věcmi (káva, pivo, benzín) v CZK.
+- Exposuje MCP endpoint (Model Context Protocol) pro AI klienty: nástroje get_total_cost, get_top_models, delete_request a další.
+- Obsahuje AI agenta s tool-callingem nad vlastními daty uživatele.
+
+## Klíčové stránky
+- [Landing / Dashboard demo](https://tokeny.pohl.uk/) — marketing + ukázka dashboardu s demo daty
+- [Přihlášení / Registrace](https://tokeny.pohl.uk/auth) — Email, Google, Apple
+- [Zábava / AI generace](https://tokeny.pohl.uk/fun) — veřejná stránka s českými vtipy a obrázky generovanými přes Gemini
+
+## Bezpečnost a architektura
+- Postgres (Supabase) s Row-Level Security per user_id.
+- Zápisy do DB jdou výhradně přes ověřené Edge Functions s service-role klíčem.
+- Šifrování at rest (AES-256) a TLS in transit.
+- GDPR: uživatel může exportovat všechna data do CSV a smazat účet z /profile.
+
+## Časté otázky
+- **CSV import:** openrouter.ai → Activity → Export → upload na dashboardu. Duplicity se přeskakují.
+- **Auto-sync:** Není. OpenRouter zatím nemá veřejné API pro historii activity.
+- **Cena:** Zdarma, bez kreditky a bez trialu.
+- **MCP token:** Generuje se v /settings, vkládá se do konfigurace AI klienta (Claude Desktop, Cursor, Zed).
+
+## Kontakt
+- Web: https://martin.pohl.uk
+- Projekt: https://tokeny.pohl.uk
