@@ -13,6 +13,8 @@ export function useDashboardData(options: { demoMode?: boolean } = {}) {
   const [syncing, setSyncing] = useState(false);
   const [syncError, setSyncError] = useState<string | null>(null);
   const [dateFilter, setDateFilter] = useState<{ from: Date; to: Date } | null>(null);
+  const [hasUserData, setHasUserData] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(true);
 
   // Load data from DB, fall back to sample CSV
   useEffect(() => {
