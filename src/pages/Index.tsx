@@ -34,6 +34,7 @@ const Index = () => {
     dateFilter, setDateFilter, models,
     totalCost, totalRequests, totalTokens, avgGenTime,
     costByModel, costByProvider, timeSeries,
+    hasUserData, loading,
   } = useDashboardData();
   const { exportPNG, exportPDF } = useExport(dashboardRef);
   const { currency, toggle: toggleCurrency, setCurrency, exchangeRate, rateDate } = useCurrency();
