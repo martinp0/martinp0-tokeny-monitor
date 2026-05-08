@@ -19,6 +19,7 @@ import { CostForecast } from "@/components/dashboard/CostForecast";
 import { AnomalyPanel } from "@/components/dashboard/AnomalyPanel";
 import { AiAgentChat, type AgentAction } from "@/components/dashboard/AiAgentChat";
 import { ShareDashboardButton } from "@/components/dashboard/ShareDashboardButton";
+import { OnboardingEmptyState } from "@/components/dashboard/OnboardingEmptyState";
 import { Activity, Download, Image, FileText, LogOut, Settings as SettingsIcon, User } from "lucide-react";
 import { ChangelogModal } from "@/components/ChangelogModal";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
