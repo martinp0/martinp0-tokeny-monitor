@@ -1,21 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://tokeny.pohl.uk/</loc>
-    <lastmod>2026-05-01</lastmod>
-    <changefreq>daily</changefreq>
+    <lastmod>2026-05-08</lastmod>
+    <changefreq>weekly</changefreq>
     <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://tokeny.pohl.uk/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://tokeny.pohl.uk/?lang=en" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tokeny.pohl.uk/" />
   </url>
   <url>
     <loc>https://tokeny.pohl.uk/auth</loc>
-    <lastmod>2026-05-01</lastmod>
+    <lastmod>2026-05-08</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://tokeny.pohl.uk/fun</loc>
-    <lastmod>2026-05-01</lastmod>
+    <lastmod>2026-05-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>https://tokeny.pohl.uk/llms.txt</loc>
+    <lastmod>2026-05-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.3</priority>
   </url>
 </urlset>

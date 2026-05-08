@@ -13,6 +13,18 @@
     <link rel="author" href="https://martin.pohl.uk" />
     <link rel="me" href="https://martin.pohl.uk" />
     <link rel="canonical" href="https://tokeny.pohl.uk/" />
+    <link rel="alternate" hreflang="cs" href="https://tokeny.pohl.uk/" />
+    <link rel="alternate" hreflang="en" href="https://tokeny.pohl.uk/?lang=en" />
+    <link rel="alternate" hreflang="x-default" href="https://tokeny.pohl.uk/" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1" />
+    <meta name="keywords" content="OpenRouter, monitoring nákladů, AI tokeny, dashboard, FinOps, MCP server, Claude, GPT, Gemini, CZK, USD, kurz ČNB, AI agent, OpenRouter Activity, CSV import" />
+    <meta name="application-name" content="OpenRouter Monitor" />
+    <meta name="apple-mobile-web-app-title" content="Tokeny Monitor" />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <link rel="alternate" type="text/plain" title="LLMs.txt" href="/llms.txt" />
 
     <!-- Open Graph -->
     <meta property="og:type" content="website" />
@@ -145,6 +157,50 @@
           }
         }
       ]
+    }
+    </script>
+
+    <!-- JSON-LD: HowTo (import CSV) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "HowTo",
+      "name": "Jak importovat náklady z OpenRouter do Tokeny Monitoru",
+      "description": "Postup, jak stáhnout CSV export z OpenRouter Activity a nahrát ho do dashboardu.",
+      "totalTime": "PT2M",
+      "inLanguage": "cs",
+      "step": [
+        { "@type": "HowToStep", "position": 1, "name": "Otevři OpenRouter Activity", "text": "Přihlas se na openrouter.ai a otevři stránku Activity.", "url": "https://openrouter.ai/activity" },
+        { "@type": "HowToStep", "position": 2, "name": "Stáhni CSV", "text": "Klikni na Export → CSV. Stáhne se soubor se všemi tvými requesty." },
+        { "@type": "HowToStep", "position": 3, "name": "Nahraj CSV do dashboardu", "text": "Přetáhni soubor do uploaderu na dashboardu Tokeny Monitoru. Duplicity se přeskočí podle ID requestu.", "url": "https://tokeny.pohl.uk/" }
+      ]
+    }
+    </script>
+
+    <!-- JSON-LD: BreadcrumbList -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Martin Pohl", "item": "https://martin.pohl.uk" },
+        { "@type": "ListItem", "position": 2, "name": "OpenRouter Monitor", "item": "https://tokeny.pohl.uk/" }
+      ]
+    }
+    </script>
+
+    <!-- JSON-LD: SoftwareSourceCode (open-source repo) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareSourceCode",
+      "name": "Tokeny Monitor",
+      "codeRepository": "https://github.com/martinp0/martinp0-tokeny-monitor",
+      "programmingLanguage": ["TypeScript", "React"],
+      "runtimePlatform": "Web",
+      "license": "https://opensource.org/licenses/MIT",
+      "author": { "@id": "https://martin.pohl.uk/#person" },
+      "url": "https://tokeny.pohl.uk/"
     }
     </script>
   </head>
