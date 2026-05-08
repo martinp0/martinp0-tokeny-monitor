@@ -112,6 +112,7 @@ export function useDashboardData(options: { demoMode?: boolean } = {}) {
       }));
       await supabase.from("activity_rows").upsert(batch, { onConflict: "generation_id" });
     }
+    setHasUserData(parsed.length > 0);
   }, [session]);
 
   // Sync from OpenRouter API via edge function
