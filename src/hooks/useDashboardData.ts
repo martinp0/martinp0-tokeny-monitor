@@ -250,5 +250,7 @@ export function useDashboardData(options: { demoMode?: boolean } = {}) {
     costByModel,
     costByProvider,
     timeSeries,
+    hasUserData,
+    loading,
   };
 }
