@@ -19,6 +19,7 @@ import { CostForecast } from "@/components/dashboard/CostForecast";
 import { AnomalyPanel } from "@/components/dashboard/AnomalyPanel";
 import { AiAgentChat, type AgentAction } from "@/components/dashboard/AiAgentChat";
 import { ShareDashboardButton } from "@/components/dashboard/ShareDashboardButton";
+import { OnboardingEmptyState } from "@/components/dashboard/OnboardingEmptyState";
 import { Activity, Download, Image, FileText, LogOut, Settings as SettingsIcon, User } from "lucide-react";
 import { ChangelogModal } from "@/components/ChangelogModal";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
@@ -33,6 +34,7 @@ const Index = () => {
     dateFilter, setDateFilter, models,
     totalCost, totalRequests, totalTokens, avgGenTime,
     costByModel, costByProvider, timeSeries,
+    hasUserData, loading,
   } = useDashboardData();
   const { exportPNG, exportPDF } = useExport(dashboardRef);
   const { currency, toggle: toggleCurrency, setCurrency, exchangeRate, rateDate } = useCurrency();
@@ -146,29 +148,35 @@ const Index = () => {
 
       {/* Dashboard */}
       <main ref={dashboardRef} className="p-6 space-y-4 max-w-[1600px] mx-auto">
-        <KpiCards totalCost={totalCost} totalRequests={totalRequests} totalTokens={totalTokens} avgGenTime={avgGenTime} />
+        {!loading && !hasUserData ? (
+          <OnboardingEmptyState onUpload={loadCSV} />
+        ) : (
+          <>
+            <KpiCards totalCost={totalCost} totalRequests={totalRequests} totalTokens={totalTokens} avgGenTime={avgGenTime} />
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <CostTimeChart data={timeSeries} />
-          <TokensChart data={timeSeries} />
-        </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <CostTimeChart data={timeSeries} />
+              <TokensChart data={timeSeries} />
+            </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <ModelCostChart data={costByModel} onModelClick={setSelectedModel} selectedModel={selectedModel} />
-          <ProviderChart data={costByProvider} />
-          <SpeedChart data={timeSeries} />
-        </div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              <ModelCostChart data={costByModel} onModelClick={setSelectedModel} selectedModel={selectedModel} />
+              <ProviderChart data={costByProvider} />
+              <SpeedChart data={timeSeries} />
+            </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <CostForecast data={data} />
-          <AnomalyPanel data={data} />
-        </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <CostForecast data={data} />
+              <AnomalyPanel data={data} />
+            </div>
 
-        <ModelComparison data={filteredData} />
+            <ModelComparison data={filteredData} />
 
-        <RealLifeComparison totalCostCzk={totalCost * exchangeRate} />
+            <RealLifeComparison totalCostCzk={totalCost * exchangeRate} />
 
-        <RequestsTable data={filteredData} />
+            <RequestsTable data={filteredData} />
+          </>
+        )}
       </main>
 
       <AiAgentChat onAction={handleAgentAction} />

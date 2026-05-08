@@ -13,6 +13,8 @@ export function useDashboardData(options: { demoMode?: boolean } = {}) {
   const [syncing, setSyncing] = useState(false);
   const [syncError, setSyncError] = useState<string | null>(null);
   const [dateFilter, setDateFilter] = useState<{ from: Date; to: Date } | null>(null);
+  const [hasUserData, setHasUserData] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(true);
 
   // Load data from DB, fall back to sample CSV
   useEffect(() => {
@@ -22,6 +24,8 @@ export function useDashboardData(options: { demoMode?: boolean } = {}) {
         const parsed = parseCSV(sampleCSV);
         setData(parsed);
         setFileName("demo data – openrouter sample");
+        setHasUserData(true);
+        setLoading(false);
         return;
       }
 
@@ -58,12 +62,14 @@ export function useDashboardData(options: { demoMode?: boolean } = {}) {
         }));
         setData(mapped);
         setFileName(`Cloud DB (${mapped.length} rows)`);
+        setHasUserData(true);
       } else {
-        // Fall back to sample CSV
-        const parsed = parseCSV(sampleCSV);
-        setData(parsed);
-        setFileName("openrouter_activity_2026-03-28.csv (sample)");
+        // No user data — leave empty so onboarding can render
+        setData([]);
+        setFileName("Žádná data – nahrajte první CSV");
+        setHasUserData(false);
       }
+      setLoading(false);
     }
     loadFromDB();
   }, [demoMode]);
@@ -106,6 +112,7 @@ export function useDashboardData(options: { demoMode?: boolean } = {}) {
       }));
       await supabase.from("activity_rows").upsert(batch, { onConflict: "generation_id" });
     }
+    setHasUserData(parsed.length > 0);
   }, [session]);
 
   // Sync from OpenRouter API via edge function
@@ -243,5 +250,7 @@ export function useDashboardData(options: { demoMode?: boolean } = {}) {
     costByModel,
     costByProvider,
     timeSeries,
+    hasUserData,
+    loading,
   };
 }
