@@ -148,29 +148,35 @@ const Index = () => {
 
       {/* Dashboard */}
       <main ref={dashboardRef} className="p-6 space-y-4 max-w-[1600px] mx-auto">
-        <KpiCards totalCost={totalCost} totalRequests={totalRequests} totalTokens={totalTokens} avgGenTime={avgGenTime} />
+        {!loading && !hasUserData ? (
+          <OnboardingEmptyState onUpload={loadCSV} />
+        ) : (
+          <>
+            <KpiCards totalCost={totalCost} totalRequests={totalRequests} totalTokens={totalTokens} avgGenTime={avgGenTime} />
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <CostTimeChart data={timeSeries} />
-          <TokensChart data={timeSeries} />
-        </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <CostTimeChart data={timeSeries} />
+              <TokensChart data={timeSeries} />
+            </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <ModelCostChart data={costByModel} onModelClick={setSelectedModel} selectedModel={selectedModel} />
-          <ProviderChart data={costByProvider} />
-          <SpeedChart data={timeSeries} />
-        </div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              <ModelCostChart data={costByModel} onModelClick={setSelectedModel} selectedModel={selectedModel} />
+              <ProviderChart data={costByProvider} />
+              <SpeedChart data={timeSeries} />
+            </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <CostForecast data={data} />
-          <AnomalyPanel data={data} />
-        </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <CostForecast data={data} />
+              <AnomalyPanel data={data} />
+            </div>
 
-        <ModelComparison data={filteredData} />
+            <ModelComparison data={filteredData} />
 
-        <RealLifeComparison totalCostCzk={totalCost * exchangeRate} />
+            <RealLifeComparison totalCostCzk={totalCost * exchangeRate} />
 
-        <RequestsTable data={filteredData} />
+            <RequestsTable data={filteredData} />
+          </>
+        )}
       </main>
 
       <AiAgentChat onAction={handleAgentAction} />
