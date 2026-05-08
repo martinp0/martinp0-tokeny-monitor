@@ -24,6 +24,8 @@ export function useDashboardData(options: { demoMode?: boolean } = {}) {
         const parsed = parseCSV(sampleCSV);
         setData(parsed);
         setFileName("demo data – openrouter sample");
+        setHasUserData(true);
+        setLoading(false);
         return;
       }
 
@@ -60,12 +62,14 @@ export function useDashboardData(options: { demoMode?: boolean } = {}) {
         }));
         setData(mapped);
         setFileName(`Cloud DB (${mapped.length} rows)`);
+        setHasUserData(true);
       } else {
-        // Fall back to sample CSV
-        const parsed = parseCSV(sampleCSV);
-        setData(parsed);
-        setFileName("openrouter_activity_2026-03-28.csv (sample)");
+        // No user data — leave empty so onboarding can render
+        setData([]);
+        setFileName("Žádná data – nahrajte první CSV");
+        setHasUserData(false);
       }
+      setLoading(false);
     }
     loadFromDB();
   }, [demoMode]);
