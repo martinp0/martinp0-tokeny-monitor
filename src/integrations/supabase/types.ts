@@ -309,6 +309,7 @@ export type Database = {
           filters: Json | null
           id: string
           label: string | null
+          og_image_path: string | null
           share_token: string
           user_id: string
         }
@@ -318,6 +319,7 @@ export type Database = {
           filters?: Json | null
           id?: string
           label?: string | null
+          og_image_path?: string | null
           share_token?: string
           user_id: string
         }
@@ -327,6 +329,7 @@ export type Database = {
           filters?: Json | null
           id?: string
           label?: string | null
+          og_image_path?: string | null
           share_token?: string
           user_id?: string
         }

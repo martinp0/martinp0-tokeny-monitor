@@ -60,7 +60,7 @@ export function ProviderConnections() {
 
   async function load() {
     setLoading(true);
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from("provider_credentials")
       .select(
         "id, provider, label, key_preview, enabled, organization_id, last_synced_at, last_sync_status, last_sync_error, rows_imported",
@@ -107,7 +107,7 @@ export function ProviderConnections() {
   }
 
   async function handleDelete(id: string) {
-    const { error } = await supabase.from("provider_credentials").delete().eq("id", id);
+    const { error } = await (supabase as any).from("provider_credentials").delete().eq("id", id);
     if (error) {
       toast.error(error.message);
       return;
