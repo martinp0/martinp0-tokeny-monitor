@@ -59,7 +59,9 @@ export function useDashboardData(options: { demoMode?: boolean } = {}) {
           time_to_first_token_ms: r.time_to_first_token_ms,
           app_name: r.app_name,
           api_key_name: r.api_key_name,
-        }));
+          provider_source: (r.provider_source ?? "openrouter") as "openrouter" | "anthropic" | "openai",
+          request_count: r.request_count ?? 1,
+        })) as ActivityRow[];
         setData(mapped);
         setFileName(`Cloud DB (${mapped.length} rows)`);
         setHasUserData(true);
@@ -109,6 +111,8 @@ export function useDashboardData(options: { demoMode?: boolean } = {}) {
         app_name: r.app_name,
         api_key_name: r.api_key_name,
         user_id: session?.user?.id,
+        provider_source: r.provider_source ?? "openrouter",
+        request_count: r.request_count ?? 1,
       }));
       await supabase.from("activity_rows").upsert(batch, { onConflict: "generation_id" });
     }
@@ -155,6 +159,8 @@ export function useDashboardData(options: { demoMode?: boolean } = {}) {
           time_to_first_token_ms: r.time_to_first_token_ms,
           app_name: r.app_name,
           api_key_name: r.api_key_name,
+          provider_source: (r.provider_source ?? "openrouter") as "openrouter" | "anthropic" | "openai",
+          request_count: r.request_count ?? 1,
         }));
         setData(mapped);
         setFileName(`Cloud DB (${mapped.length} rows) — synced`);
@@ -184,14 +190,19 @@ export function useDashboardData(options: { demoMode?: boolean } = {}) {
   const providers = [...new Set(dateFiltered.map((r) => r.provider_name))];
 
   const totalCost = dateFiltered.reduce((s, r) => s + r.cost_total, 0);
-  const totalRequests = dateFiltered.length;
+  // Aggregated rows (Anthropic/OpenAI Admin API) carry request_count > 1; per-generation
+  // OpenRouter rows have request_count = 1, so summing it works for mixed datasets.
+  const totalRequests = dateFiltered.reduce((s, r) => s + (r.request_count ?? 1), 0);
   const totalTokens = dateFiltered.reduce(
     (s, r) => s + r.tokens_prompt + r.tokens_completion + r.tokens_reasoning,
     0
   );
+  // Only OpenRouter rows have generation_time_ms — average over those, ignore aggregated
+  // Admin-API rows (which have generation_time_ms = 0).
+  const timed = dateFiltered.filter((r) => r.generation_time_ms > 0);
   const avgGenTime =
-    dateFiltered.length > 0
-      ? dateFiltered.reduce((s, r) => s + r.generation_time_ms, 0) / dateFiltered.length
+    timed.length > 0
+      ? timed.reduce((s, r) => s + r.generation_time_ms, 0) / timed.length
       : 0;
 
   const dateRange = data.length > 0
@@ -210,7 +221,8 @@ export function useDashboardData(options: { demoMode?: boolean } = {}) {
   const costByProvider = providers.map((p) => ({
     provider: p,
     cost: dateFiltered.filter((r) => r.provider_name === p).reduce((s, r) => s + r.cost_total, 0),
-    requests: dateFiltered.filter((r) => r.provider_name === p).length,
+    // Sum request_count so aggregated Anthropic/OpenAI Admin-API rows are counted correctly.
+    requests: dateFiltered.filter((r) => r.provider_name === p).reduce((s, r) => s + (r.request_count ?? 1), 0),
   })).sort((a, b) => b.cost - a.cost);
 
   const timeSeries = [...filteredData]

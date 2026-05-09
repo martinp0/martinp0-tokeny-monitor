@@ -1,5 +1,7 @@
 import Papa from "papaparse";
 
+export type ProviderSource = "openrouter" | "anthropic" | "openai";
+
 export interface ActivityRow {
   generation_id: string;
   created_at: string;
@@ -24,6 +26,8 @@ export interface ActivityRow {
   time_to_first_token_ms: number;
   app_name: string;
   api_key_name: string;
+  provider_source: ProviderSource;
+  request_count: number;
 }
 
 const toNum = (v: string | undefined) => {
@@ -62,5 +66,7 @@ export function parseCSV(text: string): ActivityRow[] {
     time_to_first_token_ms: toNum(row.time_to_first_token_ms),
     app_name: row.app_name || "",
     api_key_name: row.api_key_name || "",
+    provider_source: "openrouter",
+    request_count: 1,
   }));
 }

@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { ArrowLeft, Bell, Key, Plus, Trash2, Copy, Terminal } from "lucide-react";
 import { toast } from "sonner";
+import { ProviderConnections } from "@/components/dashboard/ProviderConnections";
 
 interface BudgetAlert {
   id: string;
@@ -110,6 +111,8 @@ const Settings = () => {
       </header>
 
       <main className="max-w-4xl mx-auto p-6 space-y-6">
+        <ProviderConnections />
+
         <Card className="glass border-white/[0.06]">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
