@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { ArrowLeft, User, Lock, Download, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { SharedDashboardsManager } from "@/components/dashboard/SharedDashboardsManager";
 
 const Profile = () => {
   const { session, signOut } = useAuth();
