@@ -211,6 +211,9 @@ const Profile = () => {
           </CardContent>
         </Card>
 
+        {/* Shared dashboards & OG image management */}
+        <SharedDashboardsManager />
+
         {/* Export */}
         <Card className="glass border-white/[0.06]">
           <CardHeader>
