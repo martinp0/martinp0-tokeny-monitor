@@ -107,7 +107,7 @@ export function ProviderConnections() {
   }
 
   async function handleDelete(id: string) {
-    const { error } = await supabase.from("provider_credentials").delete().eq("id", id);
+    const { error } = await (supabase as any).from("provider_credentials").delete().eq("id", id);
     if (error) {
       toast.error(error.message);
       return;
