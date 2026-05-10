@@ -28,6 +28,22 @@ export function fmtNumShort(n: number, currency: Currency = "CZK"): string {
   return currency === "CZK" ? czFmt.format(n) : enFmt.format(n);
 }
 
+/** Shorten model name: strip date suffix, collapse common tokens, truncate */
+export function shortModel(name: string, max = 22): string {
+  if (!name) return name;
+  let s = name.split("/").pop() || name;
+  // strip ISO date suffix: -YYYY-MM-DD or -YYYYMMDD (with optional -preview after)
+  s = s.replace(/-(20\d{2})-?(\d{2})-?(\d{2})(?=(-|$))/g, "");
+  // collapse common verbose tokens
+  s = s
+    .replace(/-preview\b/gi, "-prev")
+    .replace(/-experimental\b/gi, "-exp")
+    .replace(/-instruct\b/gi, "-ins")
+    .replace(/-thinking\b/gi, "-think");
+  if (s.length <= max) return s;
+  return s.slice(0, max - 1) + "…";
+}
+
 /** Format cost for chart axis (short) */
 export function fmtCostShort(usd: number, currency: Currency = "CZK", rate: number = FALLBACK_RATE): string {
   if (currency === "CZK") {

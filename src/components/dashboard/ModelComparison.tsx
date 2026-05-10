@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { type ActivityRow } from "@/lib/csv-parser";
 import { useCurrency } from "@/hooks/useCurrency";
-import { fmtCost } from "@/lib/format";
+import { fmtCost, shortModel } from "@/lib/format";
 import { Trophy, Zap } from "lucide-react";
 
 interface Props {
@@ -66,12 +66,12 @@ export function ModelComparison({ data }: Props) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
           <div className="rounded-xl bg-gradient-to-br from-accent/10 to-transparent border border-accent/20 p-3">
             <div className="text-[10px] text-muted-foreground font-mono uppercase">Nejlepší cena/výkon</div>
-            <div className="text-sm font-semibold mt-1 truncate" title={cheapest.model}>{cheapest.model.split("/").pop()}</div>
+            <div className="text-sm font-semibold mt-1 truncate" title={cheapest.model}>{shortModel(cheapest.model, 28)}</div>
             <div className="text-xs font-mono text-accent mt-1">{fmt(cheapest.costPer1kTokens)} / 1k tok.</div>
           </div>
           <div className="rounded-xl bg-gradient-to-br from-primary/10 to-transparent border border-primary/20 p-3">
             <div className="text-[10px] text-muted-foreground font-mono uppercase flex items-center gap-1"><Zap className="h-3 w-3" />Nejrychlejší</div>
-            <div className="text-sm font-semibold mt-1 truncate" title={fastest.model}>{fastest.model.split("/").pop()}</div>
+            <div className="text-sm font-semibold mt-1 truncate" title={fastest.model}>{shortModel(fastest.model, 28)}</div>
             <div className="text-xs font-mono text-primary mt-1">{Math.round(fastest.tokensPerSec).toLocaleString("cs-CZ")} tok/s</div>
           </div>
         </div>
@@ -91,7 +91,7 @@ export function ModelComparison({ data }: Props) {
             <tbody>
               {stats.slice(0, 10).map((s) => (
                 <tr key={s.model} className="border-b border-white/[0.04] hover:bg-white/[0.02]">
-                  <td className="py-2 truncate max-w-[200px]" title={s.model}>{s.model.split("/").pop()}</td>
+                  <td className="py-2 truncate max-w-[200px]" title={s.model}>{shortModel(s.model, 26)}</td>
                   <td className="text-right py-2 font-mono">{s.requests}</td>
                   <td className="text-right py-2 font-mono">{fmt(s.cost)}</td>
                   <td className="text-right py-2 font-mono text-accent">{fmt(s.costPer1kTokens)}</td>
