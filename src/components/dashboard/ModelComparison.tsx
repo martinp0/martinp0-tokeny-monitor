@@ -71,7 +71,7 @@ export function ModelComparison({ data }: Props) {
           </div>
           <div className="rounded-xl bg-gradient-to-br from-primary/10 to-transparent border border-primary/20 p-3">
             <div className="text-[10px] text-muted-foreground font-mono uppercase flex items-center gap-1"><Zap className="h-3 w-3" />Nejrychlejší</div>
-            <div className="text-sm font-semibold mt-1 truncate" title={fastest.model}>{fastest.model.split("/").pop()}</div>
+            <div className="text-sm font-semibold mt-1 truncate" title={fastest.model}>{shortModel(fastest.model, 28)}</div>
             <div className="text-xs font-mono text-primary mt-1">{Math.round(fastest.tokensPerSec).toLocaleString("cs-CZ")} tok/s</div>
           </div>
         </div>
