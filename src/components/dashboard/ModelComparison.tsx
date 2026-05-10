@@ -66,7 +66,7 @@ export function ModelComparison({ data }: Props) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
           <div className="rounded-xl bg-gradient-to-br from-accent/10 to-transparent border border-accent/20 p-3">
             <div className="text-[10px] text-muted-foreground font-mono uppercase">Nejlepší cena/výkon</div>
-            <div className="text-sm font-semibold mt-1 truncate" title={cheapest.model}>{cheapest.model.split("/").pop()}</div>
+            <div className="text-sm font-semibold mt-1 truncate" title={cheapest.model}>{shortModel(cheapest.model, 28)}</div>
             <div className="text-xs font-mono text-accent mt-1">{fmt(cheapest.costPer1kTokens)} / 1k tok.</div>
           </div>
           <div className="rounded-xl bg-gradient-to-br from-primary/10 to-transparent border border-primary/20 p-3">
