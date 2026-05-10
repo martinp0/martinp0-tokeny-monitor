@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { fmtCost } from "@/lib/format";
+import { shortModel } from "@/lib/format";
 import { useCurrency } from "@/hooks/useCurrency";
 
 const COLORS = [
