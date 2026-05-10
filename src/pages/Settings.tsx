@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -7,9 +7,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, Bell, Key, Plus, Trash2, Copy, Terminal } from "lucide-react";
+import { ArrowLeft, Bell, Key, Plus, Trash2, Copy, Terminal, Sparkles, CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { ProviderConnections } from "@/components/dashboard/ProviderConnections";
+import { useSubscription } from "@/hooks/useSubscription";
+import { ProBadge } from "@/components/ProBadge";
 
 interface BudgetAlert {
   id: string;
@@ -28,6 +30,9 @@ interface McpToken {
 
 const Settings = () => {
   const { session } = useAuth();
+  const [searchParams] = useSearchParams();
+  const { isPro, currentPeriodEnd, cancelAtPeriodEnd, loading: subLoading, startCheckout, refresh: refreshSub } = useSubscription();
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [alert, setAlert] = useState<BudgetAlert | null>(null);
   const [tokens, setTokens] = useState<McpToken[]>([]);
   const [newToken, setNewToken] = useState<string | null>(null);
@@ -42,10 +47,22 @@ const Settings = () => {
     void load();
   }, [session]);
 
+  // Handle Stripe redirect
+  useEffect(() => {
+    const result = searchParams.get("checkout");
+    if (result === "success") {
+      toast.success("Platba proběhla úspěšně! Pro tier aktivován.");
+      void refreshSub();
+    } else if (result === "canceled") {
+      toast.info("Platba zrušena.");
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   async function load() {
     const { data: a } = await supabase.from("budget_alerts").select("*").maybeSingle();
     if (a) {
-      setAlert(a as any);
+      setAlert(a as unknown as BudgetAlert);
       setBudget(String(a.monthly_budget_usd));
       setThreshold(String(a.threshold_pct));
       setEmail(a.notify_email ?? "");
@@ -54,7 +71,7 @@ const Settings = () => {
       setEmail(session?.user.email ?? "");
     }
     const { data: t } = await supabase.from("mcp_tokens").select("*").order("created_at", { ascending: false });
-    setTokens((t as any) ?? []);
+    setTokens((t as unknown as McpToken[]) ?? []);
   }
 
   async function saveAlert() {
@@ -111,6 +128,58 @@ const Settings = () => {
       </header>
 
       <main className="max-w-4xl mx-auto p-6 space-y-6">
+        {/* ── Pro subscription card ── */}
+        <Card className="glass border-white/[0.06]">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Sparkles className="h-4 w-4 text-violet-400" />
+              Předplatné
+              {isPro && <ProBadge className="ml-1" />}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {subLoading ? (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" /> Načítám…
+              </div>
+            ) : isPro ? (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-sm text-emerald-400">
+                  <CheckCircle2 className="h-4 w-4" />
+                  Pro tier aktivní
+                  {cancelAtPeriodEnd && <span className="text-xs text-amber-400 font-mono">(zruší se na konci období)</span>}
+                </div>
+                {currentPeriodEnd && (
+                  <div className="text-xs text-muted-foreground font-mono">
+                    Platnost do: {new Date(currentPeriodEnd).toLocaleDateString("cs-CZ")}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <XCircle className="h-4 w-4" />
+                  Free tier — odemkni Pro za $7 / měsíc
+                </div>
+                <Button
+                  size="sm"
+                  className="gap-1.5 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 border-0"
+                  disabled={checkoutLoading}
+                  onClick={async () => {
+                    setCheckoutLoading(true);
+                    try { await startCheckout(); }
+                    catch { toast.error("Nepodařilo se otevřít platební bránu"); }
+                    finally { setCheckoutLoading(false); }
+                  }}
+                >
+                  {checkoutLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                  {checkoutLoading ? "Přesměrování…" : "Upgrade na Pro"}
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
         <ProviderConnections />
 
         <Card className="glass border-white/[0.06]">
@@ -215,6 +284,7 @@ const Settings = () => {
           </CardContent>
         </Card>
       </main>
+
     </div>
   );
 };
