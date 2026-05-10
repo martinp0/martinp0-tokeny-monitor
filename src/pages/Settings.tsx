@@ -7,9 +7,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, Bell, Key, Plus, Trash2, Copy, Terminal } from "lucide-react";
+import { ArrowLeft, Bell, Key, Plus, Trash2, Copy, Terminal, Zap, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import { ProviderConnections } from "@/components/dashboard/ProviderConnections";
+import { useSubscription } from "@/hooks/useSubscription";
+import { ProBadge } from "@/components/ProBadge";
+import { UpgradeModal } from "@/components/UpgradeModal";
 
 interface BudgetAlert {
   id: string;
@@ -28,6 +31,8 @@ interface McpToken {
 
 const Settings = () => {
   const { session } = useAuth();
+  const { isPro, loading: subLoading, currentPeriodEnd, startCheckout } = useSubscription();
+  const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
   const [alert, setAlert] = useState<BudgetAlert | null>(null);
   const [tokens, setTokens] = useState<McpToken[]>([]);
   const [newToken, setNewToken] = useState<string | null>(null);
@@ -111,6 +116,57 @@ const Settings = () => {
       </header>
 
       <main className="max-w-4xl mx-auto p-6 space-y-6">
+        <Card className="glass border-white/[0.06]">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Zap className="h-4 w-4 text-primary" /> Předplatné
+              {!subLoading && isPro && <ProBadge />}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {subLoading ? (
+              <div className="h-8 w-32 rounded bg-secondary/40 animate-pulse" />
+            ) : isPro ? (
+              <div className="space-y-3">
+                <p className="text-sm text-muted-foreground">
+                  Tvůj plán: <span className="font-semibold text-foreground">Pro</span>
+                </p>
+                {currentPeriodEnd && (
+                  <p className="font-mono text-xs text-muted-foreground">
+                    Obnovení: {new Date(currentPeriodEnd).toLocaleDateString("cs-CZ")}
+                  </p>
+                )}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5"
+                  onClick={async () => {
+                    const { data, error } = await supabase.functions.invoke("create-checkout");
+                    if (error) { toast.error(error.message); return; }
+                    window.location.href = (data as { url: string }).url;
+                  }}
+                >
+                  <ExternalLink className="h-3.5 w-3.5" /> Správa předplatného
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <p className="text-sm text-muted-foreground">
+                  Tvůj plán: <span className="font-semibold text-foreground">Free</span>
+                </p>
+                <Button
+                  size="sm"
+                  className="bg-gradient-to-r from-primary to-[hsl(320,90%,65%)] text-white gap-1.5"
+                  onClick={() => setUpgradeModalOpen(true)}
+                >
+                  <Zap className="h-3.5 w-3.5" /> Upgradovat na Pro – $7/měsíc
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+        <UpgradeModal open={upgradeModalOpen} onOpenChange={setUpgradeModalOpen} />
+
         <ProviderConnections />
 
         <Card className="glass border-white/[0.06]">
