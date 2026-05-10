@@ -177,7 +177,7 @@ export function RequestsTable({ data }: Props) {
                     className="border-border/30 hover:bg-secondary/50 font-mono text-xs cursor-pointer"
                   >
                     <TableCell className="text-muted-foreground">{row.created_at.substring(11, 19)}</TableCell>
-                    <TableCell className="text-foreground max-w-[200px] truncate">{row.model_permaslug.split("/").pop()}</TableCell>
+                    <TableCell className="text-foreground max-w-[200px] truncate" title={row.model_permaslug}>{shortModel(row.model_permaslug, 24)}</TableCell>
                     <TableCell className="text-muted-foreground">{row.provider_name}</TableCell>
                     <TableCell className="text-right text-chart-1">{fmtCost(row.cost_total, 4, currency, exchangeRate)}</TableCell>
                     <TableCell className="text-right text-chart-2">{fmtNum(row.tokens_prompt + row.tokens_completion, currency)}</TableCell>
