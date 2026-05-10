@@ -77,8 +77,8 @@ const Index = () => {
             </Link>
             <h1 className="text-lg font-bold gradient-text tracking-tight">OpenRouter Monitor</h1>
             {selectedModel && (
-              <span className="text-xs font-mono bg-primary/15 text-primary px-2 py-0.5 rounded-full">
-                {selectedModel.split("/").pop()}
+              <span className="text-xs font-mono bg-primary/15 text-primary px-2 py-0.5 rounded-full" title={selectedModel}>
+                {(selectedModel.split("/").pop() || selectedModel).replace(/-(20\d{2})-?(\d{2})-?(\d{2})/g, "").slice(0, 28)}
               </span>
             )}
           </div>
