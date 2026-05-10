@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { type ActivityRow } from "@/lib/csv-parser";
-import { fmtCost, fmtNum } from "@/lib/format";
+import { fmtCost, fmtNum, shortModel } from "@/lib/format";
 import { useCurrency } from "@/hooks/useCurrency";
 import { ArrowUpDown, Search } from "lucide-react";
 
@@ -32,7 +32,7 @@ function RequestDetailModal({ row, open, onClose }: { row: ActivityRow | null; o
       <DialogContent className="bg-card border-border max-w-lg max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-sm font-mono text-foreground">
-            {row.model_permaslug.split("/").pop()}
+            <span title={row.model_permaslug}>{shortModel(row.model_permaslug, 32)}</span>
           </DialogTitle>
           <p className="text-xs text-muted-foreground font-mono">{row.generation_id}</p>
         </DialogHeader>
@@ -177,7 +177,7 @@ export function RequestsTable({ data }: Props) {
                     className="border-border/30 hover:bg-secondary/50 font-mono text-xs cursor-pointer"
                   >
                     <TableCell className="text-muted-foreground">{row.created_at.substring(11, 19)}</TableCell>
-                    <TableCell className="text-foreground max-w-[200px] truncate">{row.model_permaslug.split("/").pop()}</TableCell>
+                    <TableCell className="text-foreground max-w-[200px] truncate" title={row.model_permaslug}>{shortModel(row.model_permaslug, 24)}</TableCell>
                     <TableCell className="text-muted-foreground">{row.provider_name}</TableCell>
                     <TableCell className="text-right text-chart-1">{fmtCost(row.cost_total, 4, currency, exchangeRate)}</TableCell>
                     <TableCell className="text-right text-chart-2">{fmtNum(row.tokens_prompt + row.tokens_completion, currency)}</TableCell>
