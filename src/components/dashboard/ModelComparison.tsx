@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { type ActivityRow } from "@/lib/csv-parser";
 import { useCurrency } from "@/hooks/useCurrency";
-import { fmtCost } from "@/lib/format";
+import { fmtCost, shortModel } from "@/lib/format";
 import { Trophy, Zap } from "lucide-react";
 
 interface Props {
