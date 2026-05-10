@@ -13,6 +13,32 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Authenticate the caller — sync runs in the context of a logged-in user.
+    const authHeader = req.headers.get("Authorization") ?? "";
+    const m = authHeader.match(/^Bearer\s+(.+)$/i);
+    if (!m) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+
+    const userClient = createClient(supabaseUrl, anonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const { data: userRes, error: userErr } = await userClient.auth.getUser();
+    if (userErr || !userRes?.user) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    const userId = userRes.user.id;
+
     const OPENROUTER_API_KEY = Deno.env.get("OPENROUTER_API_KEY");
     if (!OPENROUTER_API_KEY) {
       return new Response(
@@ -21,9 +47,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    const supabase = createClient(supabaseUrl, serviceKey);
 
     const response = await fetch(OPENROUTER_API, {
       headers: { Authorization: `Bearer ${OPENROUTER_API_KEY}` },
@@ -49,6 +73,7 @@ Deno.serve(async (req) => {
       const { error } = await supabase.from("activity_rows").upsert(
         {
           generation_id: generationId,
+          user_id: userId,
           created_at: item.date || "",
           cost_total: item.usage || 0,
           tokens_prompt: item.prompt_tokens || 0,
