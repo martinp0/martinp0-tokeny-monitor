@@ -91,7 +91,7 @@ export function ModelComparison({ data }: Props) {
             <tbody>
               {stats.slice(0, 10).map((s) => (
                 <tr key={s.model} className="border-b border-white/[0.04] hover:bg-white/[0.02]">
-                  <td className="py-2 truncate max-w-[200px]" title={s.model}>{s.model.split("/").pop()}</td>
+                  <td className="py-2 truncate max-w-[200px]" title={s.model}>{shortModel(s.model, 26)}</td>
                   <td className="text-right py-2 font-mono">{s.requests}</td>
                   <td className="text-right py-2 font-mono">{fmt(s.cost)}</td>
                   <td className="text-right py-2 font-mono text-accent">{fmt(s.costPer1kTokens)}</td>
