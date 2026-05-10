@@ -5,8 +5,39 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+function parseJwtClaims(token: string): Record<string, unknown> | null {
+  const parts = token.split(".");
+  if (parts.length < 2) return null;
+  try {
+    const payload = parts[1]
+      .replaceAll("-", "+")
+      .replaceAll("_", "/")
+      .padEnd(Math.ceil(parts[1].length / 4) * 4, "=");
+    return JSON.parse(atob(payload)) as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
+  // Require service_role JWT — this is an internal cron-only endpoint.
+  const authHeader = req.headers.get("Authorization") ?? "";
+  const m = authHeader.match(/^Bearer\s+(.+)$/i);
+  if (!m) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+  const claims = parseJwtClaims(m[1].trim());
+  if (claims?.role !== "service_role") {
+    return new Response(JSON.stringify({ error: "Forbidden" }), {
+      status: 403,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
 
   try {
     const supabase = createClient(
@@ -29,6 +60,7 @@ Deno.serve(async (req) => {
       const { data: rows } = await supabase
         .from("activity_rows")
         .select("cost_total")
+        .eq("user_id", alert.user_id)
         .gte("created_at", monthStart.toISOString().substring(0, 10));
 
       const monthCost = (rows ?? []).reduce((s, r: any) => s + r.cost_total, 0);
