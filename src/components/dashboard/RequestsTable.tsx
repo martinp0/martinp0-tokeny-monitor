@@ -32,7 +32,7 @@ function RequestDetailModal({ row, open, onClose }: { row: ActivityRow | null; o
       <DialogContent className="bg-card border-border max-w-lg max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-sm font-mono text-foreground">
-            {row.model_permaslug.split("/").pop()}
+            <span title={row.model_permaslug}>{shortModel(row.model_permaslug, 32)}</span>
           </DialogTitle>
           <p className="text-xs text-muted-foreground font-mono">{row.generation_id}</p>
         </DialogHeader>
