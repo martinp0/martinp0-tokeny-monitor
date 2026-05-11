@@ -1,10 +1,11 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
 interface SubscriptionStatus {
   isPro: boolean;
   currentPeriodEnd: string | null;
+  cancelAtPeriodEnd: boolean;
 }
 
 async function fetchSubscriptionStatus(): Promise<SubscriptionStatus> {
@@ -14,6 +15,7 @@ async function fetchSubscriptionStatus(): Promise<SubscriptionStatus> {
 }
 
 export function useSubscription() {
+  const queryClient = useQueryClient();
   const { data, isLoading } = useQuery({
     queryKey: ["subscription"],
     queryFn: fetchSubscriptionStatus,
@@ -32,10 +34,16 @@ export function useSubscription() {
     }
   }
 
+  function refresh() {
+    void queryClient.invalidateQueries({ queryKey: ["subscription"] });
+  }
+
   return {
     isPro: data?.isPro ?? false,
     loading: isLoading,
     currentPeriodEnd: data?.currentPeriodEnd ?? null,
+    cancelAtPeriodEnd: data?.cancelAtPeriodEnd ?? false,
     startCheckout,
+    refresh,
   };
 }

@@ -1,60 +1,32 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import Stripe from "https://esm.sh/stripe@14.21.0?target=deno";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, stripe-signature",
 };
 
-async function verifyStripeSignature(payload: string, sigHeader: string, secret: string): Promise<boolean> {
-  const parts = sigHeader.split(",");
-  const tPart = parts.find((p) => p.startsWith("t="));
-  const v1Part = parts.find((p) => p.startsWith("v1="));
-  if (!tPart || !v1Part) return false;
-
-  const timestamp = tPart.slice(2);
-  const signature = v1Part.slice(3);
-  const signedPayload = `${timestamp}.${payload}`;
-
-  const key = await crypto.subtle.importKey(
-    "raw",
-    new TextEncoder().encode(secret),
-    { name: "HMAC", hash: "SHA-256" },
-    false,
-    ["sign"],
-  );
-  const sig = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(signedPayload));
-  const expected = Array.from(new Uint8Array(sig)).map((b) => b.toString(16).padStart(2, "0")).join("");
-
-  // Prevent replay attacks: reject events older than 5 minutes
-  const tolerance = 300;
-  if (Math.abs(Date.now() / 1000 - Number(timestamp)) > tolerance) return false;
-
-  return expected === signature;
-}
-
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
-  const rawBody = await req.text();
-  const sigHeader = req.headers.get("stripe-signature") ?? "";
-  const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET")!;
+  const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!, {
+    apiVersion: "2024-04-10",
+    httpClient: Stripe.createFetchHttpClient(),
+  });
 
-  const valid = await verifyStripeSignature(rawBody, sigHeader, webhookSecret);
-  if (!valid) {
-    return new Response(JSON.stringify({ error: "Invalid signature" }), {
-      status: 400,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+  const sig = req.headers.get("stripe-signature");
+  if (!sig) {
+    return new Response(JSON.stringify({ error: "Missing stripe-signature" }), { status: 400 });
   }
+  const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET")!;
+  const body = await req.text();
 
-  let event: { type: string; data: { object: Record<string, unknown> } };
+  let event: Stripe.Event;
   try {
-    event = JSON.parse(rawBody);
-  } catch {
-    return new Response(JSON.stringify({ error: "Invalid JSON" }), {
-      status: 400,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    event = await stripe.webhooks.constructEventAsync(body, sig, webhookSecret);
+  } catch (err) {
+    console.error("Webhook signature verification failed:", err);
+    return new Response(JSON.stringify({ error: "Invalid signature" }), { status: 400 });
   }
 
   const svc = createClient(
@@ -62,53 +34,65 @@ Deno.serve(async (req) => {
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
   );
 
-  if (event.type === "checkout.session.completed") {
-    const session = event.data.object;
-    const userId = (session.client_reference_id ?? (session.metadata as Record<string, string>)?.user_id) as string;
-    const customerId = session.customer as string;
-    const subscriptionId = session.subscription as string;
-
-    // Fetch subscription to get current_period_end
-    const stripeKey = Deno.env.get("STRIPE_SECRET_KEY")!;
-    const subRes = await fetch(`https://api.stripe.com/v1/subscriptions/${subscriptionId}`, {
-      headers: { "Authorization": `Bearer ${stripeKey}` },
-    });
-    const sub = await subRes.json();
-    const periodEnd = new Date((sub.current_period_end as number) * 1000).toISOString();
-
-    const { error } = await svc.from("subscriptions").upsert({
-      user_id: userId,
-      stripe_customer_id: customerId,
-      stripe_subscription_id: subscriptionId,
-      status: "active",
-      current_period_end: periodEnd,
-    }, { onConflict: "stripe_subscription_id" });
-
-    if (error) {
-      console.error("DB upsert error:", error);
-      return new Response(JSON.stringify({ error: error.message }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+  async function upsertSubscription(sub: Stripe.Subscription, customerId: string) {
+    // Prefer user_id from subscription metadata; fall back to existing DB row by customer
+    let resolvedUserId = sub.metadata?.supabase_user_id as string | undefined;
+    if (!resolvedUserId) {
+      const { data } = await svc
+        .from("subscriptions")
+        .select("user_id")
+        .eq("stripe_customer_id", customerId)
+        .maybeSingle();
+      if (!data) {
+        console.warn("No user found for customer", customerId);
+        return;
+      }
+      resolvedUserId = data.user_id as string;
     }
-  }
+    if (!resolvedUserId) return;
 
-  if (event.type === "customer.subscription.deleted") {
-    const sub = event.data.object;
-    const subscriptionId = sub.id as string;
+    const item = sub.items.data[0];
+    const payload = {
+      user_id: resolvedUserId,
+      stripe_customer_id: customerId,
+      stripe_subscription_id: sub.id,
+      price_id: item?.price.id ?? null,
+      status: sub.status,
+      current_period_start: new Date(sub.current_period_start * 1000).toISOString(),
+      current_period_end: new Date(sub.current_period_end * 1000).toISOString(),
+      cancel_at_period_end: sub.cancel_at_period_end,
+    };
 
     const { error } = await svc
       .from("subscriptions")
-      .update({ status: "canceled" })
-      .eq("stripe_subscription_id", subscriptionId);
+      .upsert(payload, { onConflict: "user_id" });
 
-    if (error) {
-      console.error("DB update error:", error);
-      return new Response(JSON.stringify({ error: error.message }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    if (error) console.error("upsertSubscription error:", error);
+  }
+
+  try {
+    switch (event.type) {
+      case "checkout.session.completed": {
+        const session = event.data.object as Stripe.Checkout.Session;
+        if (session.mode !== "subscription" || !session.subscription) break;
+        const sub = await stripe.subscriptions.retrieve(session.subscription as string);
+        await upsertSubscription(sub, session.customer as string);
+        break;
+      }
+
+      case "customer.subscription.updated":
+      case "customer.subscription.deleted": {
+        const sub = event.data.object as Stripe.Subscription;
+        await upsertSubscription(sub, sub.customer as string);
+        break;
+      }
+
+      default:
+        break;
     }
+  } catch (e) {
+    console.error("Webhook handler error:", e);
+    return new Response(JSON.stringify({ error: "Handler error" }), { status: 500 });
   }
 
   return new Response(JSON.stringify({ received: true }), {

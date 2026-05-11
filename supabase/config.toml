@@ -15,3 +15,9 @@ project_id = "cfjusewixhycahgxoylm"
     verify_jwt = false
   [functions.get-shared-dashboard]
     verify_jwt = false
+  [functions.stripe-webhook]
+    verify_jwt = false
+  [functions.create-checkout]
+    verify_jwt = true
+  [functions.check-subscription]
+    verify_jwt = true

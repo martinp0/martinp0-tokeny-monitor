@@ -30,9 +30,9 @@ Deno.serve(async (req) => {
 
     const { data } = await svc
       .from("subscriptions")
-      .select("current_period_end, status")
+      .select("current_period_end, status, cancel_at_period_end")
       .eq("user_id", user.id)
-      .eq("status", "active")
+      .in("status", ["active", "trialing"])
       .gt("current_period_end", new Date().toISOString())
       .maybeSingle();
 
@@ -40,6 +40,7 @@ Deno.serve(async (req) => {
       JSON.stringify({
         isPro: !!data,
         currentPeriodEnd: data?.current_period_end ?? null,
+        cancelAtPeriodEnd: data?.cancel_at_period_end ?? false,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );

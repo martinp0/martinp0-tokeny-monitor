@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -31,7 +31,8 @@ interface McpToken {
 
 const Settings = () => {
   const { session } = useAuth();
-  const { isPro, loading: subLoading, currentPeriodEnd, startCheckout } = useSubscription();
+  const [searchParams] = useSearchParams();
+  const { isPro, loading: subLoading, currentPeriodEnd, cancelAtPeriodEnd, startCheckout, refresh: refreshSub } = useSubscription();
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
   const [alert, setAlert] = useState<BudgetAlert | null>(null);
   const [tokens, setTokens] = useState<McpToken[]>([]);
@@ -47,10 +48,22 @@ const Settings = () => {
     void load();
   }, [session]);
 
+  // Handle Stripe redirect
+  useEffect(() => {
+    const result = searchParams.get("checkout");
+    if (result === "success") {
+      toast.success("Platba proběhla úspěšně! Pro tier aktivován.");
+      refreshSub();
+    } else if (result === "canceled") {
+      toast.info("Platba zrušena.");
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   async function load() {
     const { data: a } = await supabase.from("budget_alerts").select("*").maybeSingle();
     if (a) {
-      setAlert(a as any);
+      setAlert(a as unknown as BudgetAlert);
       setBudget(String(a.monthly_budget_usd));
       setThreshold(String(a.threshold_pct));
       setEmail(a.notify_email ?? "");
@@ -59,7 +72,7 @@ const Settings = () => {
       setEmail(session?.user.email ?? "");
     }
     const { data: t } = await supabase.from("mcp_tokens").select("*").order("created_at", { ascending: false });
-    setTokens((t as any) ?? []);
+    setTokens((t as unknown as McpToken[]) ?? []);
   }
 
   async function saveAlert() {
@@ -130,6 +143,9 @@ const Settings = () => {
               <div className="space-y-3">
                 <p className="text-sm text-muted-foreground">
                   Tvůj plán: <span className="font-semibold text-foreground">Pro</span>
+                  {cancelAtPeriodEnd && (
+                    <span className="ml-2 text-xs text-amber-400 font-mono">(nekončí obnovením)</span>
+                  )}
                 </p>
                 {currentPeriodEnd && (
                   <p className="font-mono text-xs text-muted-foreground">
@@ -140,11 +156,7 @@ const Settings = () => {
                   variant="outline"
                   size="sm"
                   className="gap-1.5"
-                  onClick={async () => {
-                    const { data, error } = await supabase.functions.invoke("create-checkout");
-                    if (error) { toast.error(error.message); return; }
-                    window.location.href = (data as { url: string }).url;
-                  }}
+                  onClick={startCheckout}
                 >
                   <ExternalLink className="h-3.5 w-3.5" /> Správa předplatného
                 </Button>
@@ -165,6 +177,7 @@ const Settings = () => {
             )}
           </CardContent>
         </Card>
+
         <UpgradeModal open={upgradeModalOpen} onOpenChange={setUpgradeModalOpen} />
 
         <ProviderConnections />
