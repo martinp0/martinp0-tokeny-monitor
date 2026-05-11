@@ -59,8 +59,8 @@ export function useDashboardData(options: { demoMode?: boolean } = {}) {
           time_to_first_token_ms: r.time_to_first_token_ms,
           app_name: r.app_name,
           api_key_name: r.api_key_name,
-          provider_source: (r.provider_source ?? "openrouter") as "openrouter" | "anthropic" | "openai",
-          request_count: r.request_count ?? 1,
+          provider_source: ((r as any).provider_source ?? "openrouter") as "openrouter" | "anthropic" | "openai",
+          request_count: (r as any).request_count ?? 1,
         })) as ActivityRow[];
         setData(mapped);
         setFileName(`Cloud DB (${mapped.length} rows)`);
@@ -159,8 +159,8 @@ export function useDashboardData(options: { demoMode?: boolean } = {}) {
           time_to_first_token_ms: r.time_to_first_token_ms,
           app_name: r.app_name,
           api_key_name: r.api_key_name,
-          provider_source: (r.provider_source ?? "openrouter") as "openrouter" | "anthropic" | "openai",
-          request_count: r.request_count ?? 1,
+          provider_source: ((r as any).provider_source ?? "openrouter") as "openrouter" | "anthropic" | "openai",
+          request_count: (r as any).request_count ?? 1,
         }));
         setData(mapped);
         setFileName(`Cloud DB (${mapped.length} rows) — synced`);

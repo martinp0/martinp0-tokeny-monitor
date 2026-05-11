@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "OG images are publicly readable" ON storage.objects;

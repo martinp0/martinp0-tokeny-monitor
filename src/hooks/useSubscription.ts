@@ -1,54 +1,49 @@
-import { useEffect, useState, useCallback } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "./useAuth";
 
-export interface SubscriptionState {
+interface SubscriptionStatus {
   isPro: boolean;
-  status: "active" | "trialing" | "past_due" | "canceled" | "incomplete" | "inactive";
   currentPeriodEnd: string | null;
   cancelAtPeriodEnd: boolean;
-  loading: boolean;
-  startCheckout: () => Promise<void>;
-  refresh: () => Promise<void>;
 }
 
-export function useSubscription(): SubscriptionState {
-  const { session } = useAuth();
-  const [isPro, setIsPro] = useState(false);
-  const [status, setStatus] = useState<SubscriptionState["status"]>("inactive");
-  const [currentPeriodEnd, setCurrentPeriodEnd] = useState<string | null>(null);
-  const [cancelAtPeriodEnd, setCancelAtPeriodEnd] = useState(false);
-  const [loading, setLoading] = useState(true);
+async function fetchSubscriptionStatus(): Promise<SubscriptionStatus> {
+  const { data, error } = await supabase.functions.invoke("check-subscription");
+  if (error) throw error;
+  return data as SubscriptionStatus;
+}
 
-  const refresh = useCallback(async () => {
-    if (!session) {
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
+export function useSubscription() {
+  const queryClient = useQueryClient();
+  const { data, isLoading } = useQuery({
+    queryKey: ["subscription"],
+    queryFn: fetchSubscriptionStatus,
+    staleTime: 5 * 60 * 1000,
+    retry: 1,
+  });
+
+  async function startCheckout() {
     try {
-      const { data, error } = await supabase.functions.invoke("check-subscription");
-      if (error || !data) throw error ?? new Error("No data");
-      setIsPro(data.isPro);
-      setStatus(data.status);
-      setCurrentPeriodEnd(data.currentPeriodEnd);
-      setCancelAtPeriodEnd(data.cancelAtPeriodEnd);
-    } catch {
-      // Fail silently — treat as free tier
-    } finally {
-      setLoading(false);
+      const { data, error } = await supabase.functions.invoke("create-checkout");
+      if (error) throw error;
+      const url = (data as { url: string }).url;
+      window.location.href = url;
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Nepodařilo se zahájit platbu");
     }
-  }, [session]);
+  }
 
-  useEffect(() => {
-    void refresh();
-  }, [refresh]);
+  function refresh() {
+    void queryClient.invalidateQueries({ queryKey: ["subscription"] });
+  }
 
-  const startCheckout = useCallback(async () => {
-    const { data, error } = await supabase.functions.invoke("create-checkout");
-    if (error || !data?.url) throw error ?? new Error("No checkout URL");
-    window.location.href = data.url;
-  }, []);
-
-  return { isPro, status, currentPeriodEnd, cancelAtPeriodEnd, loading, startCheckout, refresh };
+  return {
+    isPro: data?.isPro ?? false,
+    loading: isLoading,
+    currentPeriodEnd: data?.currentPeriodEnd ?? null,
+    cancelAtPeriodEnd: data?.cancelAtPeriodEnd ?? false,
+    startCheckout,
+    refresh,
+  };
 }

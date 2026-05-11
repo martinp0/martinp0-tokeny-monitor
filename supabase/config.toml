@@ -9,6 +9,10 @@ project_id = "cfjusewixhycahgxoylm"
     verify_jwt = false
   [functions.process-email-queue]
     verify_jwt = true
+  [functions.og-dashboard]
+    verify_jwt = false
+  [functions.get-shared-dashboard]
+    verify_jwt = false
   [functions.stripe-webhook]
     verify_jwt = false
   [functions.create-checkout]

@@ -7,11 +7,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, Bell, Key, Plus, Trash2, Copy, Terminal, Sparkles, CheckCircle2, XCircle, Loader2 } from "lucide-react";
+import { ArrowLeft, Bell, Key, Plus, Trash2, Copy, Terminal, Zap, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import { ProviderConnections } from "@/components/dashboard/ProviderConnections";
 import { useSubscription } from "@/hooks/useSubscription";
 import { ProBadge } from "@/components/ProBadge";
+import { UpgradeModal } from "@/components/UpgradeModal";
 
 interface BudgetAlert {
   id: string;
@@ -31,8 +32,8 @@ interface McpToken {
 const Settings = () => {
   const { session } = useAuth();
   const [searchParams] = useSearchParams();
-  const { isPro, currentPeriodEnd, cancelAtPeriodEnd, loading: subLoading, startCheckout, refresh: refreshSub } = useSubscription();
-  const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const { isPro, loading: subLoading, currentPeriodEnd, cancelAtPeriodEnd, startCheckout, refresh: refreshSub } = useSubscription();
+  const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
   const [alert, setAlert] = useState<BudgetAlert | null>(null);
   const [tokens, setTokens] = useState<McpToken[]>([]);
   const [newToken, setNewToken] = useState<string | null>(null);
@@ -52,7 +53,7 @@ const Settings = () => {
     const result = searchParams.get("checkout");
     if (result === "success") {
       toast.success("Platba proběhla úspěšně! Pro tier aktivován.");
-      void refreshSub();
+      refreshSub();
     } else if (result === "canceled") {
       toast.info("Platba zrušena.");
     }
@@ -128,57 +129,56 @@ const Settings = () => {
       </header>
 
       <main className="max-w-4xl mx-auto p-6 space-y-6">
-        {/* ── Pro subscription card ── */}
         <Card className="glass border-white/[0.06]">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
-              <Sparkles className="h-4 w-4 text-violet-400" />
-              Předplatné
-              {isPro && <ProBadge className="ml-1" />}
+              <Zap className="h-4 w-4 text-primary" /> Předplatné
+              {!subLoading && isPro && <ProBadge />}
             </CardTitle>
           </CardHeader>
           <CardContent>
             {subLoading ? (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Loader2 className="h-4 w-4 animate-spin" /> Načítám…
-              </div>
+              <div className="h-8 w-32 rounded bg-secondary/40 animate-pulse" />
             ) : isPro ? (
               <div className="space-y-3">
-                <div className="flex items-center gap-2 text-sm text-emerald-400">
-                  <CheckCircle2 className="h-4 w-4" />
-                  Pro tier aktivní
-                  {cancelAtPeriodEnd && <span className="text-xs text-amber-400 font-mono">(zruší se na konci období)</span>}
-                </div>
+                <p className="text-sm text-muted-foreground">
+                  Tvůj plán: <span className="font-semibold text-foreground">Pro</span>
+                  {cancelAtPeriodEnd && (
+                    <span className="ml-2 text-xs text-amber-400 font-mono">(nekončí obnovením)</span>
+                  )}
+                </p>
                 {currentPeriodEnd && (
-                  <div className="text-xs text-muted-foreground font-mono">
-                    Platnost do: {new Date(currentPeriodEnd).toLocaleDateString("cs-CZ")}
-                  </div>
+                  <p className="font-mono text-xs text-muted-foreground">
+                    Obnovení: {new Date(currentPeriodEnd).toLocaleDateString("cs-CZ")}
+                  </p>
                 )}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5"
+                  onClick={startCheckout}
+                >
+                  <ExternalLink className="h-3.5 w-3.5" /> Správa předplatného
+                </Button>
               </div>
             ) : (
               <div className="space-y-3">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <XCircle className="h-4 w-4" />
-                  Free tier — odemkni Pro za $7 / měsíc
-                </div>
+                <p className="text-sm text-muted-foreground">
+                  Tvůj plán: <span className="font-semibold text-foreground">Free</span>
+                </p>
                 <Button
                   size="sm"
-                  className="gap-1.5 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 border-0"
-                  disabled={checkoutLoading}
-                  onClick={async () => {
-                    setCheckoutLoading(true);
-                    try { await startCheckout(); }
-                    catch { toast.error("Nepodařilo se otevřít platební bránu"); }
-                    finally { setCheckoutLoading(false); }
-                  }}
+                  className="bg-gradient-to-r from-primary to-[hsl(320,90%,65%)] text-white gap-1.5"
+                  onClick={() => setUpgradeModalOpen(true)}
                 >
-                  {checkoutLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-                  {checkoutLoading ? "Přesměrování…" : "Upgrade na Pro"}
+                  <Zap className="h-3.5 w-3.5" /> Upgradovat na Pro – $7/měsíc
                 </Button>
               </div>
             )}
           </CardContent>
         </Card>
+
+        <UpgradeModal open={upgradeModalOpen} onOpenChange={setUpgradeModalOpen} />
 
         <ProviderConnections />
 
@@ -284,7 +284,6 @@ const Settings = () => {
           </CardContent>
         </Card>
       </main>
-
     </div>
   );
 };

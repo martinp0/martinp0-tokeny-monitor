@@ -75,7 +75,6 @@ Deno.serve(async (req) => {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
         if (session.mode !== "subscription" || !session.subscription) break;
-
         const sub = await stripe.subscriptions.retrieve(session.subscription as string);
         await upsertSubscription(sub, session.customer as string);
         break;
@@ -89,7 +88,6 @@ Deno.serve(async (req) => {
       }
 
       default:
-        // Ignore unhandled events
         break;
     }
   } catch (e) {
@@ -98,6 +96,6 @@ Deno.serve(async (req) => {
   }
 
   return new Response(JSON.stringify({ received: true }), {
-    headers: { "Content-Type": "application/json" },
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
 });

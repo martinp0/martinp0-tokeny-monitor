@@ -16,9 +16,7 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_ANON_KEY")!,
       { global: { headers: { Authorization: authHeader } } },
     );
-
-    const { data: userRes } = await supabase.auth.getUser();
-    const user = userRes.user;
+    const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
@@ -34,7 +32,7 @@ Deno.serve(async (req) => {
     const priceId = Deno.env.get("STRIPE_PRICE_ID")!;
     const appUrl = Deno.env.get("APP_URL") ?? "https://tokeny.pohl.uk";
 
-    // Reuse existing customer if we already have one
+    // Reuse existing Stripe customer if one already exists
     const svc = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,

@@ -29,9 +29,32 @@ export default function SharedDashboard() {
 
   useEffect(() => {
     if (!token) return;
-    supabase.functions
-      .invoke("get-shared-dashboard", { body: null, headers: {} })
-      .then(() => {});
+
+    // Inject OG meta tags pointing to the dynamic preview endpoint
+    const ogImage = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/og-dashboard?token=${token}`;
+    const pageUrl = `${window.location.origin}/shared/${token}`;
+    const tags: Array<[string, string, string]> = [
+      ["property", "og:image", ogImage],
+      ["property", "og:image:width", "1200"],
+      ["property", "og:image:height", "630"],
+      ["property", "og:type", "website"],
+      ["property", "og:url", pageUrl],
+      ["property", "og:title", "Sdílený dashboard – OpenRouter Monitor"],
+      ["name", "twitter:card", "summary_large_image"],
+      ["name", "twitter:image", ogImage],
+    ];
+    const created: HTMLMetaElement[] = [];
+    tags.forEach(([attr, key, value]) => {
+      const sel = `meta[${attr}="${key}"]`;
+      let el = document.head.querySelector<HTMLMetaElement>(sel);
+      if (!el) {
+        el = document.createElement("meta");
+        el.setAttribute(attr, key);
+        document.head.appendChild(el);
+        created.push(el);
+      }
+      el.setAttribute("content", value);
+    });
 
     // Use fetch directly since we need query params
     const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-shared-dashboard?token=${token}`;
@@ -47,6 +70,10 @@ export default function SharedDashboard() {
       })
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
+
+    return () => {
+      created.forEach((el) => el.remove());
+    };
   }, [token]);
 
   const processed = useMemo(() => {

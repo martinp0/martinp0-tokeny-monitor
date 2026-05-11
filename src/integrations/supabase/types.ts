@@ -33,8 +33,6 @@ export type Database = {
           inserted_at: string
           model_permaslug: string
           provider_name: string
-          provider_source: string
-          request_count: number
           streamed: boolean
           time_to_first_token_ms: number
           tokens_cached: number
@@ -63,8 +61,6 @@ export type Database = {
           inserted_at?: string
           model_permaslug?: string
           provider_name?: string
-          provider_source?: string
-          request_count?: number
           streamed?: boolean
           time_to_first_token_ms?: number
           tokens_cached?: number
@@ -93,8 +89,6 @@ export type Database = {
           inserted_at?: string
           model_permaslug?: string
           provider_name?: string
-          provider_source?: string
-          request_count?: number
           streamed?: boolean
           time_to_first_token_ms?: number
           tokens_cached?: number
@@ -308,57 +302,6 @@ export type Database = {
         }
         Relationships: []
       }
-      provider_credentials: {
-        Row: {
-          api_key: string
-          created_at: string
-          enabled: boolean
-          id: string
-          key_preview: string
-          label: string
-          last_sync_error: string | null
-          last_sync_status: string | null
-          last_synced_at: string | null
-          organization_id: string | null
-          provider: string
-          rows_imported: number
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          api_key?: string
-          created_at?: string
-          enabled?: boolean
-          id?: string
-          key_preview: string
-          label?: string
-          last_sync_error?: string | null
-          last_sync_status?: string | null
-          last_synced_at?: string | null
-          organization_id?: string | null
-          provider: string
-          rows_imported?: number
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          api_key?: string
-          created_at?: string
-          enabled?: boolean
-          id?: string
-          key_preview?: string
-          label?: string
-          last_sync_error?: string | null
-          last_sync_status?: string | null
-          last_synced_at?: string | null
-          organization_id?: string | null
-          provider?: string
-          rows_imported?: number
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       shared_dashboards: {
         Row: {
           created_at: string
@@ -366,6 +309,7 @@ export type Database = {
           filters: Json | null
           id: string
           label: string | null
+          og_image_path: string | null
           share_token: string
           user_id: string
         }
@@ -375,6 +319,7 @@ export type Database = {
           filters?: Json | null
           id?: string
           label?: string | null
+          og_image_path?: string | null
           share_token?: string
           user_id: string
         }
@@ -384,6 +329,7 @@ export type Database = {
           filters?: Json | null
           id?: string
           label?: string | null
+          og_image_path?: string | null
           share_token?: string
           user_id?: string
         }

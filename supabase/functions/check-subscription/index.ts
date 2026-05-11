@@ -5,8 +5,6 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const ACTIVE_STATUSES = new Set(["active", "trialing"]);
-
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -17,9 +15,7 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_ANON_KEY")!,
       { global: { headers: { Authorization: authHeader } } },
     );
-
-    const { data: userRes } = await supabase.auth.getUser();
-    const user = userRes.user;
+    const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
@@ -27,21 +23,24 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { data } = await supabase
-      .from("subscriptions")
-      .select("status, current_period_end, cancel_at_period_end, price_id")
-      .eq("user_id", user.id)
-      .maybeSingle();
+    const svc = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    );
 
-    const isPro = data ? ACTIVE_STATUSES.has(data.status) : false;
+    const { data } = await svc
+      .from("subscriptions")
+      .select("current_period_end, status, cancel_at_period_end")
+      .eq("user_id", user.id)
+      .in("status", ["active", "trialing"])
+      .gt("current_period_end", new Date().toISOString())
+      .maybeSingle();
 
     return new Response(
       JSON.stringify({
-        isPro,
-        status: data?.status ?? "inactive",
+        isPro: !!data,
         currentPeriodEnd: data?.current_period_end ?? null,
         cancelAtPeriodEnd: data?.cancel_at_period_end ?? false,
-        priceId: data?.price_id ?? null,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
