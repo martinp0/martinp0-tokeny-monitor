@@ -198,15 +198,16 @@ export default function Landing() {
           <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-accent" />Bez instalace</span>
           <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-accent" />CZ rozhraní</span>
         </div>
-        <div className="mt-6">
+        <div className="mt-6 flex flex-col items-center gap-2">
           <a
             href="https://buymeacoffee.com/martinpohlp"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 text-xs font-mono text-muted-foreground/60 hover:text-accent transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-[hsl(35,100%,60%)]/20 to-[hsl(20,90%,55%)]/20 border border-[hsl(35,100%,60%)]/30 text-[hsl(35,100%,70%)] text-sm font-mono hover:from-[hsl(35,100%,60%)]/30 hover:to-[hsl(20,90%,55%)]/30 hover:border-[hsl(35,100%,60%)]/50 transition-all group"
           >
-            <Coffee className="h-3 w-3" />
+            <Coffee className="h-4 w-4 group-hover:scale-110 transition-transform" />
             Líbí se ti to? Kup mi kafe ☕
+            <Heart className="h-3 w-3 opacity-60 group-hover:opacity-100 transition-opacity" />
           </a>
         </div>
       </section>
