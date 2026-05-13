@@ -70,20 +70,22 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background bg-mesh">
       {/* Header */}
-      <header className="border-b border-white/[0.06] px-6 py-3 glass">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link to="/" className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center" title="Domů">
+      <header className="border-b border-white/[0.06] px-4 md:px-6 py-3 glass">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 md:gap-3 min-w-0">
+            <Link to="/" className="h-8 w-8 shrink-0 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center" title="Domů">
               <Activity className="h-4 w-4 text-white" />
             </Link>
-            <h1 className="text-lg font-bold gradient-text tracking-tight">OpenRouter Monitor</h1>
+            <h1 className="text-base md:text-lg font-bold gradient-text tracking-tight truncate">OpenRouter Monitor</h1>
             {selectedModel && (
-              <span className="text-xs font-mono bg-primary/15 text-primary px-2 py-0.5 rounded-full" title={selectedModel}>
+              <span className="hidden sm:inline-block text-xs font-mono bg-primary/15 text-primary px-2 py-0.5 rounded-full truncate max-w-[160px]" title={selectedModel}>
                 {(selectedModel.split("/").pop() || selectedModel).replace(/-(20\d{2})-?(\d{2})-?(\d{2})/g, "").slice(0, 28)}
               </span>
             )}
           </div>
-          <div className="flex items-center gap-4">
+
+          {/* Desktop actions */}
+          <div className="hidden md:flex items-center gap-4">
             <div className="flex items-center gap-1.5">
               <Button
                 variant="outline"
@@ -144,11 +146,81 @@ const Index = () => {
               <LogOut className="h-3.5 w-3.5" />
             </Button>
           </div>
+
+          {/* Mobile actions */}
+          <div className="flex md:hidden items-center gap-1.5">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={toggleCurrency}
+              className="h-8 px-2 border-border font-mono text-xs"
+            >
+              {currency === "CZK" ? "Kč" : "$"}
+            </Button>
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0" aria-label="Menu">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[300px] bg-card border-border overflow-y-auto">
+                <SheetHeader>
+                  <SheetTitle className="text-sm gradient-text">Menu</SheetTitle>
+                </SheetHeader>
+                <div className="mt-6 space-y-4">
+                  <div>
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2">Datum</p>
+                    <DateRangePicker value={dateFilter} onChange={setDateFilter} />
+                  </div>
+                  {currency === "CZK" && (
+                    <p className="text-[10px] text-muted-foreground font-mono">
+                      1 USD = {exchangeRate.toFixed(2)} CZK
+                    </p>
+                  )}
+                  <div className="space-y-2">
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Data</p>
+                    <CsvUpload onUpload={loadCSV} />
+                    {fileName && <p className="text-[10px] font-mono text-muted-foreground truncate">{fileName}</p>}
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Export</p>
+                    <Button variant="outline" size="sm" onClick={exportPNG} className="w-full justify-start gap-2 font-mono text-xs">
+                      <Image className="h-3.5 w-3.5" /> PNG
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => exportPDF(data, totalCost, totalRequests, totalTokens, avgGenTime)} className="w-full justify-start gap-2 font-mono text-xs">
+                      <FileText className="h-3.5 w-3.5" /> PDF
+                    </Button>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Ostatní</p>
+                    <ShareDashboardButton />
+                    <div className="flex items-center gap-2">
+                      <ChangelogModal />
+                      <LanguageSwitcher />
+                    </div>
+                    <Link to="/profile" className="block">
+                      <Button variant="ghost" size="sm" className="w-full justify-start gap-2 font-mono text-xs">
+                        <User className="h-3.5 w-3.5" /> Profil
+                      </Button>
+                    </Link>
+                    <Link to="/settings" className="block">
+                      <Button variant="ghost" size="sm" className="w-full justify-start gap-2 font-mono text-xs">
+                        <SettingsIcon className="h-3.5 w-3.5" /> Nastavení
+                      </Button>
+                    </Link>
+                    <Button variant="ghost" size="sm" onClick={signOut} className="w-full justify-start gap-2 font-mono text-xs">
+                      <LogOut className="h-3.5 w-3.5" /> Odhlásit se
+                    </Button>
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
       </header>
 
       {/* Dashboard */}
-      <main ref={dashboardRef} className="p-6 space-y-4 max-w-[1600px] mx-auto">
+      <main ref={dashboardRef} className="p-3 md:p-6 space-y-4 max-w-[1600px] mx-auto">
         {!loading && !hasUserData ? (
           <OnboardingEmptyState onUpload={loadCSV} />
         ) : (
