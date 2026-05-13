@@ -132,6 +132,15 @@ export default function Landing() {
             <a href="#faq" className="hover:text-foreground transition-colors">{t("nav.faq")}</a>
           </nav>
           <div className="flex items-center gap-2">
+            <a
+              href="https://buymeacoffee.com/martinpohlp"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-gradient-to-r from-[hsl(35,100%,60%)]/20 to-[hsl(20,90%,55%)]/20 border border-[hsl(35,100%,60%)]/30 text-[hsl(35,100%,70%)] text-xs font-mono hover:from-[hsl(35,100%,60%)]/30 hover:to-[hsl(20,90%,55%)]/30 transition-all"
+            >
+              <Coffee className="h-3 w-3" />
+              Buy me a coffee
+            </a>
             <LanguageSwitcher />
             {!session && (
               <Link to="/auth">
