@@ -503,10 +503,10 @@ export default function Landing() {
               href="https://buymeacoffee.com/martinpohlp"
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-foreground transition-colors flex items-center gap-1"
+              className="hover:text-[hsl(35,100%,70%)] transition-colors flex items-center gap-1.5 px-2 py-1 rounded-full bg-[hsl(35,100%,60%)]/10 border border-[hsl(35,100%,60%)]/20"
             >
-              <Coffee className="h-3 w-3" />
-              Support
+              <Coffee className="h-3 w-3 text-[hsl(35,100%,70%)]" />
+              <span className="text-[hsl(35,100%,70%)]">Support</span>
             </a>
             <a
               href="https://martin.pohl.uk?utm_source=tokeny.pohl.uk&utm_medium=footer_nav"
