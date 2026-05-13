@@ -132,6 +132,15 @@ export default function Landing() {
             <a href="#faq" className="hover:text-foreground transition-colors">{t("nav.faq")}</a>
           </nav>
           <div className="flex items-center gap-2">
+            <a
+              href="https://buymeacoffee.com/martinpohlp"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-gradient-to-r from-[hsl(35,100%,60%)]/20 to-[hsl(20,90%,55%)]/20 border border-[hsl(35,100%,60%)]/30 text-[hsl(35,100%,70%)] text-xs font-mono hover:from-[hsl(35,100%,60%)]/30 hover:to-[hsl(20,90%,55%)]/30 transition-all"
+            >
+              <Coffee className="h-3 w-3" />
+              Buy me a coffee
+            </a>
             <LanguageSwitcher />
             {!session && (
               <Link to="/auth">
@@ -189,15 +198,16 @@ export default function Landing() {
           <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-accent" />Bez instalace</span>
           <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-accent" />CZ rozhraní</span>
         </div>
-        <div className="mt-6">
+        <div className="mt-6 flex flex-col items-center gap-2">
           <a
             href="https://buymeacoffee.com/martinpohlp"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 text-xs font-mono text-muted-foreground/60 hover:text-accent transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-[hsl(35,100%,60%)]/20 to-[hsl(20,90%,55%)]/20 border border-[hsl(35,100%,60%)]/30 text-[hsl(35,100%,70%)] text-sm font-mono hover:from-[hsl(35,100%,60%)]/30 hover:to-[hsl(20,90%,55%)]/30 hover:border-[hsl(35,100%,60%)]/50 transition-all group"
           >
-            <Coffee className="h-3 w-3" />
+            <Coffee className="h-4 w-4 group-hover:scale-110 transition-transform" />
             Líbí se ti to? Kup mi kafe ☕
+            <Heart className="h-3 w-3 opacity-60 group-hover:opacity-100 transition-opacity" />
           </a>
         </div>
       </section>
@@ -383,31 +393,35 @@ export default function Landing() {
 
       {/* Support — Buy Me a Coffee */}
       <section className="px-6 py-12 max-w-3xl mx-auto text-center">
-        <div className="glass rounded-2xl border-white/[0.08] p-8 md:p-10">
-          <div className="h-12 w-12 rounded-full bg-gradient-to-br from-[hsl(35,100%,60%)] to-[hsl(20,90%,55%)] flex items-center justify-center mx-auto mb-5">
-            <Coffee className="h-6 w-6 text-white" />
-          </div>
-          <h3 className="text-xl md:text-2xl font-bold mb-3">
-            Podpoř vývoj <span className="gradient-text">kávou</span>
-          </h3>
-          <p className="text-sm text-muted-foreground font-mono max-w-lg mx-auto mb-6 leading-relaxed">
-            Tokeny Monitor je zdarma a open-source. Pokud ti šetří čas nebo peníze, můžeš
-            poděkovat symbolickým kafem. Každá podpora motivuje k dalšímu vylepšování. 💜
-          </p>
-          <a
-            href="https://buymeacoffee.com/martinpohlp"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Button
-              size="lg"
-              className="gap-2 font-mono bg-gradient-to-r from-[hsl(35,100%,60%)] to-[hsl(20,90%,55%)] hover:opacity-90 transition-opacity border-0 text-white"
+        <div className="glass rounded-2xl border-[hsl(35,100%,60%)]/20 p-8 md:p-10 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-[hsl(35,100%,60%)]/5 via-transparent to-[hsl(20,90%,55%)]/5 pointer-events-none" />
+          <div className="absolute -top-10 -right-10 h-32 w-32 bg-[hsl(35,100%,60%)]/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="relative">
+            <div className="h-12 w-12 rounded-full bg-gradient-to-br from-[hsl(35,100%,60%)] to-[hsl(20,90%,55%)] flex items-center justify-center mx-auto mb-5 shadow-lg shadow-[hsl(35,100%,60%)]/20">
+              <Coffee className="h-6 w-6 text-white" />
+            </div>
+            <h3 className="text-xl md:text-2xl font-bold mb-3">
+              Podpoř vývoj <span className="gradient-text">kávou</span>
+            </h3>
+            <p className="text-sm text-muted-foreground font-mono max-w-lg mx-auto mb-6 leading-relaxed">
+              Tokeny Monitor je zdarma a open-source. Pokud ti šetří čas nebo peníze, můžeš
+              poděkovat symbolickým kafem. Každá podpora motivuje k dalšímu vylepšování. 💜
+            </p>
+            <a
+              href="https://buymeacoffee.com/martinpohlp"
+              target="_blank"
+              rel="noopener noreferrer"
             >
-              <Heart className="h-4 w-4" />
-              Buy Me a Coffee
-              <ExternalLink className="h-3.5 w-3.5 opacity-60" />
-            </Button>
-          </a>
+              <Button
+                size="lg"
+                className="gap-2 font-mono bg-gradient-to-r from-[hsl(35,100%,60%)] to-[hsl(20,90%,55%)] hover:opacity-90 transition-opacity border-0 text-white shadow-lg shadow-[hsl(35,100%,60%)]/25 hover:shadow-[hsl(35,100%,60%)]/40"
+              >
+                <Heart className="h-4 w-4" />
+                Buy Me a Coffee
+                <ExternalLink className="h-3.5 w-3.5 opacity-60" />
+              </Button>
+            </a>
+          </div>
         </div>
       </section>
 
@@ -489,10 +503,10 @@ export default function Landing() {
               href="https://buymeacoffee.com/martinpohlp"
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-foreground transition-colors flex items-center gap-1"
+              className="hover:text-[hsl(35,100%,70%)] transition-colors flex items-center gap-1.5 px-2 py-1 rounded-full bg-[hsl(35,100%,60%)]/10 border border-[hsl(35,100%,60%)]/20"
             >
-              <Coffee className="h-3 w-3" />
-              Support
+              <Coffee className="h-3 w-3 text-[hsl(35,100%,70%)]" />
+              <span className="text-[hsl(35,100%,70%)]">Support</span>
             </a>
             <a
               href="https://martin.pohl.uk?utm_source=tokeny.pohl.uk&utm_medium=footer_nav"
