@@ -142,9 +142,9 @@ export function RequestsTable({ data }: Props) {
     <>
       <Card className="bg-card border-border/50">
         <CardHeader className="pb-2">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <CardTitle className="text-sm text-muted-foreground uppercase tracking-wider">Request Log</CardTitle>
-            <div className="relative w-64">
+            <div className="relative w-full sm:w-64">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search model, provider..."
@@ -156,7 +156,45 @@ export function RequestsTable({ data }: Props) {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="max-h-[400px] overflow-auto">
+          {/* Mobile: card list */}
+          <div className="sm:hidden max-h-[500px] overflow-auto space-y-2">
+            {filtered.slice(0, 100).map((row) => (
+              <button
+                key={row.generation_id}
+                onClick={() => setSelectedRow(row)}
+                className="w-full text-left bg-secondary/40 hover:bg-secondary/70 border border-border/30 rounded-md p-3 font-mono text-xs space-y-1.5"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-foreground truncate" title={row.model_permaslug}>
+                    {shortModel(row.model_permaslug, 22)}
+                  </span>
+                  <span className="text-chart-1 shrink-0">{fmtCost(row.cost_total, 4, currency, exchangeRate)}</span>
+                </div>
+                <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+                  <span>{row.provider_name} · {row.created_at.substring(11, 19)}</span>
+                  <span className={`px-1.5 py-0.5 rounded uppercase font-bold ${
+                    row.finish_reason_normalized === "stop" ? "bg-primary/20 text-primary" :
+                    row.finish_reason_normalized === "length" ? "bg-chart-3/20 text-chart-3" :
+                    "bg-chart-4/20 text-chart-4"
+                  }`}>
+                    {row.finish_reason_normalized}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-[10px]">
+                  <span className="text-chart-2">{fmtNum(row.tokens_prompt + row.tokens_completion, currency)} tok</span>
+                  <span className="text-chart-3">{fmtNum(row.generation_time_ms, currency)} ms</span>
+                </div>
+              </button>
+            ))}
+            {filtered.length > 100 && (
+              <p className="text-[10px] text-center text-muted-foreground pt-2">
+                Zobrazeno 100 z {filtered.length} – pro víc použij desktop
+              </p>
+            )}
+          </div>
+
+          {/* Desktop: table */}
+          <div className="hidden sm:block max-h-[400px] overflow-auto">
             <Table>
               <TableHeader>
                 <TableRow className="border-border/50 hover:bg-transparent">
