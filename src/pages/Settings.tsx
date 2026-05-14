@@ -203,16 +203,16 @@ const Settings = () => {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <Label className="text-xs">Měsíční budget (USD)</Label>
-                <Input type="number" value={budget} onChange={(e) => setBudget(e.target.value)} className="mt-1 font-mono" />
+                <Label htmlFor={budgetId} className="text-xs">Měsíční budget (USD)</Label>
+                <Input id={budgetId} type="number" value={budget} onChange={(e) => setBudget(e.target.value)} className="mt-1 font-mono" />
               </div>
               <div>
-                <Label className="text-xs">Alert při (%)</Label>
-                <Input type="number" value={threshold} onChange={(e) => setThreshold(e.target.value)} className="mt-1 font-mono" />
+                <Label htmlFor={thresholdId} className="text-xs">Alert při (%)</Label>
+                <Input id={thresholdId} type="number" value={threshold} onChange={(e) => setThreshold(e.target.value)} className="mt-1 font-mono" />
               </div>
               <div>
-                <Label className="text-xs">Notifikační e-mail</Label>
-                <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1 font-mono" />
+                <Label htmlFor={emailId} className="text-xs">Notifikační e-mail</Label>
+                <Input id={emailId} type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1 font-mono" />
               </div>
             </div>
             <div className="flex items-center justify-between">
