@@ -273,7 +273,7 @@ const Settings = () => {
                         {t.last_used_at ? `Použit ${new Date(t.last_used_at).toLocaleString("cs-CZ")}` : "Nepoužit"}
                       </div>
                     </div>
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => deleteToken(t.id)}>
+                    <Button variant="ghost" size="icon" aria-label="Smazat token" className="h-7 w-7" onClick={() => deleteToken(t.id)}>
                       <Trash2 className="h-3.5 w-3.5 text-destructive" />
                     </Button>
                   </div>
