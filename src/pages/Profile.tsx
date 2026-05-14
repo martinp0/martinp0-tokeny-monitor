@@ -171,12 +171,13 @@ const Profile = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label className="text-xs">E-mail</Label>
-              <Input value={session?.user.email ?? ""} disabled className="mt-1 font-mono opacity-60" />
+              <Label htmlFor={emailId} className="text-xs">E-mail</Label>
+              <Input id={emailId} value={session?.user.email ?? ""} disabled className="mt-1 font-mono opacity-60" />
             </div>
             <div>
-              <Label className="text-xs">Zobrazované jméno</Label>
+              <Label htmlFor={nameId} className="text-xs">Zobrazované jméno</Label>
               <Input
+                id={nameId}
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
                 className="mt-1 font-mono"
