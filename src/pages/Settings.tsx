@@ -117,8 +117,19 @@ const Settings = () => {
 
   const mcpUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/mcp`;
 
+  const budgetId = useId();
+  const thresholdId = useId();
+  const emailId = useId();
+  const tokenNameId = useId();
+
   return (
     <div className="min-h-screen bg-background bg-mesh">
+      <Helmet>
+        <title>Nastavení – budget alerty a MCP tokeny | OpenRouter Monitor</title>
+        <meta name="description" content="Spravuj měsíční budget alerty, MCP tokeny pro Claude/Cursor/Zed a propojené API providery." />
+        <link rel="canonical" href="https://tokeny.pohl.uk/settings" />
+        <meta name="robots" content="noindex,nofollow" />
+      </Helmet>
       <header className="border-b border-white/[0.06] px-6 py-3 glass">
         <div className="flex items-center justify-between max-w-4xl mx-auto">
           <Link to="/dashboard" className="flex items-center gap-2 text-sm font-mono text-muted-foreground hover:text-foreground">
