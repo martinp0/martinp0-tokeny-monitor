@@ -136,12 +136,12 @@ const Index = () => {
             <ChangelogModal />
             <LanguageSwitcher />
             <Link to="/profile">
-              <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground hover:text-foreground font-mono text-xs" title="Profil">
+              <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground hover:text-foreground font-mono text-xs" title="Profil" aria-label="Profil">
                 <User className="h-3.5 w-3.5" />
               </Button>
             </Link>
             <Link to="/settings">
-              <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground hover:text-foreground font-mono text-xs" title="Nastavení">
+              <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground hover:text-foreground font-mono text-xs" title="Nastavení" aria-label="Nastavení">
                 <SettingsIcon className="h-3.5 w-3.5" />
               </Button>
             </Link>
@@ -151,6 +151,7 @@ const Index = () => {
               onClick={signOut}
               className="gap-1.5 text-muted-foreground hover:text-foreground font-mono text-xs"
               title="Odhlásit se"
+              aria-label="Odhlásit se"
             >
               <LogOut className="h-3.5 w-3.5" />
             </Button>
