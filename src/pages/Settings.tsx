@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useId } from "react";
 import { Link, useSearchParams } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -116,8 +117,19 @@ const Settings = () => {
 
   const mcpUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/mcp`;
 
+  const budgetId = useId();
+  const thresholdId = useId();
+  const emailId = useId();
+  const tokenNameId = useId();
+
   return (
     <div className="min-h-screen bg-background bg-mesh">
+      <Helmet>
+        <title>Nastavení – budget alerty a MCP tokeny | OpenRouter Monitor</title>
+        <meta name="description" content="Spravuj měsíční budget alerty, MCP tokeny pro Claude/Cursor/Zed a propojené API providery." />
+        <link rel="canonical" href="https://tokeny.pohl.uk/settings" />
+        <meta name="robots" content="noindex,nofollow" />
+      </Helmet>
       <header className="border-b border-white/[0.06] px-6 py-3 glass">
         <div className="flex items-center justify-between max-w-4xl mx-auto">
           <Link to="/dashboard" className="flex items-center gap-2 text-sm font-mono text-muted-foreground hover:text-foreground">
@@ -191,16 +203,16 @@ const Settings = () => {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <Label className="text-xs">Měsíční budget (USD)</Label>
-                <Input type="number" value={budget} onChange={(e) => setBudget(e.target.value)} className="mt-1 font-mono" />
+                <Label htmlFor={budgetId} className="text-xs">Měsíční budget (USD)</Label>
+                <Input id={budgetId} type="number" value={budget} onChange={(e) => setBudget(e.target.value)} className="mt-1 font-mono" />
               </div>
               <div>
-                <Label className="text-xs">Alert při (%)</Label>
-                <Input type="number" value={threshold} onChange={(e) => setThreshold(e.target.value)} className="mt-1 font-mono" />
+                <Label htmlFor={thresholdId} className="text-xs">Alert při (%)</Label>
+                <Input id={thresholdId} type="number" value={threshold} onChange={(e) => setThreshold(e.target.value)} className="mt-1 font-mono" />
               </div>
               <div>
-                <Label className="text-xs">Notifikační e-mail</Label>
-                <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1 font-mono" />
+                <Label htmlFor={emailId} className="text-xs">Notifikační e-mail</Label>
+                <Input id={emailId} type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1 font-mono" />
               </div>
             </div>
             <div className="flex items-center justify-between">
@@ -226,14 +238,15 @@ const Settings = () => {
               </div>
               <div className="flex items-center gap-2">
                 <code className="text-xs font-mono flex-1 truncate">{mcpUrl}</code>
-                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { navigator.clipboard.writeText(mcpUrl); toast.success("Zkopírováno"); }}>
+                <Button variant="ghost" size="icon" aria-label="Zkopírovat MCP endpoint" className="h-7 w-7" onClick={() => { navigator.clipboard.writeText(mcpUrl); toast.success("Zkopírováno"); }}>
                   <Copy className="h-3.5 w-3.5" />
                 </Button>
               </div>
             </div>
 
             <div className="flex gap-2">
-              <Input placeholder="Název tokenu" value={tokenName} onChange={(e) => setTokenName(e.target.value)} />
+              <Label htmlFor={tokenNameId} className="sr-only">Název tokenu</Label>
+              <Input id={tokenNameId} placeholder="Název tokenu" value={tokenName} onChange={(e) => setTokenName(e.target.value)} />
               <Button onClick={createToken} className="gap-1.5"><Plus className="h-4 w-4" /> Vytvořit token</Button>
             </div>
 
@@ -242,7 +255,7 @@ const Settings = () => {
                 <div className="text-xs font-semibold text-accent">⚠️ Token zobrazen jen jednou — zkopíruj si ho hned!</div>
                 <div className="flex items-center gap-2">
                   <code className="text-xs font-mono flex-1 break-all">{newToken}</code>
-                  <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0" onClick={() => { navigator.clipboard.writeText(newToken); toast.success("Zkopírováno"); }}>
+                  <Button variant="ghost" size="icon" aria-label="Zkopírovat token" className="h-7 w-7 shrink-0" onClick={() => { navigator.clipboard.writeText(newToken); toast.success("Zkopírováno"); }}>
                     <Copy className="h-3.5 w-3.5" />
                   </Button>
                 </div>
@@ -260,7 +273,7 @@ const Settings = () => {
                         {t.last_used_at ? `Použit ${new Date(t.last_used_at).toLocaleString("cs-CZ")}` : "Nepoužit"}
                       </div>
                     </div>
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => deleteToken(t.id)}>
+                    <Button variant="ghost" size="icon" aria-label="Smazat token" className="h-7 w-7" onClick={() => deleteToken(t.id)}>
                       <Trash2 className="h-3.5 w-3.5 text-destructive" />
                     </Button>
                   </div>

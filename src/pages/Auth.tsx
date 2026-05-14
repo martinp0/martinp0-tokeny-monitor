@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Activity, LogIn, UserPlus, Mail, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
@@ -54,7 +56,15 @@ export default function Auth() {
   const title = view === "login" ? "Přihlášení" : view === "register" ? "Registrace" : "Reset hesla";
 
   return (
-    <div className="min-h-screen bg-background bg-mesh flex items-center justify-center p-4">
+    <main className="min-h-screen bg-background bg-mesh flex items-center justify-center p-4">
+      <Helmet>
+        <title>{title} – OpenRouter Monitor</title>
+        <meta name="description" content="Přihlaste se nebo si vytvořte účet v OpenRouter Monitoru a začněte sledovat náklady na AI tokeny." />
+        <link rel="canonical" href="https://tokeny.pohl.uk/auth" />
+        <meta property="og:title" content={`${title} – OpenRouter Monitor`} />
+        <meta property="og:url" content="https://tokeny.pohl.uk/auth" />
+        <meta name="robots" content="noindex,follow" />
+      </Helmet>
       <Card className="w-full max-w-md glass border-white/[0.08] glow-sm">
         <CardHeader className="text-center">
           <div className="flex items-center justify-center gap-3 mb-4">
@@ -63,37 +73,50 @@ export default function Auth() {
             </div>
             <span className="text-xl font-bold gradient-text">OpenRouter Monitor</span>
           </div>
-          <CardTitle className="text-lg text-foreground">{title}</CardTitle>
+          <h1 className="text-lg font-semibold text-foreground">{title}</h1>
+          <CardTitle className="sr-only">{title}</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             {view === "register" && (
-              <Input
-                type="text"
-                placeholder="Tvoje jméno ✏️"
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
-                className="bg-white/[0.04] border-white/[0.08] font-mono focus:border-primary/50"
-              />
+              <div className="space-y-1">
+                <Label htmlFor="auth-name" className="sr-only">Jméno</Label>
+                <Input
+                  id="auth-name"
+                  type="text"
+                  placeholder="Tvoje jméno ✏️"
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value)}
+                  className="bg-white/[0.04] border-white/[0.08] font-mono focus:border-primary/50"
+                />
+              </div>
             )}
-            <Input
-              type="email"
-              placeholder="Email 📧"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="bg-white/[0.04] border-white/[0.08] font-mono focus:border-primary/50"
-            />
-            {view !== "forgot" && (
+            <div className="space-y-1">
+              <Label htmlFor="auth-email" className="sr-only">Email</Label>
               <Input
-                type="password"
-                placeholder="Heslo 🔒"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                id="auth-email"
+                type="email"
+                placeholder="Email 📧"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
-                minLength={6}
                 className="bg-white/[0.04] border-white/[0.08] font-mono focus:border-primary/50"
               />
+            </div>
+            {view !== "forgot" && (
+              <div className="space-y-1">
+                <Label htmlFor="auth-password" className="sr-only">Heslo</Label>
+                <Input
+                  id="auth-password"
+                  type="password"
+                  placeholder="Heslo 🔒"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  minLength={6}
+                  className="bg-white/[0.04] border-white/[0.08] font-mono focus:border-primary/50"
+                />
+              </div>
             )}
             <Button type="submit" disabled={loading} className="w-full gap-2 font-mono bg-gradient-to-r from-primary to-[hsl(320,90%,65%)] hover:opacity-90 transition-opacity border-0">
               {view === "login" && <LogIn className="h-4 w-4" />}
@@ -196,6 +219,6 @@ export default function Auth() {
           </div>
         </CardContent>
       </Card>
-    </div>
+    </main>
   );
 }

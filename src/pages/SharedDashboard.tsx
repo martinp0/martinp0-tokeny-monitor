@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { KpiCards } from "@/components/dashboard/KpiCards";
 import { CostTimeChart } from "@/components/dashboard/CostTimeChart";
@@ -164,10 +165,18 @@ export default function SharedDashboard() {
 
   return (
     <div className="min-h-screen bg-background bg-mesh">
+      <Helmet>
+        <title>{data?.label ? `${data.label} – Sdílený dashboard` : "Sdílený dashboard"} | OpenRouter Monitor</title>
+        <meta name="description" content={`Sdílený read-only dashboard nákladů na AI tokeny${data?.owner ? ` od ${data.owner}` : ""}.`} />
+        <link rel="canonical" href={`https://tokeny.pohl.uk/shared/${token}`} />
+        <meta name="robots" content="noindex,follow" />
+        <meta property="og:url" content={`https://tokeny.pohl.uk/shared/${token}`} />
+        <meta property="og:title" content={data?.label ? `${data.label} – Sdílený dashboard` : "Sdílený dashboard"} />
+      </Helmet>
       <header className="border-b border-white/[0.06] px-6 py-3 glass">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Link to="/" className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+            <Link to="/" aria-label="Domů" className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
               <Activity className="h-4 w-4 text-white" />
             </Link>
             <h1 className="text-lg font-bold gradient-text tracking-tight">Sdílený Dashboard</h1>

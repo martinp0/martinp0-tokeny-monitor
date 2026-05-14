@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -50,12 +51,20 @@ export default function Fun() {
   };
 
   return (
-    <div className="min-h-screen bg-background bg-mesh p-4 md:p-8">
+    <main className="min-h-screen bg-background bg-mesh p-4 md:p-8">
+      <Helmet>
+        <title>AI Zábava – generátor vtipů a obrázků | OpenRouter Monitor</title>
+        <meta name="description" content="Generuj české AI vtipy a unikátní obrázky pomocí Gemini. Zdarma, bez registrace." />
+        <link rel="canonical" href="https://tokeny.pohl.uk/fun" />
+        <meta property="og:title" content="AI Zábava – vtipy a obrázky generované AI" />
+        <meta property="og:description" content="Generátor českých vtipů a obrázků poháněný Gemini." />
+        <meta property="og:url" content="https://tokeny.pohl.uk/fun" />
+      </Helmet>
       <div className="max-w-2xl mx-auto space-y-8">
         {/* Header */}
         <div className="flex items-center gap-4 animate-fade-in">
-          <Link to="/">
-            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground glass">
+          <Link to="/" aria-label="Zpět na úvod">
+            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground glass" aria-label="Zpět na úvod">
               <ArrowLeft className="h-5 w-5" />
             </Button>
           </Link>
@@ -149,6 +158,6 @@ export default function Fun() {
           ✨ Poháněno AI • Každý výsledek je unikátní ✨
         </p>
       </div>
-    </div>
+    </main>
   );
 }

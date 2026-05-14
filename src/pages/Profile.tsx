@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useId } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -134,8 +135,19 @@ const Profile = () => {
     }
   }
 
+  const emailId = useId();
+  const nameId = useId();
+  const newPwdId = useId();
+  const confirmPwdId = useId();
+
   return (
     <div className="min-h-screen bg-background bg-mesh">
+      <Helmet>
+        <title>Profil – účet, heslo a export dat | OpenRouter Monitor</title>
+        <meta name="description" content="Spravuj svůj profil, změň si heslo, exportuj data nebo smaž účet (GDPR)." />
+        <link rel="canonical" href="https://tokeny.pohl.uk/profile" />
+        <meta name="robots" content="noindex,nofollow" />
+      </Helmet>
       <header className="border-b border-white/[0.06] px-6 py-3 glass">
         <div className="flex items-center justify-between max-w-4xl mx-auto">
           <Link
@@ -159,12 +171,13 @@ const Profile = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label className="text-xs">E-mail</Label>
-              <Input value={session?.user.email ?? ""} disabled className="mt-1 font-mono opacity-60" />
+              <Label htmlFor={emailId} className="text-xs">E-mail</Label>
+              <Input id={emailId} value={session?.user.email ?? ""} disabled className="mt-1 font-mono opacity-60" />
             </div>
             <div>
-              <Label className="text-xs">Zobrazované jméno</Label>
+              <Label htmlFor={nameId} className="text-xs">Zobrazované jméno</Label>
               <Input
+                id={nameId}
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
                 className="mt-1 font-mono"
@@ -186,8 +199,9 @@ const Profile = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label className="text-xs">Nové heslo</Label>
+              <Label htmlFor={newPwdId} className="text-xs">Nové heslo</Label>
               <Input
+                id={newPwdId}
                 type="password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
@@ -196,8 +210,9 @@ const Profile = () => {
               />
             </div>
             <div>
-              <Label className="text-xs">Potvrzení hesla</Label>
+              <Label htmlFor={confirmPwdId} className="text-xs">Potvrzení hesla</Label>
               <Input
+                id={confirmPwdId}
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
