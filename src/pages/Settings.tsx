@@ -238,7 +238,7 @@ const Settings = () => {
               </div>
               <div className="flex items-center gap-2">
                 <code className="text-xs font-mono flex-1 truncate">{mcpUrl}</code>
-                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { navigator.clipboard.writeText(mcpUrl); toast.success("Zkopírováno"); }}>
+                <Button variant="ghost" size="icon" aria-label="Zkopírovat MCP endpoint" className="h-7 w-7" onClick={() => { navigator.clipboard.writeText(mcpUrl); toast.success("Zkopírováno"); }}>
                   <Copy className="h-3.5 w-3.5" />
                 </Button>
               </div>
