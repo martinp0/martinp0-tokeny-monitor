@@ -70,14 +70,22 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background bg-mesh">
+      <Helmet>
+        <title>Dashboard – OpenRouter Monitor</title>
+        <meta name="description" content="Tvůj přehled nákladů, tokenů, modelů a providerů na OpenRouteru. Filtruj podle data, exportuj a sleduj anomálie." />
+        <link rel="canonical" href="https://tokeny.pohl.uk/dashboard" />
+        <meta name="robots" content="noindex,follow" />
+        <meta property="og:title" content="Dashboard – OpenRouter Monitor" />
+        <meta property="og:url" content="https://tokeny.pohl.uk/dashboard" />
+      </Helmet>
       {/* Header */}
       <header className="border-b border-white/[0.06] px-4 md:px-6 py-3 glass">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 md:gap-3 min-w-0">
-            <Link to="/" className="h-8 w-8 shrink-0 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center" title="Domů">
+            <Link to="/" className="h-8 w-8 shrink-0 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center" title="Domů" aria-label="Domů">
               <Activity className="h-4 w-4 text-white" />
             </Link>
-            <h1 className="text-base md:text-lg font-bold gradient-text tracking-tight truncate">OpenRouter Monitor</h1>
+            <h1 className="text-base md:text-lg font-bold gradient-text tracking-tight truncate">OpenRouter Monitor — Dashboard</h1>
             {selectedModel && (
               <span className="hidden sm:inline-block text-xs font-mono bg-primary/15 text-primary px-2 py-0.5 rounded-full truncate max-w-[160px]" title={selectedModel}>
                 {(selectedModel.split("/").pop() || selectedModel).replace(/-(20\d{2})-?(\d{2})-?(\d{2})/g, "").slice(0, 28)}
