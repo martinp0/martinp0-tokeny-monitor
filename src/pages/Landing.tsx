@@ -196,6 +196,7 @@ export default function Landing() {
         </div>
       </header>
 
+      <main>
       {/* Hero */}
       <section className="relative px-6 pt-20 pb-16 max-w-7xl mx-auto text-center">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass border-white/[0.08] text-xs font-mono text-muted-foreground mb-8 animate-fade-in">
