@@ -199,8 +199,9 @@ const Profile = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label className="text-xs">Nové heslo</Label>
+              <Label htmlFor={newPwdId} className="text-xs">Nové heslo</Label>
               <Input
+                id={newPwdId}
                 type="password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
@@ -209,8 +210,9 @@ const Profile = () => {
               />
             </div>
             <div>
-              <Label className="text-xs">Potvrzení hesla</Label>
+              <Label htmlFor={confirmPwdId} className="text-xs">Potvrzení hesla</Label>
               <Input
+                id={confirmPwdId}
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
