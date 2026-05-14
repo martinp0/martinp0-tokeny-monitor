@@ -245,7 +245,8 @@ const Settings = () => {
             </div>
 
             <div className="flex gap-2">
-              <Input placeholder="Název tokenu" value={tokenName} onChange={(e) => setTokenName(e.target.value)} />
+              <Label htmlFor={tokenNameId} className="sr-only">Název tokenu</Label>
+              <Input id={tokenNameId} placeholder="Název tokenu" value={tokenName} onChange={(e) => setTokenName(e.target.value)} />
               <Button onClick={createToken} className="gap-1.5"><Plus className="h-4 w-4" /> Vytvořit token</Button>
             </div>
 
