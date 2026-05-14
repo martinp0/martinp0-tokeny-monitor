@@ -158,6 +158,6 @@ export default function Fun() {
           ✨ Poháněno AI • Každý výsledek je unikátní ✨
         </p>
       </div>
-    </div>
+    </main>
   );
 }
