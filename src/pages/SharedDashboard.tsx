@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { KpiCards } from "@/components/dashboard/KpiCards";
 import { CostTimeChart } from "@/components/dashboard/CostTimeChart";
