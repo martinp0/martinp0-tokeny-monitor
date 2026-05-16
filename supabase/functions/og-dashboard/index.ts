@@ -188,6 +188,7 @@ Deno.serve(async (req) => {
       },
     });
   } catch (e) {
-    return new Response(`Error: ${(e as Error).message}`, { status: 500, headers: cors });
+    console.error("og-dashboard error", e);
+    return new Response("Internal server error", { status: 500, headers: cors });
   }
 });

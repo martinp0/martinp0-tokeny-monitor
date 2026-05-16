@@ -180,6 +180,36 @@ Deno.serve(async (req) => {
 
     const { messages } = await req.json();
 
+    // Input validation to prevent API cost abuse
+    if (!Array.isArray(messages)) {
+      return new Response(JSON.stringify({ error: "messages must be an array" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (messages.length === 0 || messages.length > 20) {
+      return new Response(JSON.stringify({ error: "messages length must be between 1 and 20" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const MAX_CONTENT_CHARS = 4000;
+    for (const m of messages) {
+      if (!m || typeof m !== "object" || typeof m.role !== "string") {
+        return new Response(JSON.stringify({ error: "invalid message shape" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const contentStr = typeof m.content === "string" ? m.content : JSON.stringify(m.content ?? "");
+      if (contentStr.length > MAX_CONTENT_CHARS) {
+        return new Response(JSON.stringify({ error: `message content exceeds ${MAX_CONTENT_CHARS} characters` }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+
     // Convert OpenAI-style message history to Anthropic format (strip system messages)
     const anthropicMessages = messages.filter((m: any) => m.role !== "system");
 
