@@ -18,7 +18,8 @@
     "free": "Free",
     "noInstall": "No install",
     "czInterface": "CZ & EN",
-    "buyMeCoffee": "Like it? Buy me a coffee ☕"
+    "buyMeCoffee": "Like it? Buy me a coffee ☕",
+    "buyMeCoffeeShort": "Buy me a coffee"
   },
   "features": {
     "title": "Everything you need for",
