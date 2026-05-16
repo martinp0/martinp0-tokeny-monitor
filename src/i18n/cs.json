@@ -18,7 +18,8 @@
     "free": "Zdarma",
     "noInstall": "Bez instalace",
     "czInterface": "CZ rozhraní",
-    "buyMeCoffee": "Líbí se ti to? Kup mi kafe ☕"
+    "buyMeCoffee": "Líbí se ti to? Kup mi kafe ☕",
+    "buyMeCoffeeShort": "Kup mi kafe"
   },
   "features": {
     "title": "Vše, co potřebuješ pro",
