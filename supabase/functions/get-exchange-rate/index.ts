@@ -49,9 +49,8 @@ Deno.serve(async (req) => {
       status: 200,
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
-    console.error("Error fetching CNB rate:", message);
-    return new Response(JSON.stringify({ error: message, rate: 23.5 }), {
+    console.error("Error fetching CNB rate:", error);
+    return new Response(JSON.stringify({ error: "Unable to fetch exchange rate", rate: 23.5 }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });
