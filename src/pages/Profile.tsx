@@ -147,6 +147,9 @@ const Profile = () => {
         <meta name="description" content="Spravuj svůj profil, změň si heslo, exportuj data nebo smaž účet (GDPR)." />
         <link rel="canonical" href="https://tokeny.pohl.uk/profile" />
         <meta name="robots" content="noindex,nofollow" />
+        <meta property="og:title" content="Profil – OpenRouter Monitor" />
+        <meta property="og:description" content="Spravuj svůj účet, heslo a export dat v OpenRouter Monitoru." />
+        <meta property="og:url" content="https://tokeny.pohl.uk/profile" />
       </Helmet>
       <header className="border-b border-white/[0.06] px-6 py-3 glass">
         <div className="flex items-center justify-between max-w-4xl mx-auto">
