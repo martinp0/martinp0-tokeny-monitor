@@ -178,6 +178,25 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Server-side Pro subscription enforcement (AI agent is a Pro feature)
+    const svc = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    );
+    const { data: sub } = await svc
+      .from("subscriptions")
+      .select("status, current_period_end")
+      .eq("user_id", userRes.user.id)
+      .in("status", ["active", "trialing"])
+      .gt("current_period_end", new Date().toISOString())
+      .maybeSingle();
+    if (!sub) {
+      return new Response(JSON.stringify({ error: "Pro subscription required" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const { messages } = await req.json();
 
     // Input validation to prevent API cost abuse
