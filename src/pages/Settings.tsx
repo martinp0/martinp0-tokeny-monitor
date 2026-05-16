@@ -129,6 +129,9 @@ const Settings = () => {
         <meta name="description" content="Spravuj měsíční budget alerty, MCP tokeny pro Claude/Cursor/Zed a propojené API providery." />
         <link rel="canonical" href="https://tokeny.pohl.uk/settings" />
         <meta name="robots" content="noindex,nofollow" />
+        <meta property="og:title" content="Nastavení – OpenRouter Monitor" />
+        <meta property="og:description" content="Budget alerty, MCP tokeny a propojení API providerů v OpenRouter Monitoru." />
+        <meta property="og:url" content="https://tokeny.pohl.uk/settings" />
       </Helmet>
       <header className="border-b border-white/[0.06] px-6 py-3 glass">
         <div className="flex items-center justify-between max-w-4xl mx-auto">

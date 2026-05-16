@@ -76,6 +76,7 @@ const Index = () => {
         <link rel="canonical" href="https://tokeny.pohl.uk/dashboard" />
         <meta name="robots" content="noindex,follow" />
         <meta property="og:title" content="Dashboard – OpenRouter Monitor" />
+        <meta property="og:description" content="Interaktivní dashboard s náklady, tokeny, modely a anomáliemi z OpenRouteru. Filtry, export, AI agent." />
         <meta property="og:url" content="https://tokeny.pohl.uk/dashboard" />
       </Helmet>
       {/* Header */}
