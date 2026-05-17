@@ -1,0 +1,1007 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="googlebot" content="noindex, nofollow">
+<title>Marketing roll-out · Tokeny Monitor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: hsl(260, 25%, 6%);
+    --fg: hsl(240, 10%, 93%);
+    --muted: hsl(240, 8%, 50%);
+    --primary: hsl(270, 95%, 65%);
+    --accent: hsl(175, 85%, 55%);
+    --pink: hsl(320, 90%, 65%);
+    --gold: hsl(45, 100%, 60%);
+    --green: hsl(140, 80%, 55%);
+    --red: hsl(350, 90%, 60%);
+    --orange: hsl(20, 95%, 60%);
+    --blue: hsl(210, 85%, 60%);
+    --border: hsl(0, 0%, 100%, 0.08);
+    --card-bg: hsl(0 0% 100% / 0.04);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { min-height: 100vh; }
+  body {
+    font-family: 'Space Grotesk', sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    background-image:
+      radial-gradient(at 20% 80%, hsl(270 95% 65% / 0.08) 0, transparent 50%),
+      radial-gradient(at 80% 20%, hsl(175 85% 55% / 0.06) 0, transparent 50%),
+      radial-gradient(at 50% 50%, hsl(320 90% 65% / 0.04) 0, transparent 50%);
+    background-attachment: fixed;
+    padding: 40px 24px 80px;
+  }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+  .gradient-text {
+    background: linear-gradient(135deg, var(--primary), var(--pink), var(--accent));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .container { max-width: 1180px; margin: 0 auto; }
+
+  /* ===== Header ===== */
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 28px;
+    flex-wrap: wrap; gap: 16px;
+  }
+  header .brand { display: flex; align-items: center; gap: 12px; }
+  .logo {
+    width: 36px; height: 36px;
+    border-radius: 9px;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    display: grid; place-items: center;
+    box-shadow: 0 0 20px -3px hsl(270 95% 65% / 0.5);
+  }
+  .logo svg { width: 18px; height: 18px; color: white; }
+  h1 { font-size: 26px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; }
+  .subtitle { font-family: 'JetBrains Mono'; font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .header-actions { display: flex; gap: 10px; align-items: center; }
+  .pill {
+    font-family: 'JetBrains Mono';
+    font-size: 11px;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: hsl(0 0% 100% / 0.05);
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+
+  /* ===== Progress strip ===== */
+  .progress-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(24px);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px 24px;
+    margin-bottom: 24px;
+    display: flex; align-items: center; gap: 24px;
+    flex-wrap: wrap;
+  }
+  .progress-info { flex: 1; min-width: 240px; }
+  .progress-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+  .progress-value { font-family: 'JetBrains Mono'; font-size: 32px; font-weight: 700; }
+  .progress-value b { color: var(--accent); }
+  .progress-bar {
+    flex: 2; min-width: 260px;
+    height: 12px;
+    background: hsl(0 0% 100% / 0.06);
+    border-radius: 999px; overflow: hidden;
+    position: relative;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    width: 0%;
+    transition: width 0.4s cubic-bezier(.4, 0, .2, 1);
+    box-shadow: 0 0 14px hsl(270 95% 65% / 0.5);
+  }
+  .reset-btn {
+    background: transparent;
+    border: 1px solid hsl(350 90% 60% / 0.3);
+    color: var(--red);
+    border-radius: 8px;
+    padding: 7px 12px;
+    font-family: 'JetBrains Mono';
+    font-size: 11px;
+    cursor: pointer;
+  }
+  .reset-btn:hover { background: hsl(350 90% 60% / 0.1); }
+
+  /* ===== Filter tabs ===== */
+  .tabs {
+    display: flex; gap: 6px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+  .tab {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 8px 14px;
+    border-radius: 10px;
+    font-family: 'JetBrains Mono';
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.18s;
+  }
+  .tab:hover { color: var(--fg); border-color: hsl(0 0% 100% / 0.15); }
+  .tab.active {
+    background: hsl(270 95% 65% / 0.15);
+    border-color: hsl(270 95% 65% / 0.4);
+    color: var(--primary);
+  }
+  .tab .count {
+    margin-left: 6px;
+    padding: 1px 6px;
+    border-radius: 4px;
+    background: hsl(0 0% 100% / 0.06);
+    color: var(--muted);
+    font-size: 10px;
+  }
+  .tab.active .count { background: hsl(270 95% 65% / 0.2); color: var(--primary); }
+
+  /* ===== Channel filter chips ===== */
+  .channels {
+    display: flex; gap: 6px; align-items: center;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  .channels .label { font-family: 'JetBrains Mono'; font-size: 11px; color: var(--muted); margin-right: 4px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .chip {
+    background: transparent;
+    border: 1px solid var(--border);
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-family: 'JetBrains Mono';
+    font-size: 11px;
+    cursor: pointer;
+    display: inline-flex; align-items: center; gap: 5px;
+    color: var(--muted);
+    transition: all 0.18s;
+  }
+  .chip:hover { color: var(--fg); }
+  .chip.on { background: hsl(0 0% 100% / 0.05); color: var(--fg); border-color: hsl(0 0% 100% / 0.18); }
+  .chip .swatch { width: 8px; height: 8px; border-radius: 2px; display: inline-block; }
+
+  /* ===== Day group ===== */
+  .day-group {
+    margin-bottom: 16px;
+  }
+  .day-header {
+    display: flex; align-items: baseline; gap: 12px;
+    padding: 4px 0 10px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 10px;
+  }
+  .day-header .date {
+    font-family: 'JetBrains Mono';
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--fg);
+  }
+  .day-header .day-name { font-family: 'JetBrains Mono'; font-size: 11px; color: var(--muted); }
+  .day-header .week { margin-left: auto; font-family: 'JetBrains Mono'; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+
+  /* ===== Item ===== */
+  .item {
+    background: var(--card-bg);
+    backdrop-filter: blur(24px);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 8px;
+    transition: all 0.18s;
+    overflow: hidden;
+  }
+  .item:hover { border-color: hsl(0 0% 100% / 0.15); }
+  .item.done .item-row { opacity: 0.55; }
+  .item.done .item-title { text-decoration: line-through; text-decoration-color: hsl(140 80% 55% / 0.6); }
+
+  .item-row {
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 18px;
+    cursor: pointer;
+  }
+  .checkbox {
+    width: 22px; height: 22px;
+    border: 2px solid var(--border);
+    border-radius: 6px;
+    display: grid; place-items: center;
+    flex-shrink: 0;
+    transition: all 0.15s;
+  }
+  .item.done .checkbox {
+    background: hsl(140 80% 55% / 0.15);
+    border-color: var(--green);
+  }
+  .checkbox svg { width: 14px; height: 14px; color: var(--green); opacity: 0; transition: opacity 0.15s; }
+  .item.done .checkbox svg { opacity: 1; }
+
+  .time-block {
+    flex-shrink: 0;
+    display: flex; flex-direction: column;
+    min-width: 56px;
+  }
+  .time-block .time { font-family: 'JetBrains Mono'; font-size: 14px; font-weight: 600; color: var(--fg); }
+  .time-block .duration { font-family: 'JetBrains Mono'; font-size: 10px; color: var(--muted); }
+
+  .channel-badge {
+    flex-shrink: 0;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-family: 'JetBrains Mono';
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .ch-prep    { background: hsl(240 8% 50% / 0.15); color: var(--muted); }
+  .ch-twitter { background: hsl(270 95% 65% / 0.15); color: var(--primary); }
+  .ch-linkedin{ background: hsl(210 85% 60% / 0.15); color: var(--blue); }
+  .ch-reddit  { background: hsl(20 95% 60% / 0.15); color: var(--orange); }
+  .ch-blog    { background: hsl(140 80% 55% / 0.15); color: var(--green); }
+  .ch-email   { background: hsl(350 90% 60% / 0.15); color: var(--red); }
+  .ch-slack   { background: hsl(45 100% 60% / 0.15); color: var(--gold); }
+
+  .item-title {
+    flex: 1;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.4;
+  }
+
+  .expand-icon {
+    flex-shrink: 0;
+    color: var(--muted);
+    transition: transform 0.18s;
+  }
+  .item.open .expand-icon { transform: rotate(180deg); }
+
+  .item-detail {
+    display: none;
+    border-top: 1px solid var(--border);
+    padding: 18px;
+    background: hsl(0 0% 100% / 0.02);
+  }
+  .item.open .item-detail { display: block; }
+  .item-detail .description {
+    color: var(--fg);
+    font-size: 14px;
+    line-height: 1.6;
+    margin-bottom: 14px;
+  }
+  .item-detail .description b { color: var(--accent); font-weight: 600; }
+  .copy-block {
+    background: hsl(0 0% 0% / 0.3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-family: 'JetBrains Mono';
+    font-size: 12px;
+    line-height: 1.65;
+    white-space: pre-wrap;
+    word-break: break-word;
+    color: hsl(240 10% 80%);
+    margin-bottom: 12px;
+    position: relative;
+  }
+  .copy-block .copy-btn {
+    position: absolute; top: 8px; right: 8px;
+    background: hsl(0 0% 100% / 0.06);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-family: 'JetBrains Mono';
+    font-size: 10px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .copy-block .copy-btn:hover { background: hsl(270 95% 65% / 0.15); color: var(--primary); border-color: hsl(270 95% 65% / 0.3); }
+  .copy-block .copy-btn.copied { background: hsl(140 80% 55% / 0.2); color: var(--green); border-color: hsl(140 80% 55% / 0.4); }
+  .detail-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .detail-actions a, .detail-actions .action {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    color: var(--fg);
+    padding: 7px 12px;
+    border-radius: 8px;
+    font-family: 'JetBrains Mono';
+    font-size: 11px;
+    text-decoration: none;
+    display: inline-flex; align-items: center; gap: 6px;
+    cursor: pointer;
+  }
+  .detail-actions a:hover, .detail-actions .action:hover { border-color: hsl(0 0% 100% / 0.18); }
+  .detail-actions a svg, .detail-actions .action svg { width: 12px; height: 12px; }
+
+  /* ===== Anti-patterns box ===== */
+  .footer-note {
+    margin-top: 32px;
+    padding: 16px 20px;
+    border-radius: 12px;
+    background: hsl(45 100% 60% / 0.06);
+    border: 1px solid hsl(45 100% 60% / 0.18);
+    font-size: 13px;
+    line-height: 1.55;
+    color: hsl(240 10% 75%);
+  }
+  .footer-note strong { color: var(--gold); }
+
+  /* ===== Empty state ===== */
+  .empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--muted);
+    font-family: 'JetBrains Mono';
+    font-size: 14px;
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed; bottom: 20px; left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: hsl(140 80% 55% / 0.15);
+    border: 1px solid hsl(140 80% 55% / 0.4);
+    color: var(--green);
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-family: 'JetBrains Mono';
+    font-size: 13px;
+    backdrop-filter: blur(20px);
+    transition: transform 0.3s;
+    z-index: 100;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* Responsive */
+  @media (max-width: 680px) {
+    h1 { font-size: 20px; }
+    .progress-value { font-size: 24px; }
+    .item-row { flex-wrap: wrap; }
+    .time-block { min-width: auto; flex-direction: row; gap: 6px; align-items: baseline; }
+    .item-title { flex-basis: 100%; order: 5; padding-left: 36px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <header>
+    <div class="brand">
+      <span class="logo"><svg viewBox="0 0 24 24" fill="none"><path d="M3 12h3l3-9 4 18 3-9h5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      <div>
+        <h1 class="gradient-text">Marketing roll-out</h1>
+        <div class="subtitle">Tokeny Monitor · 11. 5. – 5. 6. 2026 · build-in-public</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <span class="pill" id="todayPill">dnes je —</span>
+      <a class="pill" href="https://tokeny.pohl.uk" target="_blank" rel="noreferrer" style="color: var(--accent); border-color: hsl(175 85% 55% / 0.3);">tokeny.pohl.uk →</a>
+    </div>
+  </header>
+
+  <!-- Progress -->
+  <div class="progress-card">
+    <div class="progress-info">
+      <div class="progress-label">Done</div>
+      <div class="progress-value"><b id="doneCount">0</b> <span style="color: var(--muted);">/ <span id="totalCount">0</span></span></div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <button class="reset-btn" onclick="resetProgress()">↻ Reset</button>
+  </div>
+
+  <!-- Tabs (weeks) -->
+  <div class="tabs" id="weekTabs"></div>
+
+  <!-- Channel filter -->
+  <div class="channels">
+    <span class="label">Filter:</span>
+    <button class="chip on" data-channel="all">vše</button>
+    <button class="chip" data-channel="prep"><span class="swatch" style="background: var(--muted);"></span>prep</button>
+    <button class="chip" data-channel="twitter"><span class="swatch" style="background: var(--primary);"></span>twitter</button>
+    <button class="chip" data-channel="linkedin"><span class="swatch" style="background: var(--blue);"></span>linkedin</button>
+    <button class="chip" data-channel="reddit"><span class="swatch" style="background: var(--orange);"></span>reddit</button>
+    <button class="chip" data-channel="blog"><span class="swatch" style="background: var(--green);"></span>blog</button>
+    <button class="chip" data-channel="email"><span class="swatch" style="background: var(--red);"></span>email</button>
+    <button class="chip" data-channel="slack"><span class="swatch" style="background: var(--gold);"></span>slack</button>
+  </div>
+
+  <!-- Items list -->
+  <div id="itemsList"></div>
+
+  <!-- Anti-patterns -->
+  <div class="footer-note">
+    <strong>Anti-patterny — čeho se vyhnout:</strong>
+    Nešilkat „launch day" pro všechno najednou (rozprostři); nenetagovat influencery do prázdna; AppSumo deal počká až bude pricing model; ProductHunt bez paywallu má slabší response; press release / TechCrunch pitching s 0 MRR nemá smysl; vanity metrics (stars) jsou signál, ne cíl — demo→signup je co počítá; reagovat na haty hádkou ničí týden.
+  </div>
+
+</div>
+
+<div class="toast" id="toast">Zkopírováno do schránky</div>
+
+<script>
+// ====================================================================
+// Data
+// ====================================================================
+const PLAN_VERSION = 'v1-2026-05-10';
+const STORAGE_KEY = 'tokeny-marketing-plan-' + PLAN_VERSION;
+
+const ITEMS = [
+  // === PREP ===
+  {
+    id: 'prep-01',
+    week: 0, dayLabel: 'Ne 10. 5.', dayShort: 'Sun', date: '2026-05-10',
+    time: '22:00', duration: '90 min',
+    channel: 'prep',
+    title: 'Deploy backend & smoke-test sync',
+    description: 'Aplikuj migrace, deploynij 3 edge funkce, projet manuální sync s reálným Anthropic nebo OpenAI Admin klíčem aby ses ujistil že to funguje end-to-end.',
+    copy: `cd ~/martinp0-tokeny-monitor
+supabase db push
+supabase functions deploy save-provider-credential sync-anthropic sync-openai
+
+# pak v UI Settings → API integrace → Přidat klíč
+# klikni Sync, ověř že přibyly řádky v dashboard`,
+    file: null,
+  },
+  {
+    id: 'prep-02',
+    week: 0, dayLabel: 'Po 11. 5.', dayShort: 'Mon', date: '2026-05-11',
+    time: '08:00', duration: '30 min',
+    channel: 'prep',
+    title: 'Pre-launch check: demo, OG, analytics, Buy Me a Coffee',
+    description: 'Final go/no-go. Demo musí loadnout do 2s, OG image v meta tagu, Plausible/Umami funguje, BMaC link v UI footeru i README.',
+    copy: `Checklist:
+[ ] tokeny.pohl.uk loadne demo do 2s
+[ ] public/og-image.png nasazené
+[ ] <meta property="og:image"> + twitter:card v index.html
+[ ] Plausible/Umami snippet v <head>
+[ ] Buy Me a Coffee viditelný v UI footeru
+[ ] README hero: dashboard-overview.png
+[ ] GitHub: repo public, MIT LICENSE, Issues otevřené`,
+    file: null,
+  },
+  {
+    id: 'prep-03',
+    week: 0, dayLabel: 'Po 11. 5.', dayShort: 'Mon', date: '2026-05-11',
+    time: '09:00', duration: '30 min',
+    channel: 'prep',
+    title: 'GitHub repo → public, hero screenshot, README hotový',
+    description: 'Hodit dashboard-overview.png do README pod hlavičkou. Settings → Make public. Ověř, že MIT LICENSE soubor existuje a Buy Me a Coffee link je v patičce.',
+    copy: null,
+    file: null,
+  },
+
+  // === WEEK 1 (12. – 15. 5.) ===
+  {
+    id: 'w1-01',
+    week: 1, dayLabel: 'Út 12. 5.', dayShort: 'Tue', date: '2026-05-12',
+    time: '09:00', duration: '30 min',
+    channel: 'twitter',
+    title: 'Twitter launch thread + PIN na měsíc',
+    description: '10-tweetový thread. Začni hookem $47 v Claudovi za odpoledne. Embed: dashboard-overview.png, provider-connections.png, cappuccino.png. Pin na měsíc.',
+    copy: `I burned $47 on Claude Opus in one afternoon and didn't notice for 3 days.
+
+So I built a dashboard for OpenRouter / Anthropic / OpenAI spend.
+
+Open-source, MIT, runs in your browser — no signup for the demo.
+
+🧵👇`,
+    file: 'marketing/twitter-thread-and-calendar.md',
+  },
+  {
+    id: 'w1-02',
+    week: 1, dayLabel: 'Út 12. 5.', dayShort: 'Tue', date: '2026-05-12',
+    time: '09:30', duration: '20 min',
+    channel: 'linkedin',
+    title: 'LinkedIn CS článek + tag relevantní lidi',
+    description: 'Long-form post v ČJ. Pain-point story, demo, GitHub. Embed cappuccino.png. Po publikaci: odpovídej na komentáře do 30 min první hodinu.',
+    copy: `Před třemi týdny jsem si přečetl výpis z Anthropic Console a chvíli mě píchlo u srdce.
+
+Za jedno odpoledne jsem vyladil Claude Sonnet pro automatizaci, která měla ušetřit pár hodin práce týdně, a přitom jsem během toho ladění protočil víc než 1 200 Kč v API requestech. Ne za měsíc. Za odpoledne.
+
+[...pokračování v marketing/linkedin-cs.md]`,
+    file: 'marketing/linkedin-cs.md',
+  },
+  {
+    id: 'w1-03',
+    week: 1, dayLabel: 'Út 12. 5.', dayShort: 'Tue', date: '2026-05-12',
+    time: '11:00', duration: '15 min',
+    channel: 'reddit',
+    title: 'Reddit r/SideProject — Show & Tell post',
+    description: 'Genuine indie story, ne marketing. Embed cappuccino.png. **Odpovídat na komentáře do 30 min** první hodinu (algoritmus).',
+    copy: `Title: I built a free dashboard so I'd stop bleeding $$ on AI APIs without noticing
+
+Few weeks ago I checked my OpenRouter activity page and realized I'd burned through $47 of Claude Opus in one afternoon experimenting with agentic stuff. The problem wasn't the spend — it was that I had no way to see it building up.
+
+[...full post in marketing/reddit-pack.md]`,
+    file: 'marketing/reddit-pack.md',
+  },
+  {
+    id: 'w1-04',
+    week: 1, dayLabel: 'St 13. 5.', dayShort: 'Wed', date: '2026-05-13',
+    time: '09:00', duration: '15 min',
+    channel: 'slack',
+    title: 'Crosspost LinkedIn → czech.dev #ai + AI Czech Republic Discord',
+    description: 'Mírně zkrácená verze LinkedIn článku. Přidat řádek "už jsem to dal i na LinkedIn, ale tohle je primárně pro vás".',
+    copy: `Ahoj, sdílím něco pro tuhle komunitu — postavil jsem open-source dashboard pro náklady na OpenRouter, Anthropic a OpenAI:
+
+→ tokeny.pohl.uk (demo bez registrace)
+→ github.com/<user>/tokeny-monitor (MIT)
+
+CZK + ČNB kurz, multi-provider, MCP server pro Claude Desktop. Free, žádný paywall.
+
+Už jsem to dal i na LinkedIn, ale tohle je primárně pro vás. Hodně mě bude zajímat feedback, co tam chybí pro váš workflow.`,
+    file: null,
+  },
+  {
+    id: 'w1-05',
+    week: 1, dayLabel: 'Čt 14. 5.', dayShort: 'Thu', date: '2026-05-14',
+    time: '09:00', duration: '45 min',
+    channel: 'blog',
+    title: 'Publish Blog #1 (Anthropic costs) + dev.to + Medium crossposts',
+    description: 'Submit na vlastní blog, dev.to a Medium s canonical URL. SEO target: "track Anthropic API costs". Po publikaci: tweet odkaz, LinkedIn share.',
+    copy: `Title: How to Track Your Anthropic API Costs in 2026 (Without Surprises)
+
+Eyebrow: Admin API guide · ~1,800 words
+
+[Full text v marketing/blog/01-track-anthropic-api-costs.md]
+
+Crossposts:
+- dev.to (canonical: blog URL)
+- Medium (canonical: blog URL)
+- Hashnode (optional)`,
+    file: 'marketing/blog/01-track-anthropic-api-costs.md',
+  },
+  {
+    id: 'w1-06',
+    week: 1, dayLabel: 'Pá 15. 5.', dayShort: 'Fri', date: '2026-05-15',
+    time: '09:00', duration: '15 min',
+    channel: 'twitter',
+    title: 'Twitter behind-the-scenes — sync-anthropic edge function',
+    description: 'Screenshot kódu (carbon.now.sh nebo prostě dark mode VS Code), caption "this is the entire Anthropic Admin API integration. one Deno file. that\'s it."',
+    copy: `this is the entire Anthropic Admin API integration. one Deno file. that's it.
+
+if you want to know how I'm pulling cost data for tokeny.pohl.uk — here you go.
+
+[screenshot of supabase/functions/sync-anthropic/index.ts]
+
+github.com/<user>/tokeny-monitor`,
+    file: 'supabase/functions/sync-anthropic/index.ts',
+  },
+
+  // === WEEK 2 (18. – 22. 5.) ===
+  {
+    id: 'w2-01',
+    week: 2, dayLabel: 'Po 18. 5.', dayShort: 'Mon', date: '2026-05-18',
+    time: '09:00', duration: '30 min',
+    channel: 'twitter',
+    title: 'Twitter mini-thread: cappuccino comparison feature',
+    description: '3 tweety o reframingu nákladů. Hook + obrázek cappuccino.png + closing thought. Pak quote-tweet to z hlavního accountu druhý den ráno.',
+    copy: `Why dollar amounts feel abstract: a thread.
+
+(1/3) Last month I spent $312 on Claude. That number meant nothing to me until I rephrased it.
+
+(2/3) $312 = 47 cappuccinos. Or 9 pizzas. Or 21 craft beers. Or 3 concert tickets.
+
+Suddenly the spend isn't a number — it's a decision.
+
+(3/3) I added this "real-life comparison" widget to tokeny.pohl.uk because numbers don't change behavior; reframing does.
+
+[cappuccino.png]`,
+    file: 'marketing/twitter-thread-and-calendar.md',
+  },
+  {
+    id: 'w2-02',
+    week: 2, dayLabel: 'Út 19. 5.', dayShort: 'Tue', date: '2026-05-19',
+    time: '09:00', duration: '20 min',
+    channel: 'reddit',
+    title: 'Reddit r/LocalLLaMA — power-user / cost-geek angle',
+    description: 'Technical depth post pro cost-geek audience. Embed dashboard-overview.png. Buď připravený na komentáře typu "Helicone už to umí" — odpovídej věcně.',
+    copy: `Title: Self-hosted dashboard for tracking Anthropic + OpenAI + OpenRouter costs (open source)
+
+Sharing this in case it's useful to anyone here who's running heavy inference workloads or experimenting across multiple providers.
+
+[...full post in marketing/reddit-pack.md sekce r/LocalLLaMA]`,
+    file: 'marketing/reddit-pack.md',
+  },
+  {
+    id: 'w2-03',
+    week: 2, dayLabel: 'St 20. 5.', dayShort: 'Wed', date: '2026-05-20',
+    time: '09:00', duration: '45 min',
+    channel: 'blog',
+    title: 'Publish Blog #2 (OpenRouter guide) + Show HN submission',
+    description: 'Submit na blog + dev.to. Pak Show HN po publikaci. Show HN title: "Show HN: Tokeny Monitor — open-source dashboard for AI API costs". Posílat ráno PT (16:00 ČR).',
+    copy: `Blog: The Open-Source OpenRouter Cost Dashboard Guide (Self-Host in 5 Minutes)
+~1,500 words. Target: "OpenRouter dashboard"
+
+Show HN title:
+Show HN: Tokeny Monitor – open-source dashboard for AI API costs (no proxy)
+
+Show HN body (max 2 paragraphs):
+I got tired of bouncing between OpenRouter activity, Anthropic Console, and OpenAI's org dashboard to figure out what I actually spent. So I built one dashboard that pulls from all three. It only reads billing data — no proxy, your traffic never touches it.
+
+It's MIT, runs on Supabase, self-host in 5 min. CSV import for OpenRouter, Admin API sync for Anthropic + OpenAI. There's also an MCP server endpoint so you can query your costs from Claude Desktop. Demo at tokeny.pohl.uk (no signup).`,
+    file: 'marketing/blog/02-openrouter-cost-dashboard-guide.md',
+  },
+  {
+    id: 'w2-04',
+    week: 2, dayLabel: 'Čt 21. 5.', dayShort: 'Thu', date: '2026-05-21',
+    time: '09:00', duration: '30 min',
+    channel: 'linkedin',
+    title: 'LinkedIn engagement — komentuj 5 postů v CZ AI komunitě',
+    description: 'Useful komentáře, žádné link drops. Cílem je být vidět v ČR AI feedu, ne pushovat odkazy. Pokud někdo zmíní cost monitoring, soft-mentnout "mám k tomu nástroj — DM když chceš".',
+    copy: `Lidi co stojí za sledování / engagement:
+- Honza Vobr
+- Jirka Růžička
+- Tomáš Pojar
+- Honza Romanovský
+- Lukáš Doležal
+- Marek Šimon
+- Karel Hron
+
+Plus všichni z #ai a #buildinpublic.
+
+Engagement playbook:
+- Substantivní komentář (3+ věty)
+- Add value first, link last (jen pokud má smysl)
+- Nedávat 5 odkazů v hodině z jednoho profilu → flagged`,
+    file: null,
+  },
+  {
+    id: 'w2-05',
+    week: 2, dayLabel: 'Pá 22. 5.', dayShort: 'Fri', date: '2026-05-22',
+    time: '09:00', duration: '45 min',
+    channel: 'email',
+    title: 'Cold email batch 1 — 5 CZ agentur (Applifting, STRV, Productboard…)',
+    description: 'Šablona č. 1 z email-outreach-cs.md. UTM: utm_source=cold-email&utm_campaign=cz-launch-v1. Posílat z m@pohl.uk, plain text, 8:30–10:00 ráno.',
+    copy: `Cílový list batch 1:
+1. Applifting — CTO
+2. STRV — Head of AI / Head of Engineering
+3. Productboard — interní AI team lead
+4. Ackee — Head of Engineering
+5. Apify — CTO
+
+Subject: Otázka k AI nákladům ve vašem stacku (1 minuta)
+
+Body: viz marketing/email-outreach-cs.md šablona č. 1.
+
+Follow-up po 5 dnech (27. 5.) jen pokud nereagovali.`,
+    file: 'marketing/email-outreach-cs.md',
+  },
+
+  // === WEEK 3 (25. – 29. 5.) ===
+  {
+    id: 'w3-01',
+    week: 3, dayLabel: 'Po 25. 5.', dayShort: 'Mon', date: '2026-05-25',
+    time: '09:00', duration: '30 min',
+    channel: 'reddit',
+    title: 'Reddit r/SaaS — open-source pricing thinking',
+    description: 'PŘEČTI PRAVIDLA SUBU NEJDŘÍV. r/SaaS má strict sebepromo rules — zarámuj jako "thinking out loud about pricing", ne "tady je můj projekt".',
+    copy: `Title: Released an open-source AI cost dashboard — keeping it free, here's why
+
+This is partly a Show HN-style post, partly me thinking out loud about pricing.
+
+[...full text v marketing/reddit-pack.md sekce r/SaaS]
+
+KRITICKÉ: Mods r/SaaS bannují za skrytou self-promo. Title musí být o pricing thinking, ne o produktu.`,
+    file: 'marketing/reddit-pack.md',
+  },
+  {
+    id: 'w3-02',
+    week: 3, dayLabel: 'Út 26. 5.', dayShort: 'Tue', date: '2026-05-26',
+    time: '09:00', duration: '45 min',
+    channel: 'blog',
+    title: 'Publish Blog #3 (AI cost tools comparison)',
+    description: 'Comparison Helicone/Langfuse/Langsmith/Vellum/Tokeny. Buď honest — neukázat se jako vítěz ve všem. Po publikaci: soft-tag autorů ostatních tools na X.',
+    copy: `Title: AI Cost Monitoring Tools Compared: Helicone, Langfuse, Langsmith, Vellum & Tokeny Monitor
+
+~2,000 words. Target: "AI cost monitoring tools".
+
+Tone: honest, no hype. Don't make yourself the hero — give each tool fair coverage.
+
+Po publikaci:
+- Tweet: "Wrote a comparison of @helicone_ai @langfuse @langchainai @vellum_ai and my own thing. Honest pros and cons of each. [link]"
+- Tagy: jen pokud máš tweet vyladěný a nesní jako rage-bait`,
+    file: 'marketing/blog/03-ai-cost-tools-compared.md',
+  },
+  {
+    id: 'w3-03',
+    week: 3, dayLabel: 'St 27. 5.', dayShort: 'Wed', date: '2026-05-27',
+    time: '09:00', duration: '15 min',
+    channel: 'twitter',
+    title: 'Twitter ask "what\'s missing from AI cost tools?"',
+    description: 'Engagement-bait, ale ne fake. Use answers jako roadmap input. Quote-tweet best 2-3 odpovědí druhý den.',
+    copy: `If you've used Helicone, Langfuse, Langsmith, or any AI cost tool — what's the one feature that's missing?
+
+I'm building tokeny.pohl.uk (open-source, no proxy) and want to ship what you actually want.
+
+Reply with the gap; I'll dump the most-asked into a GitHub Project.`,
+    file: null,
+  },
+  {
+    id: 'w3-04',
+    week: 3, dayLabel: 'Čt 28. 5.', dayShort: 'Thu', date: '2026-05-28',
+    time: '09:00', duration: '45 min',
+    channel: 'email',
+    title: 'Cold email batch 2 — 5 startupů + 5 dalších agentur',
+    description: 'Šablona č. 2 z email-outreach-cs.md (víc startup-friendly). UTM: cz-launch-v2 ať vidíš co konvertuje líp.',
+    copy: `Batch 2 cíle:
+- Heureka.cz (interní AI)
+- Mall Group
+- Slido / Cisco Brno
+- Rossum
+- DataSentics
+- Cleverlance Enterprise Solutions
+- TwoLabs
+- Stories Studio
++ 2 freelanceři ze sledovaného Twitter list
+
+Šablona č. 2 (víc startup-y) z marketing/email-outreach-cs.md`,
+    file: 'marketing/email-outreach-cs.md',
+  },
+  {
+    id: 'w3-05',
+    week: 3, dayLabel: 'Pá 29. 5.', dayShort: 'Fri', date: '2026-05-29',
+    time: '09:00', duration: '30 min',
+    channel: 'twitter',
+    title: 'Twitter 1-month recap thread',
+    description: 'Honest report: GitHub stars, demo loaders, self-hosters, $$ z donations, top feedback. Bez vanity, jen čísla a learnings. Build-in-public gold.',
+    copy: `1 month since I launched tokeny.pohl.uk. Honest numbers:
+
+⭐ <stars> GitHub stars
+👀 <demo_loads> unique demo loaders
+🏠 <forks/self-hosts> self-hosters (estimated from forks)
+💸 <bmac_amount> from Buy Me a Coffee
+📬 <email_replies>/<total_sent> cold email reply rate
+
+Things that surprised me:
+- <surprise 1>
+- <surprise 2>
+
+Things I'd do differently:
+- <lesson 1>
+- <lesson 2>
+
+What's next: <one concrete thing>`,
+    file: null,
+  },
+
+  // === WEEK 4 (1. – 5. 6.) ===
+  {
+    id: 'w4-01',
+    week: 4, dayLabel: 'Pá 5. 6.', dayShort: 'Fri', date: '2026-06-05',
+    time: '09:00', duration: '30 min',
+    channel: 'prep',
+    title: 'Marketing review — KPI check, decide next month',
+    description: 'Plausible analytics, GitHub stars trend, conversion rate (demo → sign up), cold email reply rate. Re-evaluate channel mix. Decide: ramp up co funguje, kill co ne.',
+    copy: `KPI checklist:
+[ ] Plausible: top sources, top pages, conv rate na "github-click", "demo-load"
+[ ] GitHub: nové stars, forks, issues, PRs
+[ ] Cold email: reply rate, conversions (kolik z replies se přihlásilo / signupnulo)
+[ ] BMaC: $$ za měsíc
+[ ] Twitter analytics: impressions, engagement rate
+[ ] LinkedIn: kdo komentoval/sdílel, network growth
+
+Decisions:
+- který kanál dvojnásobit?
+- který zaříznout?
+- jaký 1 feature postavit příští měsíc na základě feedbacku?`,
+    file: null,
+  },
+];
+
+// ====================================================================
+// State + render
+// ====================================================================
+const state = {
+  doneIds: new Set(JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]')),
+  openIds: new Set(),
+  weekFilter: 'all',  // all | 0 | 1 | 2 | 3 | 4
+  channelFilter: 'all',
+};
+
+function save() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify([...state.doneIds]));
+}
+
+function toggleDone(id) {
+  if (state.doneIds.has(id)) state.doneIds.delete(id);
+  else state.doneIds.add(id);
+  save();
+  render();
+}
+
+function toggleOpen(id) {
+  if (state.openIds.has(id)) state.openIds.delete(id);
+  else state.openIds.add(id);
+  render();
+}
+
+function resetProgress() {
+  if (!confirm('Smazat všechen progress?')) return;
+  state.doneIds.clear();
+  save();
+  render();
+}
+
+function setWeek(w) { state.weekFilter = w; render(); }
+function setChannel(c) { state.channelFilter = c; render(); }
+
+function filteredItems() {
+  return ITEMS.filter(it => {
+    if (state.weekFilter !== 'all' && it.week !== Number(state.weekFilter)) return false;
+    if (state.channelFilter !== 'all' && it.channel !== state.channelFilter) return false;
+    return true;
+  });
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+async function copyText(text, btn) {
+  try {
+    await navigator.clipboard.writeText(text);
+    btn.textContent = '✓ copied';
+    btn.classList.add('copied');
+    showToast();
+    setTimeout(() => { btn.textContent = '⎘ copy'; btn.classList.remove('copied'); }, 1800);
+  } catch {
+    alert('Clipboard nedostupný — zkopíruj ručně.');
+  }
+}
+
+function showToast() {
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 1500);
+}
+
+function renderTabs() {
+  const tabs = document.getElementById('weekTabs');
+  const weeks = [
+    { id: 'all', label: 'Vše' },
+    { id: 0, label: 'Prep' },
+    { id: 1, label: 'Týden 1' },
+    { id: 2, label: 'Týden 2' },
+    { id: 3, label: 'Týden 3' },
+    { id: 4, label: 'Týden 4' },
+  ];
+  tabs.innerHTML = weeks.map(w => {
+    const count = w.id === 'all' ? ITEMS.length : ITEMS.filter(i => i.week === w.id).length;
+    const active = String(state.weekFilter) === String(w.id) ? 'active' : '';
+    return `<button class="tab ${active}" data-week="${w.id}">${w.label} <span class="count">${count}</span></button>`;
+  }).join('');
+  tabs.querySelectorAll('.tab').forEach(t => {
+    t.addEventListener('click', () => setWeek(t.dataset.week));
+  });
+}
+
+function renderChannels() {
+  document.querySelectorAll('.chip').forEach(c => {
+    c.classList.toggle('on', c.dataset.channel === state.channelFilter);
+    c.onclick = () => setChannel(c.dataset.channel);
+  });
+}
+
+function renderItems() {
+  const items = filteredItems();
+  const container = document.getElementById('itemsList');
+
+  if (items.length === 0) {
+    container.innerHTML = '<div class="empty">Nic v tomhle filtru. Zkus jiný týden / kanál.</div>';
+    return;
+  }
+
+  // Group by date
+  const byDate = {};
+  items.forEach(it => {
+    if (!byDate[it.date]) byDate[it.date] = [];
+    byDate[it.date].push(it);
+  });
+
+  const weekLabels = { 0: 'Prep', 1: 'Týden 1', 2: 'Týden 2', 3: 'Týden 3', 4: 'Týden 4' };
+
+  container.innerHTML = Object.entries(byDate).map(([date, dayItems]) => {
+    const first = dayItems[0];
+    return `
+      <div class="day-group">
+        <div class="day-header">
+          <span class="date">${first.dayLabel}</span>
+          <span class="day-name">${first.dayShort}</span>
+          <span class="week">${weekLabels[first.week]}</span>
+        </div>
+        ${dayItems.map(renderItem).join('')}
+      </div>
+    `;
+  }).join('');
+
+  // Wire up events after render
+  container.querySelectorAll('.item').forEach(el => {
+    const id = el.dataset.id;
+    el.querySelector('.checkbox').addEventListener('click', e => {
+      e.stopPropagation();
+      toggleDone(id);
+    });
+    el.querySelector('.item-row').addEventListener('click', () => toggleOpen(id));
+    const copyBtn = el.querySelector('.copy-btn');
+    if (copyBtn) {
+      copyBtn.addEventListener('click', e => {
+        e.stopPropagation();
+        copyText(copyBtn.dataset.text, copyBtn);
+      });
+    }
+  });
+}
+
+function renderItem(it) {
+  const done = state.doneIds.has(it.id);
+  const open = state.openIds.has(it.id);
+  return `
+    <div class="item ${done ? 'done' : ''} ${open ? 'open' : ''}" data-id="${it.id}">
+      <div class="item-row">
+        <div class="checkbox">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="time-block">
+          <span class="time">${it.time}</span>
+          <span class="duration">${it.duration}</span>
+        </div>
+        <span class="channel-badge ch-${it.channel}">${it.channel}</span>
+        <span class="item-title">${escapeHtml(it.title)}</span>
+        <svg class="expand-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="item-detail">
+        <div class="description">${escapeHtml(it.description).replace(/\\*\\*(.+?)\\*\\*/g, '<b>$1</b>')}</div>
+        ${it.copy ? `
+          <div class="copy-block">
+            <button class="copy-btn" data-text="${escapeHtml(it.copy)}">⎘ copy</button>
+            ${escapeHtml(it.copy)}
+          </div>
+        ` : ''}
+        <div class="detail-actions">
+          ${it.file ? `<a href="${it.file}" target="_blank" rel="noreferrer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Otevřít zdroj</a>` : ''}
+          <a href="https://buffer.com" target="_blank" rel="noreferrer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Naplánovat</a>
+          <span class="action" onclick="toggleDone('${it.id}'); event.stopPropagation();"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>${done ? 'Označit jako nehotové' : 'Označit jako hotové'}</span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderProgress() {
+  document.getElementById('doneCount').textContent = state.doneIds.size;
+  document.getElementById('totalCount').textContent = ITEMS.length;
+  const pct = ITEMS.length > 0 ? (state.doneIds.size / ITEMS.length) * 100 : 0;
+  document.getElementById('progressFill').style.width = pct + '%';
+}
+
+function renderToday() {
+  const today = new Date();
+  const cs = today.toLocaleDateString('cs-CZ', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  document.getElementById('todayPill').textContent = 'dnes je ' + cs;
+}
+
+function render() {
+  renderTabs();
+  renderChannels();
+  renderItems();
+  renderProgress();
+}
+
+renderToday();
+render();
+</script>
+</body>
+</html>
