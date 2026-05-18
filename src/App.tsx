@@ -15,6 +15,8 @@ import Settings from "./pages/Settings.tsx";
 import Profile from "./pages/Profile.tsx";
 import SharedDashboard from "./pages/SharedDashboard.tsx";
 import LlmCostCalculator from "./pages/LlmCostCalculator.tsx";
+import ClaudeApiCost from "./pages/ClaudeApiCost.tsx";
+import HowToCalculateLlmCost from "./pages/HowToCalculateLlmCost.tsx";
 
 const queryClient = new QueryClient();
 
@@ -70,6 +72,8 @@ const App = () => (
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             <Route path="/llm-cost-calculator" element={<LlmCostCalculator />} />
+            <Route path="/claude-api-cost" element={<ClaudeApiCost />} />
+            <Route path="/how-to-calculate-llm-cost" element={<HowToCalculateLlmCost />} />
             <Route path="/shared/:token" element={<SharedDashboard />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
