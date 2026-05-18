@@ -14,6 +14,7 @@ import Landing from "./pages/Landing.tsx";
 import Settings from "./pages/Settings.tsx";
 import Profile from "./pages/Profile.tsx";
 import SharedDashboard from "./pages/SharedDashboard.tsx";
+import LlmCostCalculator from "./pages/LlmCostCalculator.tsx";
 
 const queryClient = new QueryClient();
 
