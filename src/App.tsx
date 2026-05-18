@@ -15,6 +15,8 @@ import Settings from "./pages/Settings.tsx";
 import Profile from "./pages/Profile.tsx";
 import SharedDashboard from "./pages/SharedDashboard.tsx";
 import LlmCostCalculator from "./pages/LlmCostCalculator.tsx";
+import ClaudeApiCost from "./pages/ClaudeApiCost.tsx";
+import HowToCalculateLlmCost from "./pages/HowToCalculateLlmCost.tsx";
 
 const queryClient = new QueryClient();
 
