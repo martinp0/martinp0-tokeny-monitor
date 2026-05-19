@@ -78,7 +78,12 @@ const App = () => (
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             <Route path="/llm-cost-calculator" element={<LlmCostCalculator />} />
             <Route path="/claude-api-cost" element={<ClaudeApiCost />} />
+            <Route path="/gpt-api-cost" element={<GptApiCost />} />
             <Route path="/how-to-calculate-llm-cost" element={<HowToCalculateLlmCost />} />
+            <Route path="/blog" element={<Blog />} />
+            <Route path="/blog/ai-cost-saving" element={<BlogAiCostSaving />} />
+            <Route path="/blog/prompt-optimization" element={<BlogPromptOptimization />} />
+            <Route path="/blog/token-window" element={<BlogTokenWindow />} />
             <Route path="/shared/:token" element={<SharedDashboard />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
