@@ -3,63 +3,22 @@
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://tokeny.pohl.uk/</loc>
-    <lastmod>2026-05-16</lastmod>
+    <lastmod>2026-05-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="cs" href="https://tokeny.pohl.uk/" />
     <xhtml:link rel="alternate" hreflang="en" href="https://tokeny.pohl.uk/?lang=en" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://tokeny.pohl.uk/" />
   </url>
-  <url>
-    <loc>https://tokeny.pohl.uk/auth</loc>
-    <lastmod>2026-05-16</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://tokeny.pohl.uk/reset-password</loc>
-    <lastmod>2026-05-16</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  <url>
-    <loc>https://tokeny.pohl.uk/fun</loc>
-    <lastmod>2026-05-16</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.4</priority>
-  </url>
-  <url>
-    <loc>https://tokeny.pohl.uk/llm-cost-calculator</loc>
-    <lastmod>2026-05-18</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://tokeny.pohl.uk/claude-api-cost</loc>
-    <lastmod>2026-05-18</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://tokeny.pohl.uk/gpt-api-cost</loc>
-    <lastmod>2026-05-19</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://tokeny.pohl.uk/blog/prompt-optimization</loc>
-    <lastmod>2026-05-19</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://tokeny.pohl.uk/blog/token-window</loc>
-    <lastmod>2026-05-19</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
+  <url><loc>https://tokeny.pohl.uk/auth</loc><lastmod>2026-05-16</lastmod><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://tokeny.pohl.uk/reset-password</loc><lastmod>2026-05-16</lastmod><changefreq>yearly</changefreq><priority>0.2</priority></url>
+  <url><loc>https://tokeny.pohl.uk/fun</loc><lastmod>2026-05-16</lastmod><changefreq>weekly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://tokeny.pohl.uk/llm-cost-calculator</loc><lastmod>2026-05-18</lastmod><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://tokeny.pohl.uk/claude-api-cost</loc><lastmod>2026-05-18</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://tokeny.pohl.uk/gpt-api-cost</loc><lastmod>2026-05-19</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://tokeny.pohl.uk/how-to-calculate-llm-cost</loc><lastmod>2026-05-18</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tokeny.pohl.uk/blog</loc><lastmod>2026-05-19</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tokeny.pohl.uk/blog/ai-cost-saving</loc><lastmod>2026-05-19</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tokeny.pohl.uk/blog/prompt-optimization</loc><lastmod>2026-05-19</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tokeny.pohl.uk/blog/token-window</loc><lastmod>2026-05-19</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
 </urlset>
