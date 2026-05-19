@@ -15,8 +15,8 @@
     <title>OpenRouter Pricing & Claude API Cost Tracker | Tokeny Monitor</title>
     <meta name="description" content="Free OpenRouter pricing tracker & Claude/GPT API cost dashboard. Sleduj náklady, spotřebu tokenů a výkon AI modelů v reálném čase. CZK + USD, CSV import, MCP server.">
     <meta name="author" content="Martin Pohl" />
-    <link rel="author" href="https://martin.pohl.uk" />
-    <link rel="me" href="https://martin.pohl.uk" />
+    <link rel="author" href="https://martinpohl.cz" />
+    <link rel="me" href="https://martinpohl.cz" />
     <link rel="alternate" hreflang="cs" href="https://tokeny.pohl.uk/" />
     <link rel="alternate" hreflang="en" href="https://tokeny.pohl.uk/?lang=en" />
     <link rel="alternate" hreflang="x-default" href="https://tokeny.pohl.uk/" />
@@ -64,22 +64,22 @@
       },
       "creator": {
         "@type": "Person",
-        "@id": "https://martin.pohl.uk/#person",
+        "@id": "https://martinpohl.cz/#person",
         "name": "Martin Pohl",
-        "url": "https://martin.pohl.uk",
+        "url": "https://martinpohl.cz",
         "jobTitle": "IT Engineer · Apple MDM · Identity & SSO · Indie Maker",
         "sameAs": [
-          "https://martin.pohl.uk"
+          "https://martinpohl.cz"
         ]
       },
       "author": {
         "@type": "Person",
-        "@id": "https://martin.pohl.uk/#person"
+        "@id": "https://martinpohl.cz/#person"
       },
       "isPartOf": {
         "@type": "WebSite",
         "name": "Martin Pohl",
-        "url": "https://martin.pohl.uk"
+        "url": "https://martinpohl.cz"
       },
       "featureList": [
         "Sledování nákladů v CZK a USD",
@@ -96,13 +96,13 @@
     {
       "@context": "https://schema.org",
       "@type": "Person",
-      "@id": "https://martin.pohl.uk/#person",
+      "@id": "https://martinpohl.cz/#person",
       "name": "Martin Pohl",
-      "url": "https://martin.pohl.uk",
+      "url": "https://martinpohl.cz",
       "jobTitle": "IT Engineer & Indie Maker",
       "description": "Apple MDM, Identity & SSO, automation a indie web projekty.",
       "knowsAbout": ["Apple MDM", "Jamf", "Kandji", "Okta", "Entra ID", "SCIM", "Google Workspace", "FinOps", "AI tooling"],
-      "sameAs": ["https://martin.pohl.uk"]
+      "sameAs": ["https://martinpohl.cz"]
     }
     </script>
 
@@ -114,7 +114,7 @@
       "@context": "https://schema.org",
       "@type": "BreadcrumbList",
       "itemListElement": [
-        { "@type": "ListItem", "position": 1, "name": "Martin Pohl", "item": "https://martin.pohl.uk" },
+        { "@type": "ListItem", "position": 1, "name": "Martin Pohl", "item": "https://martinpohl.cz" },
         { "@type": "ListItem", "position": 2, "name": "OpenRouter Monitor", "item": "https://tokeny.pohl.uk/" }
       ]
     }
@@ -130,14 +130,18 @@
       "programmingLanguage": ["TypeScript", "React"],
       "runtimePlatform": "Web",
       "license": "https://opensource.org/licenses/MIT",
-      "author": { "@id": "https://martin.pohl.uk/#person" },
+      "author": { "@id": "https://martinpohl.cz/#person" },
       "url": "https://tokeny.pohl.uk/"
     }
     </script>
   </head>
 
   <body>
-    <div id="root"></div>
+    <!-- Static H1 for crawlers without JS — React replaces #root on hydration -->
+    <h1 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap">
+      OpenRouter Monitor — Přehled nákladů a spotřeby AI tokenů
+    </h1>
+        <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
