@@ -2,7 +2,7 @@
 
 > Webová aplikace pro sledování nákladů, spotřeby tokenů a výkonu AI modelů používaných přes OpenRouter. Import dat z CSV, dashboard v CZK i USD, AI agent a MCP server pro Claude / Cursor / Zed.
 
-Autor: Martin Pohl (https://martin.pohl.uk) — IT engineer, Apple MDM, Identity & SSO, indie maker.
+Autor: Martin Pohl (https://martinpohl.cz) — IT engineer, Apple MDM, Identity & SSO, indie maker.
 Hlavní doména: https://tokeny.pohl.uk
 Zdrojový kód (public repo): https://github.com/martinp0/martinp0-tokeny-monitor
 Jazyk obsahu: čeština (částečně EN). Měny: CZK, USD. Kurz: ČNB denní CRON.
@@ -34,5 +34,5 @@ Jazyk obsahu: čeština (částečně EN). Měny: CZK, USD. Kurz: ČNB denní CR
 - **MCP token:** Generuje se v /settings, vkládá se do konfigurace AI klienta (Claude Desktop, Cursor, Zed).
 
 ## Kontakt
-- Web: https://martin.pohl.uk
+- Web: https://martinpohl.cz
 - Projekt: https://tokeny.pohl.uk
