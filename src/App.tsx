@@ -17,6 +17,11 @@ import SharedDashboard from "./pages/SharedDashboard.tsx";
 import LlmCostCalculator from "./pages/LlmCostCalculator.tsx";
 import ClaudeApiCost from "./pages/ClaudeApiCost.tsx";
 import HowToCalculateLlmCost from "./pages/HowToCalculateLlmCost.tsx";
+import GptApiCost from "./pages/GptApiCost.tsx";
+import Blog from "./pages/Blog.tsx";
+import BlogAiCostSaving from "./pages/BlogAiCostSaving.tsx";
+import BlogPromptOptimization from "./pages/BlogPromptOptimization.tsx";
+import BlogTokenWindow from "./pages/BlogTokenWindow.tsx";
 
 const queryClient = new QueryClient();
 
