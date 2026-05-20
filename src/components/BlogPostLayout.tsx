@@ -72,7 +72,64 @@ export default function BlogPostLayout({ title, description, slug, date, tag, ke
           {children}
         </div>
 
-        <div className="mt-16 p-6 rounded-xl bg-gradient-to-br from-primary/10 to-accent/10 border border-primary/20 text-center">
+        <div className="mt-12">
+          <h3 className="text-lg font-display font-bold mb-4">Související návody a ceníky</h3>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <Card className="group hover:border-primary/50 transition-colors">
+              <CardContent className="p-4">
+                <Calculator className="h-4 w-4 text-primary mb-2" />
+                <Link to="/llm-cost-calculator" className="text-sm font-semibold group-hover:text-primary transition-colors block">LLM Cost Calculator</Link>
+                <p className="text-xs text-muted-foreground mt-1">Odhad nákladů na 11 modelů</p>
+              </CardContent>
+            </Card>
+            <Card className="group hover:border-primary/50 transition-colors">
+              <CardContent className="p-4">
+                <FileText className="h-4 w-4 text-primary mb-2" />
+                <Link to="/gpt-api-cost" className="text-sm font-semibold group-hover:text-primary transition-colors block">GPT API cost</Link>
+                <p className="text-xs text-muted-foreground mt-1">Per-token ceník OpenAI modelů</p>
+              </CardContent>
+            </Card>
+            <Card className="group hover:border-primary/50 transition-colors">
+              <CardContent className="p-4">
+                <FileText className="h-4 w-4 text-primary mb-2" />
+                <Link to="/claude-api-cost" className="text-sm font-semibold group-hover:text-primary transition-colors block">Claude API cost</Link>
+                <p className="text-xs text-muted-foreground mt-1">Haiku, Sonnet, Opus pricing</p>
+              </CardContent>
+            </Card>
+            <Card className="group hover:border-primary/50 transition-colors">
+              <CardContent className="p-4">
+                <FileText className="h-4 w-4 text-primary mb-2" />
+                <Link to="/how-to-calculate-llm-cost" className="text-sm font-semibold group-hover:text-primary transition-colors block">Jak spočítat LLM cost</Link>
+                <p className="text-xs text-muted-foreground mt-1">Krok za krokem — vzorec a tipy</p>
+              </CardContent>
+            </Card>
+          </div>
+          <div className="grid sm:grid-cols-3 gap-3 mt-3">
+            <Card className="group hover:border-primary/50 transition-colors">
+              <CardContent className="p-4">
+                <BookOpen className="h-4 w-4 text-primary mb-2" />
+                <Link to="/blog/ai-cost-saving" className="text-sm font-semibold group-hover:text-primary transition-colors block">10 způsobů úspor</Link>
+                <p className="text-xs text-muted-foreground mt-1">Caching, routing, batch API</p>
+              </CardContent>
+            </Card>
+            <Card className="group hover:border-primary/50 transition-colors">
+              <CardContent className="p-4">
+                <BookOpen className="h-4 w-4 text-primary mb-2" />
+                <Link to="/blog/prompt-optimization" className="text-sm font-semibold group-hover:text-primary transition-colors block">Optimalizace promptů</Link>
+                <p className="text-xs text-muted-foreground mt-1">Zkrátit tokeny o 30–60 %</p>
+              </CardContent>
+            </Card>
+            <Card className="group hover:border-primary/50 transition-colors">
+              <CardContent className="p-4">
+                <BookOpen className="h-4 w-4 text-primary mb-2" />
+                <Link to="/blog/token-window" className="text-sm font-semibold group-hover:text-primary transition-colors block">Token window strategie</Link>
+                <p className="text-xs text-muted-foreground mt-1">RAG, sliding window, pruning</p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        <div className="mt-10 p-6 rounded-xl bg-gradient-to-br from-primary/10 to-accent/10 border border-primary/20 text-center">
           <h3 className="text-xl font-display font-bold mb-2">Sleduj reálné AI náklady, ne jen odhady</h3>
           <p className="text-sm text-muted-foreground mb-4">
             Tokeny Monitor ti ukáže denní spend napříč GPT, Claude a Gemini — v USD i CZK.
