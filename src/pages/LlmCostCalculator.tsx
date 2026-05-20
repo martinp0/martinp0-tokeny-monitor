@@ -237,6 +237,10 @@ export default function LlmCostCalculator() {
                   Sledovat skutečné náklady v dashboardu <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
+              <div className="text-xs text-muted-foreground text-center pt-2">
+                Nebo prozkoumej <Link to="/gpt-api-cost" className="text-primary hover:underline">GPT ceník</Link> ·{" "}
+                <Link to="/claude-api-cost" className="text-primary hover:underline">Claude ceník</Link>
+              </div>
             </CardContent>
           </Card>
         </div>
