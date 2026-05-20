@@ -5,11 +5,15 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, Check, DollarSign, TrendingDown, Zap } from "lucide-react";
 
 const GPT_MODELS = [
-  { name: "GPT-4o mini", input: 0.15, output: 0.6, use: "Vysoký objem, klasifikace, levný chat" },
-  { name: "GPT-4o", input: 2.5, output: 10, use: "Většina produkčních úloh, multimodal" },
-  { name: "GPT-5 mini", input: 0.25, output: 2, use: "Lehký reasoning, dobrá cena/výkon" },
-  { name: "GPT-5", input: 1.25, output: 10, use: "Komplexní reasoning, agenti, coding" },
+  { name: "GPT-4o mini", input: 200, output: 800, use: "Vysoký objem, klasifikace, levný chat" },
+  { name: "GPT-4o", input: 2500, output: 10000, use: "Většina produkčních úloh, multimodal" },
+  { name: "GPT-5 mini", input: 250, output: 2000, use: "Lehký reasoning, dobrá cena/výkon" },
+  { name: "GPT-5", input: 1250, output: 10000, use: "Komplexní reasoning, agenti, coding" },
 ];
+
+function fmt(val: number) {
+  return val < 0.01 ? val.toFixed(6) : val.toFixed(4);
+}
 
 const EXAMPLES = [
   { title: "Support chatbot", model: "GPT-4o mini", reqs: "100k requestů, 600 in / 300 out", monthly: 27 },
