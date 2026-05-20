@@ -308,6 +308,81 @@ export default function LlmCostCalculator() {
         </div>
       </section>
 
+      {/* Related guides */}
+      <section className="container mx-auto px-4 py-12 max-w-5xl">
+        <h2 className="text-2xl md:text-3xl font-display font-bold mb-6">Podrobné ceníky a návody</h2>
+        <div className="grid md:grid-cols-3 gap-4">
+          <Card className="group hover:border-primary/50 transition-colors">
+            <CardContent className="p-5">
+              <FileText className="h-5 w-5 text-primary mb-3" />
+              <h3 className="font-semibold mb-1 group-hover:text-primary transition-colors">
+                <Link to="/gpt-api-cost">GPT API cost</Link>
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Kompletní rozpis GPT-5, GPT-4o a mini — per token, per 1k i per 1M tokenů.
+              </p>
+            </CardContent>
+          </Card>
+          <Card className="group hover:border-primary/50 transition-colors">
+            <CardContent className="p-5">
+              <FileText className="h-5 w-5 text-primary mb-3" />
+              <h3 className="font-semibold mb-1 group-hover:text-primary transition-colors">
+                <Link to="/claude-api-cost">Claude API cost</Link>
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Haiku, Sonnet a Opus — ceník per 1M tokenů a reálné měsíční příklady.
+              </p>
+            </CardContent>
+          </Card>
+          <Card className="group hover:border-primary/50 transition-colors">
+            <CardContent className="p-5">
+              <FileText className="h-5 w-5 text-primary mb-3" />
+              <h3 className="font-semibold mb-1 group-hover:text-primary transition-colors">
+                <Link to="/how-to-calculate-llm-cost">Jak spočítat LLM cost</Link>
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Krok za krokem — odhad tokenů, vzorec a srovnání GPT vs Claude.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+        <div className="grid md:grid-cols-3 gap-4 mt-4">
+          <Card className="group hover:border-primary/50 transition-colors">
+            <CardContent className="p-5">
+              <BookOpen className="h-5 w-5 text-primary mb-3" />
+              <h3 className="font-semibold mb-1 group-hover:text-primary transition-colors">
+                <Link to="/blog/ai-cost-saving">10 způsobů úspor</Link>
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Jak snížit fakturu o 40–80 % — caching, batch API, routing a další.
+              </p>
+            </CardContent>
+          </Card>
+          <Card className="group hover:border-primary/50 transition-colors">
+            <CardContent className="p-5">
+              <BookOpen className="h-5 w-5 text-primary mb-3" />
+              <h3 className="font-semibold mb-1 group-hover:text-primary transition-colors">
+                <Link to="/blog/prompt-optimization">Optimalizace promptů</Link>
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Zkrátit tokeny o 30–60 % a při tom zlepšit výsledky.
+              </p>
+            </CardContent>
+          </Card>
+          <Card className="group hover:border-primary/50 transition-colors">
+            <CardContent className="p-5">
+              <BookOpen className="h-5 w-5 text-primary mb-3" />
+              <h3 className="font-semibold mb-1 group-hover:text-primary transition-colors">
+                <Link to="/blog/token-window">Token window strategie</Link>
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Kdy se vyplatí dlouhý kontext a kdy je lepší RAG nebo sliding window.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
       {/* CTA */}
       <section className="container mx-auto px-4 py-16 text-center max-w-2xl">
         <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
