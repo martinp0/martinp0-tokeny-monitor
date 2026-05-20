@@ -110,15 +110,24 @@ export default function ClaudeApiCost() {
         </div>
 
         <h2 className="text-2xl font-display font-bold mb-4">3 způsoby, jak Claude API náklady osekat</h2>
-        <ul className="space-y-3 mb-10">
+        <ul className="space-y-3 mb-6">
           {[
-            "Použij Haiku pro klasifikaci, routing a krátké odpovědi. Sonnet nech jen tam, kde reálně potřebuješ kvalitu.",
-            "Zapni prompt caching — opakovaný systémový prompt může ušetřit 50–90 % vstupních nákladů.",
-            "Nastav max_tokens. Většina odpovědí nepotřebuje 4k tokenů; horní strop výrazně sníží output cost.",
+            { text: "Použij Haiku pro klasifikaci, routing a krátké odpovědi. Sonnet nech jen tam, kde reálně potřebuješ kvalitu.", link: "/blog/ai-cost-saving", linkText: "Model routing detailně" },
+            { text: "Zapni prompt caching — opakovaný systémový prompt může ušetřit 50–90 % vstupních nákladů.", link: "/blog/ai-cost-saving", linkText: "Prompt caching taktiky" },
+            { text: "Nastav max_tokens. Většina odpovědí nepotřebuje 4k tokenů; horní strop výrazně sníží output cost.", link: "/blog/prompt-optimization", linkText: "Optimalizace promptů" },
           ].map((t, i) => (
-            <li key={i} className="flex gap-3"><Check className="h-5 w-5 text-primary shrink-0 mt-0.5" /><span>{t}</span></li>
+            <li key={i} className="flex gap-3">
+              <Check className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+              <div>
+                <p>{t.text}</p>
+                <Link to={t.link} className="text-xs text-primary hover:underline">{t.linkText} →</Link>
+              </div>
+            </li>
           ))}
         </ul>
+        <p className="text-sm text-muted-foreground mb-10">
+          Srovnej s <Link to="/gpt-api-cost" className="text-primary hover:underline">GPT API cost</Link> nebo si všechno přehledně spočítej v <Link to="/llm-cost-calculator" className="text-primary hover:underline">kalkulačce</Link>.
+        </p>
 
         <Card className="bg-gradient-to-br from-primary/5 to-accent/5 border-primary/20 mb-10">
           <CardContent className="p-6">
