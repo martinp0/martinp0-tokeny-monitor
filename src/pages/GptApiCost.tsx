@@ -5,11 +5,15 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, Check, DollarSign, TrendingDown, Zap } from "lucide-react";
 
 const GPT_MODELS = [
-  { name: "GPT-4o mini", input: 0.15, output: 0.6, use: "Vysoký objem, klasifikace, levný chat" },
-  { name: "GPT-4o", input: 2.5, output: 10, use: "Většina produkčních úloh, multimodal" },
-  { name: "GPT-5 mini", input: 0.25, output: 2, use: "Lehký reasoning, dobrá cena/výkon" },
-  { name: "GPT-5", input: 1.25, output: 10, use: "Komplexní reasoning, agenti, coding" },
+  { name: "GPT-4o mini", input: 200, output: 800, use: "Vysoký objem, klasifikace, levný chat" },
+  { name: "GPT-4o", input: 2500, output: 10000, use: "Většina produkčních úloh, multimodal" },
+  { name: "GPT-5 mini", input: 250, output: 2000, use: "Lehký reasoning, dobrá cena/výkon" },
+  { name: "GPT-5", input: 1250, output: 10000, use: "Komplexní reasoning, agenti, coding" },
 ];
+
+function fmt(val: number) {
+  return val < 0.01 ? val.toFixed(6) : val.toFixed(4);
+}
 
 const EXAMPLES = [
   { title: "Support chatbot", model: "GPT-4o mini", reqs: "100k requestů, 600 in / 300 out", monthly: 27 },
@@ -86,9 +90,41 @@ export default function GptApiCost() {
 
       <section className="container mx-auto px-4 py-10 max-w-5xl">
         <h2 className="text-2xl md:text-3xl font-display font-bold mb-6 flex items-center gap-2">
-          <Zap className="h-7 w-7 text-primary" /> Ceník GPT modelů (per 1M tokens)
+          <Zap className="h-7 w-7 text-primary" /> Ceník GPT modelů — srovnání per token
         </h2>
-        <div className="grid md:grid-cols-2 gap-4">
+        <p className="text-muted-foreground mb-6 max-w-2xl">
+          Ceny OpenAI jsou uváděné za 1M tokenů, ale reálné náklady závisí na přesném počtu. Níže vidíš
+          cenu za <strong>jeden token</strong>, za <strong>1 000 tokenů</strong> i za <strong>1 000 000 tokenů</strong>.
+        </p>
+        <div className="overflow-x-auto rounded-xl border border-border/40">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="bg-muted/40">
+                <th className="px-4 py-3 text-left font-semibold">Model</th>
+                <th className="px-4 py-3 text-right font-semibold">Input / token</th>
+                <th className="px-4 py-3 text-right font-semibold">Input / 1k</th>
+                <th className="px-4 py-3 text-right font-semibold text-primary">Input / 1M</th>
+                <th className="px-4 py-3 text-right font-semibold">Output / token</th>
+                <th className="px-4 py-3 text-right font-semibold">Output / 1k</th>
+                <th className="px-4 py-3 text-right font-semibold text-primary">Output / 1M</th>
+              </tr>
+            </thead>
+            <tbody>
+              {GPT_MODELS.map((m) => (
+                <tr key={m.name} className="border-b last:border-1 hover:bg-muted/30">
+                  <td className="px-4 py-3 font-medium">{m.name}</td>
+                  <td className="px-4 py-3 text-right font-mono text-muted-foreground">${fmt(m.input / 1e6)}</td>
+                  <td className="px-4 py-3 text-right font-mono text-muted-foreground">${fmt(m.input / 1e3)}</td>
+                  <td className="px-4 py-3 text-right font-mono font-semibold text-primary">${m.input / 1e3}</td>
+                  <td className="px-4 py-3 text-right font-mono text-muted-foreground">${fmt(m.output / 1e6)}</td>
+                  <td className="px-4 py-3 text-right font-mono text-muted-foreground">${fmt(m.output / 1e3)}</td>
+                  <td className="px-4 py-3 text-right font-mono font-semibold text-primary">${m.output / 1e3}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="grid md:grid-cols-2 gap-4 mt-6">
           {GPT_MODELS.map((m) => (
             <Card key={m.name}>
               <CardContent className="p-5">
@@ -97,8 +133,8 @@ export default function GptApiCost() {
                   <div className="text-xs text-muted-foreground font-mono">OpenAI</div>
                 </div>
                 <div className="flex gap-4 mb-3 text-sm">
-                  <div><span className="text-muted-foreground">Input:</span> <strong>${m.input}/1M</strong></div>
-                  <div><span className="text-muted-foreground">Output:</span> <strong>${m.output}/1M</strong></div>
+                  <div><span className="text-muted-foreground">Input:</span> <strong>${m.input / 1e3}/1M</strong></div>
+                  <div><span className="text-muted-foreground">Output:</span> <strong>${m.output / 1e3}/1M</strong></div>
                 </div>
                 <p className="text-sm text-muted-foreground">{m.use}</p>
               </CardContent>
