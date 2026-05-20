@@ -99,6 +99,12 @@ export default function HowToCalculateLlmCost() {
             <div className="flex flex-wrap gap-3">
               <Button asChild><Link to="/llm-cost-calculator">Spustit kalkulačku <ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
               <Button asChild variant="outline"><Link to="/claude-api-cost">Claude API ceník</Link></Button>
+              <Button asChild variant="outline"><Link to="/gpt-api-cost">GPT API ceník</Link></Button>
+            </div>
+            <div className="mt-4 pt-4 border-t border-border/40 text-sm text-muted-foreground">
+              Další návody: <Link to="/blog/ai-cost-saving" className="text-primary hover:underline">10 způsobů úspor</Link> ·{" "}
+              <Link to="/blog/prompt-optimization" className="text-primary hover:underline">Optimalizace promptů</Link> ·{" "}
+              <Link to="/blog/token-window" className="text-primary hover:underline">Token window</Link>
             </div>
           </CardContent>
         </Card>

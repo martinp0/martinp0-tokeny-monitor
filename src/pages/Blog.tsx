@@ -87,6 +87,36 @@ export default function Blog() {
         </div>
       </section>
 
+      <section className="container mx-auto px-4 pb-16 max-w-4xl">
+        <h2 className="text-xl font-display font-bold mb-4">Nástroje a ceníky</h2>
+        <div className="grid sm:grid-cols-3 gap-4">
+          <Link to="/llm-cost-calculator" className="block group">
+            <Card className="transition-colors hover:border-primary/50">
+              <CardContent className="p-5">
+                <h3 className="font-semibold group-hover:text-primary transition-colors mb-1">LLM Cost Calculator</h3>
+                <p className="text-sm text-muted-foreground">Odhad nákladů na 11 modelů napříč providery</p>
+              </CardContent>
+            </Card>
+          </Link>
+          <Link to="/gpt-api-cost" className="block group">
+            <Card className="transition-colors hover:border-primary/50">
+              <CardContent className="p-5">
+                <h3 className="font-semibold group-hover:text-primary transition-colors mb-1">GPT API cost</h3>
+                <p className="text-sm text-muted-foreground">Per-token ceník GPT-5, GPT-4o, mini</p>
+              </CardContent>
+            </Card>
+          </Link>
+          <Link to="/claude-api-cost" className="block group">
+            <Card className="transition-colors hover:border-primary/50">
+              <CardContent className="p-5">
+                <h3 className="font-semibold group-hover:text-primary transition-colors mb-1">Claude API cost</h3>
+                <p className="text-sm text-muted-foreground">Haiku, Sonnet, Opus pricing & příklady</p>
+              </CardContent>
+            </Card>
+          </Link>
+        </div>
+      </section>
+
       <footer className="border-t border-border/40 py-8 text-center text-sm text-muted-foreground">
         © {new Date().getFullYear()} <Link to="/" className="hover:text-foreground">Tokeny Monitor</Link>
       </footer>

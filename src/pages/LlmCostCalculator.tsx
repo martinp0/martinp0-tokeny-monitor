@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowRight, Calculator, Coffee, Github, Sparkles, TrendingDown, Zap } from "lucide-react";
+import { ArrowRight, BookOpen, Calculator, Coffee, FileText, Github, Sparkles, TrendingDown, Zap } from "lucide-react";
 
 // Indicative USD prices per 1M tokens (input / output). Approximate, for estimation.
 const MODELS: { id: string; label: string; provider: string; inPrice: number; outPrice: number }[] = [
@@ -237,6 +237,10 @@ export default function LlmCostCalculator() {
                   Sledovat skutečné náklady v dashboardu <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
+              <div className="text-xs text-muted-foreground text-center pt-2">
+                Nebo prozkoumej <Link to="/gpt-api-cost" className="text-primary hover:underline">GPT ceník</Link> ·{" "}
+                <Link to="/claude-api-cost" className="text-primary hover:underline">Claude ceník</Link>
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -305,6 +309,81 @@ export default function LlmCostCalculator() {
               Nahraj CSV export z OpenRouter, nebo připoj OpenAI/Anthropic přes API klíč. Tokeny Monitor ti ukáže reálné náklady den po dni.
             </p>
           </CardContent></Card>
+        </div>
+      </section>
+
+      {/* Related guides */}
+      <section className="container mx-auto px-4 py-12 max-w-5xl">
+        <h2 className="text-2xl md:text-3xl font-display font-bold mb-6">Podrobné ceníky a návody</h2>
+        <div className="grid md:grid-cols-3 gap-4">
+          <Card className="group hover:border-primary/50 transition-colors">
+            <CardContent className="p-5">
+              <FileText className="h-5 w-5 text-primary mb-3" />
+              <h3 className="font-semibold mb-1 group-hover:text-primary transition-colors">
+                <Link to="/gpt-api-cost">GPT API cost</Link>
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Kompletní rozpis GPT-5, GPT-4o a mini — per token, per 1k i per 1M tokenů.
+              </p>
+            </CardContent>
+          </Card>
+          <Card className="group hover:border-primary/50 transition-colors">
+            <CardContent className="p-5">
+              <FileText className="h-5 w-5 text-primary mb-3" />
+              <h3 className="font-semibold mb-1 group-hover:text-primary transition-colors">
+                <Link to="/claude-api-cost">Claude API cost</Link>
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Haiku, Sonnet a Opus — ceník per 1M tokenů a reálné měsíční příklady.
+              </p>
+            </CardContent>
+          </Card>
+          <Card className="group hover:border-primary/50 transition-colors">
+            <CardContent className="p-5">
+              <FileText className="h-5 w-5 text-primary mb-3" />
+              <h3 className="font-semibold mb-1 group-hover:text-primary transition-colors">
+                <Link to="/how-to-calculate-llm-cost">Jak spočítat LLM cost</Link>
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Krok za krokem — odhad tokenů, vzorec a srovnání GPT vs Claude.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+        <div className="grid md:grid-cols-3 gap-4 mt-4">
+          <Card className="group hover:border-primary/50 transition-colors">
+            <CardContent className="p-5">
+              <BookOpen className="h-5 w-5 text-primary mb-3" />
+              <h3 className="font-semibold mb-1 group-hover:text-primary transition-colors">
+                <Link to="/blog/ai-cost-saving">10 způsobů úspor</Link>
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Jak snížit fakturu o 40–80 % — caching, batch API, routing a další.
+              </p>
+            </CardContent>
+          </Card>
+          <Card className="group hover:border-primary/50 transition-colors">
+            <CardContent className="p-5">
+              <BookOpen className="h-5 w-5 text-primary mb-3" />
+              <h3 className="font-semibold mb-1 group-hover:text-primary transition-colors">
+                <Link to="/blog/prompt-optimization">Optimalizace promptů</Link>
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Zkrátit tokeny o 30–60 % a při tom zlepšit výsledky.
+              </p>
+            </CardContent>
+          </Card>
+          <Card className="group hover:border-primary/50 transition-colors">
+            <CardContent className="p-5">
+              <BookOpen className="h-5 w-5 text-primary mb-3" />
+              <h3 className="font-semibold mb-1 group-hover:text-primary transition-colors">
+                <Link to="/blog/token-window">Token window strategie</Link>
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Kdy se vyplatí dlouhý kontext a kdy je lepší RAG nebo sliding window.
+              </p>
+            </CardContent>
+          </Card>
         </div>
       </section>
 

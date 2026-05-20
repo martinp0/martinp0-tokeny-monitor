@@ -170,17 +170,31 @@ export default function GptApiCost() {
         </h2>
         <div className="space-y-3">
           {[
-            "Routujte jednoduché dotazy na GPT-4o mini, complex jen na GPT-5.",
-            "Používejte prompt caching — opakovaný system prompt může být až 90% levnější.",
-            "Zkracujte system prompty a few-shot příklady — input tokeny rychle narostou.",
-            "Nastavte max_tokens — model jinak rád generuje delší odpovědi než potřebujete.",
-            "Sledujte denní spend — bez monitoringu nezachytíte runaway loop nebo bug v promptu.",
+            { text: "Routujte jednoduché dotazy na GPT-4o mini, complex jen na GPT-5.", link: "/blog/ai-cost-saving", linkText: "Model routing detailně" },
+            { text: "Používejte prompt caching — opakovaný system prompt může být až 90% levnější.", link: "/blog/ai-cost-saving", linkText: "Prompt caching taktiky" },
+            { text: "Zkracujte system prompty a few-shot příklady — input tokeny rychle narostou.", link: "/blog/prompt-optimization", linkText: "Optimalizace promptů" },
+            { text: "Nastavte max_tokens — model jinak rád generuje delší odpovědi než potřebujete.", link: "/blog/ai-cost-saving", linkText: "Další tipy na úspory" },
+            { text: "Sledujte denní spend — bez monitoringu nezachytíte runaway loop nebo bug v promptu.", link: "/auth", linkText: "Sledovat v Tokeny Monitor" },
           ].map((t) => (
-            <div key={t} className="flex gap-3 items-start">
+            <div key={t.text} className="flex gap-3 items-start">
               <Check className="h-5 w-5 text-primary mt-0.5 shrink-0" />
-              <p>{t}</p>
+              <div>
+                <p>{t.text}</p>
+                <Link to={t.link} className="text-xs text-primary hover:underline">{t.linkText} →</Link>
+              </div>
             </div>
           ))}
+        </div>
+
+        <div className="mt-10 p-5 rounded-xl border border-border/40 bg-muted/30">
+          <h3 className="font-display font-bold text-lg mb-2">Chceš ještě víc ušetřit?</h3>
+          <p className="text-sm text-muted-foreground mb-4">
+            Máme 10 praktických taktik pro snížení LLM nákladů o 40–80 % — od batch API přes prompt compression po cache výsledků.
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <Button asChild size="sm"><Link to="/blog/ai-cost-saving">10 způsobů úspor <ArrowRight className="ml-1 h-3 w-3" /></Link></Button>
+            <Button asChild size="sm" variant="outline"><Link to="/blog/prompt-optimization">Optimalizace promptů</Link></Button>
+          </div>
         </div>
       </section>
 
