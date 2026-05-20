@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowRight, Calculator, Coffee, Github, Sparkles, TrendingDown, Zap } from "lucide-react";
+import { ArrowRight, BookOpen, Calculator, Coffee, FileText, Github, Sparkles, TrendingDown, Zap } from "lucide-react";
 
 // Indicative USD prices per 1M tokens (input / output). Approximate, for estimation.
 const MODELS: { id: string; label: string; provider: string; inPrice: number; outPrice: number }[] = [
