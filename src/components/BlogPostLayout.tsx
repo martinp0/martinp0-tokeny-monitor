@@ -34,9 +34,28 @@ export default function BlogPostLayout({ title, description, slug, date, tag, ke
           headline: title,
           description,
           author: { "@type": "Person", name: "Martin Pohl", url: "https://martin.pohl.uk" },
+          publisher: {
+            "@type": "Organization",
+            name: "Tokeny Monitor",
+            logo: { "@type": "ImageObject", url: "https://tokeny.pohl.uk/icon-512.png" },
+          },
           datePublished: date,
+          dateModified: date,
+          inLanguage: "cs-CZ",
+          image: "https://tokeny.pohl.uk/og-image.png",
+          mainEntityOfPage: { "@type": "WebPage", "@id": url },
           url,
         })}</script>
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Domů", item: "https://tokeny.pohl.uk/" },
+            { "@type": "ListItem", position: 2, name: "Blog", item: "https://tokeny.pohl.uk/blog" },
+            { "@type": "ListItem", position: 3, name: title, item: url },
+          ],
+        })}</script>
+
       </Helmet>
 
       <header className="border-b border-border/40 backdrop-blur-sm sticky top-0 z-50 bg-background/80">
