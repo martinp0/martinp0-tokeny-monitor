@@ -26,6 +26,20 @@ const POSTS = [
     date: "2026-05-19",
     tag: "Context management",
   },
+  {
+    slug: "gpt-vs-claude-vs-gemini",
+    title: "GPT-5 vs Claude vs Gemini: srovnání 2026 (cena, rychlost, kvalita)",
+    excerpt: "Přímé srovnání flagship modelů — ceny per 1M tokenů, context window, silné a slabé stránky. Kdy který zvolit.",
+    date: "2026-05-25",
+    tag: "Model comparison",
+  },
+  {
+    slug: "monitoring-ai-costs",
+    title: "Monitoring AI nákladů: co měřit, jaké alerty nastavit a proč",
+    excerpt: "5 KPI, smysluplné alerty, red flagy v dashboardu a setup za 10 minut. FinOps pro LLM API.",
+    date: "2026-05-25",
+    tag: "Monitoring & FinOps",
+  },
 ];
 
 export default function Blog() {
