@@ -88,6 +88,22 @@ export default function GptApiCost() {
         </div>
       </section>
 
+      <section className="container mx-auto px-4 py-6 max-w-5xl">
+        <Card className="relative overflow-hidden border-0 bg-gradient-to-br from-primary/20 via-primary/10 to-transparent">
+          <CardContent className="p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div>
+              <h3 className="text-xl font-display font-bold mb-1">Spočítat si náklady na GPT API</h3>
+              <p className="text-sm text-muted-foreground">Vyber model, zadej tokeny a zjisti reálný měsíční cost.</p>
+            </div>
+            <Button asChild size="lg" className="shrink-1">
+              <Link to="/llm-cost-calculator">
+                Spočítat si náklady <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </section>
+
       <section className="container mx-auto px-4 py-10 max-w-5xl">
         <h2 className="text-2xl md:text-3xl font-display font-bold mb-6 flex items-center gap-2">
           <Zap className="h-7 w-7 text-primary" /> Ceník GPT modelů — srovnání per token
