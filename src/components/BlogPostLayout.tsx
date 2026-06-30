@@ -160,7 +160,12 @@ export default function BlogPostLayout({ title, description, slug, date, tag, ke
             <Button asChild variant="outline"><Link to="/llm-cost-calculator">Otevřít kalkulačku</Link></Button>
           </div>
         </div>
+
+        <div className="mt-10 pt-6 border-t border-border/40 flex justify-center">
+          <ShareButtons url={url} title={title} />
+        </div>
       </article>
+
 
       <footer className="border-t border-border/40 py-8 text-center text-sm text-muted-foreground">
         © {new Date().getFullYear()} <Link to="/" className="hover:text-foreground">Tokeny Monitor</Link>
