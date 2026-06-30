@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, ArrowRight, BookOpen, Calculator, Calendar, FileText } from "lucide-react";
 import { ReactNode } from "react";
+import ShareButtons from "@/components/ShareButtons";
 
 interface BlogPostLayoutProps {
   title: string;
@@ -77,7 +78,8 @@ export default function BlogPostLayout({ title, description, slug, date, tag, ke
           <span className="flex items-center gap-1"><Calendar className="h-3 w-3" /> {date}</span>
         </div>
         <h1 className="text-3xl md:text-5xl font-display font-bold tracking-tight mb-6">{title}</h1>
-        <p className="text-lg text-muted-foreground mb-10">{description}</p>
+        <p className="text-lg text-muted-foreground mb-6">{description}</p>
+        <div className="mb-10"><ShareButtons url={url} title={title} /></div>
 
         <div className="prose prose-invert max-w-none
           prose-headings:font-display prose-headings:font-bold prose-headings:tracking-tight
