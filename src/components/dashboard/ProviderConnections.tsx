@@ -11,7 +11,7 @@ import {
 import { Plug, Plus, RefreshCw, Trash2, AlertCircle, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 
-type ProviderId = "openrouter" | "anthropic" | "openai";
+type ProviderId = "openrouter" | "anthropic" | "openai" | "gemini" | "mistral" | "groq" | "xai";
 
 interface Credential {
   id: string;
@@ -44,6 +44,30 @@ const PROVIDER_META: Record<ProviderId, { label: string; hint: string; docsUrl: 
     hint: "Vyžaduje Admin API klíč. Vytvoř v platform.openai.com → Organization → Admin keys.",
     docsUrl: "https://platform.openai.com/settings/organization/admin-keys",
     keyPlaceholder: "sk-…",
+  },
+  gemini: {
+    label: "Google Gemini",
+    hint: "Gemini nemá per-key usage API — ulož klíč pro evidenci, data importuj přes CSV z Google Cloud Billing.",
+    docsUrl: "https://aistudio.google.com/app/apikey",
+    keyPlaceholder: "AIza…",
+  },
+  mistral: {
+    label: "Mistral AI",
+    hint: "Klíč z console.mistral.ai. Per-key usage zatím není veřejné — použij CSV upload.",
+    docsUrl: "https://console.mistral.ai/api-keys",
+    keyPlaceholder: "…",
+  },
+  groq: {
+    label: "Groq",
+    hint: "Klíč z console.groq.com. Per-key usage API zatím chybí — použij CSV upload.",
+    docsUrl: "https://console.groq.com/keys",
+    keyPlaceholder: "gsk_…",
+  },
+  xai: {
+    label: "xAI (Grok)",
+    hint: "Klíč z console.x.ai. Per-key usage API zatím není veřejné — použij CSV upload.",
+    docsUrl: "https://console.x.ai",
+    keyPlaceholder: "xai-…",
   },
 };
 
@@ -118,12 +142,7 @@ export function ProviderConnections() {
 
   async function handleSync(c: Credential) {
     setSyncingId(c.id);
-    const fnName =
-      c.provider === "anthropic"
-        ? "sync-anthropic"
-        : c.provider === "openai"
-          ? "sync-openai"
-          : "sync-openrouter";
+    const fnName = `sync-${c.provider}`;
     const { data, error } = await supabase.functions.invoke(fnName, {
       body: { credential_id: c.id },
     });
@@ -166,7 +185,7 @@ export function ProviderConnections() {
             <div className="space-y-4">
               <div>
                 <Label className="text-xs">Provider</Label>
-                <div className="mt-1 grid grid-cols-3 gap-2">
+                <div className="mt-1 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
                   {(Object.keys(PROVIDER_META) as ProviderId[]).map((p) => (
                     <button
                       key={p}
@@ -209,7 +228,7 @@ export function ProviderConnections() {
                 />
               </div>
 
-              {provider !== "openrouter" && (
+              {(provider === "anthropic" || provider === "openai") && (
                 <div>
                   <Label className="text-xs">Organization ID (volitelné)</Label>
                   <Input

@@ -14,7 +14,9 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const ALLOWED_PROVIDERS = new Set(["openrouter", "anthropic", "openai"]);
+const ALLOWED_PROVIDERS = new Set([
+  "openrouter", "anthropic", "openai", "gemini", "mistral", "groq", "xai",
+]);
 
 function preview(key: string): string {
   if (!key) return "";
@@ -26,13 +28,17 @@ function preview(key: string): string {
 function validateKeyShape(provider: string, key: string): string | null {
   const k = key.trim();
   if (!k) return "API key is empty";
-  if (k.length < 16) return "API key seems too short";
+  if (k.length < 12) return "API key seems too short";
   if (provider === "anthropic" && !k.startsWith("sk-ant-"))
     return "Anthropic Admin keys typically start with sk-ant-";
   if (provider === "openai" && !k.startsWith("sk-"))
     return "OpenAI keys typically start with sk-";
   if (provider === "openrouter" && !k.startsWith("sk-or-"))
     return "OpenRouter keys typically start with sk-or-";
+  if (provider === "xai" && !k.startsWith("xai-"))
+    return "xAI keys typically start with xai-";
+  if (provider === "groq" && !k.startsWith("gsk_"))
+    return "Groq keys typically start with gsk_";
   return null;
 }
 
