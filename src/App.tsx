@@ -24,6 +24,7 @@ import BlogPromptOptimization from "./pages/BlogPromptOptimization.tsx";
 import BlogTokenWindow from "./pages/BlogTokenWindow.tsx";
 import BlogModelComparison from "./pages/BlogModelComparison.tsx";
 import BlogMonitoringAiCosts from "./pages/BlogMonitoringAiCosts.tsx";
+import BlogMultiProvider from "./pages/BlogMultiProvider.tsx";
 
 const queryClient = new QueryClient();
 
@@ -88,6 +89,7 @@ const App = () => (
             <Route path="/blog/token-window" element={<BlogTokenWindow />} />
             <Route path="/blog/gpt-vs-claude-vs-gemini" element={<BlogModelComparison />} />
             <Route path="/blog/monitoring-ai-costs" element={<BlogMonitoringAiCosts />} />
+            <Route path="/blog/multi-provider-monitoring" element={<BlogMultiProvider />} />
             <Route path="/shared/:token" element={<SharedDashboard />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

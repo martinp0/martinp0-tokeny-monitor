@@ -6,6 +6,13 @@ import { ArrowRight, BookOpen, Calendar } from "lucide-react";
 
 const POSTS = [
   {
+    slug: "multi-provider-monitoring",
+    title: "Multi-provider monitoring: 7 AI providerů v jednom dashboardu",
+    excerpt: "OpenRouter, Anthropic, OpenAI, Gemini, Mistral, Groq a xAI (Grok) v jednom přehledu. Proč to dává smysl a jak začít.",
+    date: "2026-06-30",
+    tag: "Product update",
+  },
+  {
     slug: "ai-cost-saving",
     title: "10 způsobů, jak ušetřit na AI API nákladech v roce 2026",
     excerpt: "Praktický playbook pro snížení LLM nákladů o 40–80 % bez ztráty kvality. Caching, routing, batch API a další taktiky.",
