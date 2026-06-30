@@ -228,7 +228,7 @@ export function ProviderConnections() {
                 />
               </div>
 
-              {provider !== "openrouter" && (
+              {(provider === "anthropic" || provider === "openai") && (
                 <div>
                   <Label className="text-xs">Organization ID (volitelné)</Label>
                   <Input
