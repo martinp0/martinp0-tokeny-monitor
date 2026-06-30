@@ -142,12 +142,7 @@ export function ProviderConnections() {
 
   async function handleSync(c: Credential) {
     setSyncingId(c.id);
-    const fnName =
-      c.provider === "anthropic"
-        ? "sync-anthropic"
-        : c.provider === "openai"
-          ? "sync-openai"
-          : "sync-openrouter";
+    const fnName = `sync-${c.provider}`;
     const { data, error } = await supabase.functions.invoke(fnName, {
       body: { credential_id: c.id },
     });
