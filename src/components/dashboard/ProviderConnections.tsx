@@ -185,7 +185,7 @@ export function ProviderConnections() {
             <div className="space-y-4">
               <div>
                 <Label className="text-xs">Provider</Label>
-                <div className="mt-1 grid grid-cols-3 gap-2">
+                <div className="mt-1 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
                   {(Object.keys(PROVIDER_META) as ProviderId[]).map((p) => (
                     <button
                       key={p}
