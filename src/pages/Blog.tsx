@@ -6,6 +6,13 @@ import { ArrowRight, BookOpen, Calendar } from "lucide-react";
 
 const POSTS = [
   {
+    slug: "grok-token-optimization",
+    title: "Jak optimalizovat tokeny u Grok API (xAI): 7 praktických tipů",
+    excerpt: "Kratší výstupy, správa historie, prompt caching, výběr modelu a měření. Jak snížit účet za Grok.",
+    date: "2026-10-07",
+    tag: "Cost optimization",
+  },
+  {
     slug: "multi-provider-monitoring",
     title: "Multi-provider monitoring: 7 AI providerů v jednom dashboardu",
     excerpt: "OpenRouter, Anthropic, OpenAI, Gemini, Mistral, Groq a xAI (Grok) v jednom přehledu. Proč to dává smysl a jak začít.",
