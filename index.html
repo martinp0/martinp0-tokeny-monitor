@@ -8,10 +8,6 @@
     <link rel="manifest" href="/manifest.json" />
     <meta name="google-site-verification" content="BG82OYSFT_kGGIpg_Z9qAfL76irGtpXJ90eG6jWEt_w" />
     <meta name="theme-color" content="#a855f7" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" />
     <title>OpenRouter Pricing & Claude API Cost Tracker | Tokeny Monitor</title>
     <meta name="description" content="Free OpenRouter pricing tracker & Claude/GPT API cost dashboard. Sleduj náklady, spotřebu tokenů a výkon AI modelů v reálném čase. CZK + USD, CSV import, MCP server.">
     <meta name="author" content="Martin Pohl" />
@@ -137,11 +133,18 @@
   </head>
 
   <body>
-    <!-- Static H1 for crawlers without JS — React replaces #root on hydration -->
-    <h1 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap">
-      OpenRouter Monitor — Přehled nákladů a spotřeby AI tokenů
-    </h1>
-        <div id="root"></div>
+    <!-- Non-home URLs reuse this document. Hide the prerendered landing before first paint. -->
+    <script>
+      if (location.pathname !== "/") document.documentElement.classList.add("spa-shell");
+    </script>
+    <style>html.spa-shell #root{display:none !important}</style>
+    <div id="root"></div>
+    <script>
+      if (document.documentElement.classList.contains("spa-shell")) {
+        var root = document.getElementById("root");
+        if (root) root.replaceChildren();
+      }
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

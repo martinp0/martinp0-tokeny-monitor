@@ -11,11 +11,11 @@ export function ProviderChart({ data }: Props) {
   const { currency, exchangeRate } = useCurrency();
 
   return (
-    <Card className="bg-card border-border/50">
+    <Card className="bg-card border-border/50 min-w-0 max-w-full overflow-hidden">
       <CardHeader className="pb-2">
         <CardTitle className="text-sm text-muted-foreground uppercase tracking-wider">Náklady dle providera</CardTitle>
       </CardHeader>
-      <CardContent className="h-[280px]">
+      <CardContent className="h-[280px] min-w-0">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} layout="vertical">
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(232, 25%, 18%)" horizontal={false} />

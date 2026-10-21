@@ -16,9 +16,9 @@ type SortKey = "created_at" | "cost_total" | "tokens_prompt" | "generation_time_
 
 function DetailRow({ label, value, color }: { label: string; value: string | number; color?: string }) {
   return (
-    <div className="flex justify-between items-center py-1.5 border-b border-border/30 last:border-0">
-      <span className="text-xs text-muted-foreground">{label}</span>
-      <span className={`text-xs font-mono ${color || "text-foreground"}`}>{value}</span>
+    <div className="flex justify-between items-start gap-3 py-1.5 border-b border-border/30 last:border-0 min-w-0">
+      <span className="text-xs text-muted-foreground shrink-0">{label}</span>
+      <span className={`text-xs font-mono text-right break-all min-w-0 ${color || "text-foreground"}`}>{value}</span>
     </div>
   );
 }
@@ -29,12 +29,12 @@ function RequestDetailModal({ row, open, onClose }: { row: ActivityRow | null; o
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="bg-card border-border max-w-lg max-h-[85vh] overflow-y-auto">
+      <DialogContent className="bg-card border-border w-[calc(100vw-1.5rem)] max-w-lg max-h-[85vh] overflow-y-auto overflow-x-hidden">
         <DialogHeader>
-          <DialogTitle className="text-sm font-mono text-foreground">
+          <DialogTitle className="text-sm font-mono text-foreground break-words">
             <span title={row.model_permaslug}>{shortModel(row.model_permaslug, 32)}</span>
           </DialogTitle>
-          <p className="text-xs text-muted-foreground font-mono">{row.generation_id}</p>
+          <p className="text-xs text-muted-foreground font-mono break-all">{row.generation_id}</p>
         </DialogHeader>
 
         <div className="space-y-4 mt-2">
@@ -162,16 +162,16 @@ export function RequestsTable({ data }: Props) {
               <button
                 key={row.generation_id}
                 onClick={() => setSelectedRow(row)}
-                className="w-full text-left bg-secondary/40 hover:bg-secondary/70 border border-border/30 rounded-md p-3 font-mono text-xs space-y-1.5"
+                className="w-full min-w-0 text-left bg-secondary/40 hover:bg-secondary/70 border border-border/30 rounded-md p-3 font-mono text-xs space-y-1.5"
               >
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-foreground truncate" title={row.model_permaslug}>
+                <div className="flex items-center justify-between gap-2 min-w-0">
+                  <span className="text-foreground truncate min-w-0" title={row.model_permaslug}>
                     {shortModel(row.model_permaslug, 22)}
                   </span>
                   <span className="text-chart-1 shrink-0">{fmtCost(row.cost_total, 4, currency, exchangeRate)}</span>
                 </div>
-                <div className="flex items-center justify-between text-[10px] text-muted-foreground">
-                  <span>{row.provider_name} · {row.created_at.substring(11, 19)}</span>
+                <div className="flex items-center justify-between gap-2 text-[10px] text-muted-foreground min-w-0">
+                  <span className="truncate min-w-0">{row.provider_name} · {row.created_at.substring(11, 19)}</span>
                   <span className={`px-1.5 py-0.5 rounded uppercase font-bold ${
                     row.finish_reason_normalized === "stop" ? "bg-primary/20 text-primary" :
                     row.finish_reason_normalized === "length" ? "bg-chart-3/20 text-chart-3" :
