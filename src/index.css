@@ -1,4 +1,4 @@
-/* Fonts loaded via <link> in index.html for faster LCP */
+/* Fonts are self-hosted from src/fonts.css (font-display: swap). */
 
 @tailwind base;
 @tailwind components;
@@ -67,11 +67,12 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: "Space Grotesk", "Space Grotesk Fallback", sans-serif;
+    overflow-wrap: break-word;
   }
 
   .font-mono {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: "JetBrains Mono", "JetBrains Mono Fallback", ui-monospace, monospace;
   }
 }
 
@@ -120,6 +121,27 @@
   @keyframes float {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-5px); }
+  }
+
+  /* Charts must stay inside their grid cell on narrow screens. */
+  .recharts-responsive-container,
+  .recharts-wrapper,
+  .recharts-surface {
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .recharts-legend-wrapper {
+    width: 100% !important;
+    left: 0 !important;
+  }
+
+  .recharts-default-legend {
+    display: flex !important;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 2px 10px;
+    width: 100%;
   }
 
   .bg-mesh {

@@ -1,5 +1,5 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
+import { useLocation } from "react-router-dom";
 
 export type Currency = "USD" | "CZK";
 
@@ -9,6 +9,8 @@ interface CurrencyContextType {
   toggle: () => void;
   exchangeRate: number;
   rateDate: string | null;
+  /** Loads the ČNB rate. The homepage calls this when the demo is shown. */
+  prefetchExchangeRate: () => void;
 }
 
 const CurrencyContext = createContext<CurrencyContextType>({
@@ -17,39 +19,70 @@ const CurrencyContext = createContext<CurrencyContextType>({
   toggle: () => {},
   exchangeRate: 23.5,
   rateDate: null,
+  prefetchExchangeRate: () => {},
 });
 
+function storedCurrency(): Currency {
+  if (typeof window === "undefined") return "CZK";
+  const value = localStorage.getItem("currency");
+  return value === "USD" || value === "CZK" ? value : "CZK";
+}
+
+function storedRate(): number {
+  if (typeof window === "undefined") return 23.5;
+  const cached = localStorage.getItem("exchangeRate");
+  const parsed = cached ? parseFloat(cached) : NaN;
+  return Number.isFinite(parsed) ? parsed : 23.5;
+}
+
+function storedRateDate(): string | null {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem("exchangeRateDate");
+}
+
+let rateRequest: Promise<void> | null = null;
+
 export function CurrencyProvider({ children }: { children: ReactNode }) {
-  const [currency, setCurrency] = useState<Currency>(() => {
-    return (localStorage.getItem("currency") as Currency) || "CZK";
-  });
-  const [exchangeRate, setExchangeRate] = useState<number>(() => {
-    const cached = localStorage.getItem("exchangeRate");
-    return cached ? parseFloat(cached) : 23.5;
-  });
-  const [rateDate, setRateDate] = useState<string | null>(() => {
-    return localStorage.getItem("exchangeRateDate");
-  });
+  const location = useLocation();
+  const [currency, setCurrency] = useState<Currency>(storedCurrency);
+  const [exchangeRate, setExchangeRate] = useState<number>(storedRate);
+  const [rateDate, setRateDate] = useState<string | null>(storedRateDate);
+
+  const applyRate = useCallback((rate: number, date: string | null) => {
+    setExchangeRate(rate);
+    setRateDate(date);
+  }, []);
+
+  const prefetchExchangeRate = useCallback(() => {
+    if (!rateRequest) {
+      rateRequest = import("@/integrations/supabase/client")
+        .then(({ supabase }) =>
+          supabase
+            .from("exchange_rates")
+            .select("rate, source_date")
+            .eq("currency_pair", "USD_CZK")
+            .single(),
+        )
+        .then(({ data: dbRate }) => {
+          if (!dbRate?.rate) return;
+          const rate = Number(dbRate.rate);
+          const date = dbRate.source_date || null;
+          localStorage.setItem("exchangeRate", String(rate));
+          if (date) localStorage.setItem("exchangeRateDate", date);
+          applyRate(rate, date);
+        })
+        .catch(() => {
+          rateRequest = null;
+        });
+    }
+    return rateRequest;
+  }, [applyRate]);
 
   useEffect(() => {
-    const fetchRate = async () => {
-      // Try DB cache first (fast)
-      const { data: dbRate } = await supabase
-        .from("exchange_rates")
-        .select("rate, source_date")
-        .eq("currency_pair", "USD_CZK")
-        .single();
-
-      if (dbRate?.rate) {
-        const r = Number(dbRate.rate);
-        setExchangeRate(r);
-        setRateDate(dbRate.source_date || null);
-        localStorage.setItem("exchangeRate", String(r));
-        if (dbRate.source_date) localStorage.setItem("exchangeRateDate", dbRate.source_date);
-      }
-    };
-    fetchRate();
-  }, []);
+    // Keep the Supabase client off the homepage critical path.
+    if (location.pathname === "/") return;
+    void prefetchExchangeRate();
+  }, [location.pathname, prefetchExchangeRate]);
 
   const toggle = () => {
     setCurrency((prev) => {
@@ -65,7 +98,7 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <CurrencyContext.Provider value={{ currency, setCurrency: set, toggle, exchangeRate, rateDate }}>
+    <CurrencyContext.Provider value={{ currency, setCurrency: set, toggle, exchangeRate, rateDate, prefetchExchangeRate }}>
       {children}
     </CurrencyContext.Provider>
   );

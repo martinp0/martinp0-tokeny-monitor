@@ -1,8 +1,9 @@
-import { useRef } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { LandingDemoGate } from "@/components/landing/LandingDemoGate";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -24,16 +25,23 @@ import {
   Coffee,
   Github,
 } from "lucide-react";
-import { useDashboardData } from "@/hooks/useDashboardData";
 import { useCurrency } from "@/hooks/useCurrency";
-import { KpiCards } from "@/components/dashboard/KpiCards";
-import { CostTimeChart } from "@/components/dashboard/CostTimeChart";
-import { TokensChart } from "@/components/dashboard/TokensChart";
-import { ModelCostChart } from "@/components/dashboard/ModelCostChart";
-import { ProviderChart } from "@/components/dashboard/ProviderChart";
-import { SpeedChart } from "@/components/dashboard/SpeedChart";
-import { RequestsTable } from "@/components/dashboard/RequestsTable";
-import { useAuth } from "@/hooks/useAuth";
+
+function readStoredSession() {
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (!key || !key.startsWith("sb-") || !key.includes("auth-token")) continue;
+      const raw = localStorage.getItem(key);
+      if (!raw) continue;
+      const parsed = JSON.parse(raw);
+      if (parsed?.access_token || parsed?.currentSession?.access_token) return true;
+    }
+  } catch {
+    /* ignore broken storage */
+  }
+  return false;
+}
 
 const FEATURES = [
   {
@@ -102,21 +110,19 @@ const FAQS = [
 ];
 
 export default function Landing() {
-  const { session } = useAuth();
   const { t } = useTranslation();
-  const dashRef = useRef<HTMLDivElement>(null);
-  const {
-    filteredData, selectedModel, setSelectedModel,
-    totalCost, totalRequests, totalTokens, avgGenTime,
-    costByModel, costByProvider, timeSeries,
-  } = useDashboardData({ demoMode: true });
-  const { currency, toggle: toggleCurrency, exchangeRate } = useCurrency();
+  const { currency, toggle: toggleCurrency } = useCurrency();
+  const [hasSession, setHasSession] = useState(false);
 
-  const ctaHref = session ? "/dashboard" : "/auth";
-  const ctaLabel = session ? t("nav.openDashboard") : t("nav.startFree");
+  useEffect(() => {
+    setHasSession(readStoredSession());
+  }, []);
+
+  const ctaHref = hasSession ? "/dashboard" : "/auth";
+  const ctaLabel = hasSession ? t("nav.openDashboard") : t("nav.startFree");
 
   return (
-    <div className="min-h-screen bg-background bg-mesh text-foreground">
+    <div className="min-h-screen max-w-full bg-background bg-mesh text-foreground">
       <Helmet>
         <title>OpenRouter Monitor – Přehled nákladů a spotřeby AI tokenů</title>
         <meta name="description" content="Sledujte náklady, spotřebu tokenů a výkon modelů na OpenRouter. Dashboard pro analýzu API volání v reálném čase s podporou CZK a USD." />
@@ -152,12 +158,12 @@ export default function Landing() {
       </Helmet>
       {/* Nav */}
       <header className="sticky top-0 z-50 border-b border-white/[0.06] glass">
-        <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-3">
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-2 min-w-0">
+          <Link to="/" className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <div className="h-8 w-8 shrink-0 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
               <Activity className="h-4 w-4 text-white" />
             </div>
-            <span className="text-lg font-bold gradient-text tracking-tight">OpenRouter Monitor</span>
+            <span className="text-sm sm:text-lg font-bold gradient-text tracking-tight truncate">OpenRouter Monitor</span>
           </Link>
           <nav className="hidden md:flex items-center gap-8 text-sm font-mono text-muted-foreground">
             <a href="#features" className="hover:text-foreground transition-colors">{t("nav.features")}</a>
@@ -165,7 +171,7 @@ export default function Landing() {
             <a href="#how" className="hover:text-foreground transition-colors">{t("nav.howItWorks")}</a>
             <a href="#faq" className="hover:text-foreground transition-colors">{t("nav.faq")}</a>
           </nav>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
             <a
               href="https://buymeacoffee.com/martinpohlp"
               target="_blank"
@@ -175,8 +181,8 @@ export default function Landing() {
               <Coffee className="h-3 w-3" />
               {t("hero.buyMeCoffeeShort")}
             </a>
-            <LanguageSwitcher />
-            {!session && (
+            <LanguageSwitcher className="px-2 sm:px-3" />
+            {!hasSession && (
               <Link to="/auth">
                 <Button variant="ghost" size="sm" className="font-mono text-xs hidden sm:inline-flex">
                   {t("nav.login")}
@@ -186,7 +192,7 @@ export default function Landing() {
             <Link to={ctaHref}>
               <Button
                 size="sm"
-                className="gap-1.5 font-mono text-xs bg-gradient-to-r from-primary to-[hsl(320,90%,65%)] hover:opacity-90 transition-opacity border-0"
+                className="gap-1.5 font-mono text-xs px-2.5 sm:px-3 bg-gradient-to-r from-primary to-[hsl(320,90%,65%)] hover:opacity-90 transition-opacity border-0"
               >
                 {ctaLabel}
                 <ArrowRight className="h-3.5 w-3.5" />
@@ -198,8 +204,8 @@ export default function Landing() {
 
       <main>
       {/* Hero */}
-      <section className="relative px-6 pt-20 pb-16 max-w-7xl mx-auto text-center">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass border-white/[0.08] text-xs font-mono text-muted-foreground mb-8 animate-fade-in">
+      <section className="relative px-4 sm:px-6 pt-20 pb-16 max-w-7xl mx-auto text-center">
+        <div className="inline-flex max-w-full items-center gap-2 px-3 py-1 rounded-full glass border-white/[0.08] text-xs font-mono text-muted-foreground mb-8 animate-fade-in">
           <Sparkles className="h-3 w-3 text-accent" />
           Přehled nákladů AI tokenů v reálném čase
         </div>
@@ -228,7 +234,7 @@ export default function Landing() {
             </Button>
           </a>
         </div>
-        <div className="flex items-center justify-center gap-5 text-xs font-mono text-muted-foreground">
+        <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs font-mono text-muted-foreground">
           <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-accent" />Zdarma</span>
           <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-accent" />Bez instalace</span>
           <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-accent" />CZ rozhraní</span>
@@ -238,7 +244,7 @@ export default function Landing() {
             href="https://buymeacoffee.com/martinpohlp"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-[hsl(35,100%,60%)]/20 to-[hsl(20,90%,55%)]/20 border border-[hsl(35,100%,60%)]/30 text-[hsl(35,100%,70%)] text-sm font-mono hover:from-[hsl(35,100%,60%)]/30 hover:to-[hsl(20,90%,55%)]/30 hover:border-[hsl(35,100%,60%)]/50 transition-all group"
+            className="inline-flex max-w-full items-center justify-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-[hsl(35,100%,60%)]/20 to-[hsl(20,90%,55%)]/20 border border-[hsl(35,100%,60%)]/30 text-[hsl(35,100%,70%)] text-sm font-mono hover:from-[hsl(35,100%,60%)]/30 hover:to-[hsl(20,90%,55%)]/30 hover:border-[hsl(35,100%,60%)]/50 transition-all group text-center"
           >
             <Coffee className="h-4 w-4 group-hover:scale-110 transition-transform" />
             Líbí se ti to? Kup mi kafe ☕
@@ -248,7 +254,7 @@ export default function Landing() {
       </section>
 
       {/* Features */}
-      <section id="features" className="px-6 py-20 max-w-7xl mx-auto">
+      <section id="features" className="px-4 sm:px-6 py-20 max-w-7xl mx-auto">
         <div className="text-center mb-14">
           <h2 className="text-3xl md:text-5xl font-bold mb-4">
             Vše, co potřebuješ pro <span className="gradient-text">kontrolu AI nákladů</span>
@@ -278,7 +284,7 @@ export default function Landing() {
       </section>
 
       {/* Live Demo */}
-      <section id="demo" className="px-6 py-20 max-w-[1600px] mx-auto">
+      <section id="demo" className="px-4 sm:px-6 py-20 max-w-[1600px] mx-auto">
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/15 text-accent text-xs font-mono mb-4">
             <Activity className="h-3 w-3" />
@@ -300,24 +306,7 @@ export default function Landing() {
           </Button>
         </div>
 
-        <div ref={dashRef} className="space-y-4 rounded-2xl glass border-white/[0.08] p-4 md:p-6 glow-sm">
-          <KpiCards
-            totalCost={totalCost}
-            totalRequests={totalRequests}
-            totalTokens={totalTokens}
-            avgGenTime={avgGenTime}
-          />
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <CostTimeChart data={timeSeries} />
-            <TokensChart data={timeSeries} />
-          </div>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <ModelCostChart data={costByModel} onModelClick={setSelectedModel} selectedModel={selectedModel} />
-            <ProviderChart data={costByProvider} />
-            <SpeedChart data={timeSeries} />
-          </div>
-          <RequestsTable data={filteredData} />
-        </div>
+        <LandingDemoGate />
 
         <div className="mt-10 text-center">
           <p className="text-sm text-muted-foreground font-mono mb-4">
@@ -336,7 +325,7 @@ export default function Landing() {
       </section>
 
       {/* How it works */}
-      <section id="how" className="px-6 py-20 max-w-5xl mx-auto">
+      <section id="how" className="px-4 sm:px-6 py-20 max-w-5xl mx-auto">
         <h2 className="text-3xl md:text-5xl font-bold mb-12 text-center">
           3 kroky k <span className="gradient-text">dokonalému přehledu</span>
         </h2>
@@ -358,7 +347,7 @@ export default function Landing() {
       </section>
 
       {/* FAQ */}
-      <section id="faq" className="px-6 py-20 max-w-4xl mx-auto">
+      <section id="faq" className="px-4 sm:px-6 py-20 max-w-4xl mx-auto">
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/15 text-primary text-xs font-mono mb-4">
             <Sparkles className="h-3 w-3" />
@@ -378,8 +367,8 @@ export default function Landing() {
               value={`faq-${i}`}
               className="glass border-white/[0.08] rounded-xl px-5 data-[state=open]:glow-sm transition-shadow"
             >
-              <AccordionTrigger className="text-left font-bold hover:no-underline py-5">
-                {item.q}
+              <AccordionTrigger className="text-left font-bold hover:no-underline py-5 min-w-0 gap-3">
+                <span className="min-w-0 flex-1">{item.q}</span>
               </AccordionTrigger>
               <AccordionContent className="text-sm text-muted-foreground leading-relaxed pb-5">
                 {item.a}
@@ -390,7 +379,7 @@ export default function Landing() {
       </section>
 
       {/* Maker — nenápadné propojení s martin.pohl.uk */}
-      <section id="maker" className="px-6 py-16 max-w-5xl mx-auto">
+      <section id="maker" className="px-4 sm:px-6 py-16 max-w-5xl mx-auto">
         <a
           href="https://martin.pohl.uk?utm_source=tokeny.pohl.uk&utm_medium=landing&utm_campaign=maker_card"
           target="_blank"
@@ -427,10 +416,12 @@ export default function Landing() {
       </section>
 
       {/* Support — Buy Me a Coffee */}
-      <section className="px-6 py-12 max-w-3xl mx-auto text-center">
-        <div className="glass rounded-2xl border-[hsl(35,100%,60%)]/20 p-8 md:p-10 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-[hsl(35,100%,60%)]/5 via-transparent to-[hsl(20,90%,55%)]/5 pointer-events-none" />
-          <div className="absolute -top-10 -right-10 h-32 w-32 bg-[hsl(35,100%,60%)]/10 rounded-full blur-3xl pointer-events-none" />
+      <section className="px-4 sm:px-6 py-12 max-w-3xl mx-auto text-center">
+        <div className="glass rounded-2xl border-[hsl(35,100%,60%)]/20 p-6 sm:p-8 md:p-10 relative overflow-hidden max-w-full">
+          <div className="absolute inset-0 overflow-hidden rounded-[inherit] pointer-events-none" aria-hidden>
+            <div className="absolute inset-0 bg-gradient-to-br from-[hsl(35,100%,60%)]/5 via-transparent to-[hsl(20,90%,55%)]/5" />
+            <div className="absolute top-0 right-0 h-24 w-24 bg-[hsl(35,100%,60%)]/10 rounded-full blur-2xl" />
+          </div>
           <div className="relative">
             <div className="h-12 w-12 rounded-full bg-gradient-to-br from-[hsl(35,100%,60%)] to-[hsl(20,90%,55%)] flex items-center justify-center mx-auto mb-5 shadow-lg shadow-[hsl(35,100%,60%)]/20">
               <Coffee className="h-6 w-6 text-white" />
@@ -461,7 +452,7 @@ export default function Landing() {
       </section>
 
       {/* Open Source */}
-      <section className="px-6 py-12 max-w-3xl mx-auto text-center">
+      <section className="px-4 sm:px-6 py-12 max-w-3xl mx-auto text-center">
         <div className="glass rounded-2xl border-white/[0.08] p-8 md:p-10 flex flex-col items-center">
           <div className="h-12 w-12 rounded-full bg-gradient-to-br from-[hsl(0,0%,20%)] to-[hsl(0,0%,40%)] flex items-center justify-center mb-5">
             <Github className="h-6 w-6 text-white" />
@@ -492,8 +483,8 @@ export default function Landing() {
       </section>
 
       {/* Final CTA */}
-      <section className="px-6 py-24 max-w-4xl mx-auto text-center">
-        <div className="rounded-3xl glass border-white/[0.08] p-12 glow-md relative overflow-hidden">
+      <section className="px-4 sm:px-6 py-24 max-w-4xl mx-auto text-center">
+        <div className="rounded-3xl glass border-white/[0.08] p-6 sm:p-10 md:p-12 glow-md relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10 pointer-events-none" />
           <Globe className="h-12 w-12 text-accent mx-auto mb-6 relative" />
           <h2 className="text-3xl md:text-5xl font-bold mb-4 relative">
@@ -518,9 +509,9 @@ export default function Landing() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-white/[0.06] px-6 py-8">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-xs font-mono text-muted-foreground">
-          <div className="flex items-center gap-2">
+      <footer className="border-t border-white/[0.06] px-4 sm:px-6 py-8">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-xs font-mono text-muted-foreground min-w-0">
+          <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 max-w-full text-center">
             <Activity className="h-3.5 w-3.5" />
             <span>
               OpenRouter Monitor · {new Date().getFullYear()} · crafted by{" "}
@@ -534,7 +525,7 @@ export default function Landing() {
               </a>
             </span>
           </div>
-          <div className="flex items-center gap-6">
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 max-w-full md:justify-end">
             <a
               href="https://buymeacoffee.com/martinpohlp"
               target="_blank"

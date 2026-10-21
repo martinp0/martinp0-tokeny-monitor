@@ -8,11 +8,11 @@ interface Props {
 
 export function TokensChart({ data }: Props) {
   return (
-    <Card className="bg-card border-border/50">
+    <Card className="bg-card border-border/50 min-w-0 max-w-full overflow-hidden">
       <CardHeader className="pb-2">
         <CardTitle className="text-sm text-muted-foreground uppercase tracking-wider">Tokeny na požadavek</CardTitle>
       </CardHeader>
-      <CardContent className="h-[280px]">
+      <CardContent className="h-[280px] min-w-0">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data}>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(232, 25%, 18%)" />

@@ -22,7 +22,7 @@ export function KpiCards({ totalCost, totalRequests, totalTokens, avgGenTime }: 
   ];
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 min-w-0">
       {kpis.map(({ key, label, emoji, icon: Icon, format, color, glow }, index) => (
         <Card
           key={key}
@@ -32,10 +32,10 @@ export function KpiCards({ totalCost, totalRequests, totalTokens, avgGenTime }: 
           <div className={`absolute inset-0 bg-gradient-to-br ${glow} to-transparent opacity-0 group-hover:opacity-[0.06] transition-opacity duration-500`} />
           <CardContent className="p-4 relative">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs text-muted-foreground uppercase tracking-wider">{label}</span>
+              <span className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wider leading-tight min-w-0">{label}</span>
               <span className="text-lg group-hover:animate-float">{emoji}</span>
             </div>
-            <p className={`text-2xl font-mono font-bold ${color}`}>{format(values[key])}</p>
+            <p className={`text-xl sm:text-2xl font-mono font-bold leading-none break-words ${color}`}>{format(values[key])}</p>
           </CardContent>
         </Card>
       ))}

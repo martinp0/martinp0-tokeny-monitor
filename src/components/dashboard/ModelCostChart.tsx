@@ -23,7 +23,7 @@ export function ModelCostChart({ data, onModelClick, selectedModel }: Props) {
   const { currency, exchangeRate } = useCurrency();
 
   return (
-    <Card className="bg-card border-border/50">
+    <Card className="bg-card border-border/50 min-w-0 max-w-full overflow-hidden">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm text-muted-foreground uppercase tracking-wider">Náklady dle modelu</CardTitle>
@@ -34,7 +34,7 @@ export function ModelCostChart({ data, onModelClick, selectedModel }: Props) {
           )}
         </div>
       </CardHeader>
-      <CardContent className="h-[280px]">
+      <CardContent className="h-[280px] min-w-0">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
