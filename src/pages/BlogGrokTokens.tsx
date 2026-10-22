@@ -1,5 +1,6 @@
 import BlogPostLayout from "@/components/BlogPostLayout";
 import { Link } from "react-router-dom";
+import { GrokPricingTable } from "@/components/GrokPricingTable";
 
 export default function BlogGrokTokens() {
   return (
@@ -69,11 +70,16 @@ export default function BlogGrokTokens() {
         reagovat slušně, ne spadnout.
       </p>
 
-      <h2>Pozor na ceník</h2>
+      <h2>Aktuální ceník Grok API</h2>
       <p>
-        Ceny za 1M tokenů se u Groku mění s každou generací modelů. Aktuální
-        sazby si vždy ověř přímo v dokumentaci a konzoli xAI, ne v tabulkách na
-        blozích.
+        Cached input je u Groku 4–7× levnější než běžný vstup, proto se prompt
+        caching vyplatí hned. Pozor na hranici 200k tokenů: nad ní se celý
+        request účtuje dvojnásobnou sazbou.
+      </p>
+      <GrokPricingTable />
+      <p>
+        Pro srovnání s OpenAI viz{" "}
+        <Link to="/gpt-api-cost">ceník GPT API</Link>.
       </p>
 
       <h2>Další krok</h2>
