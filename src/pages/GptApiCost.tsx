@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, Check, DollarSign, TrendingDown, Zap } from "lucide-react";
+import { GrokPricingTable } from "@/components/GrokPricingTable";
 
 const GPT_MODELS = [
   { name: "GPT-4o mini", input: 200, output: 800, use: "Vysoký objem, klasifikace, levný chat" },
@@ -157,6 +158,18 @@ export default function GptApiCost() {
             </Card>
           ))}
         </div>
+      </section>
+
+      <section className="container mx-auto px-4 py-10 max-w-5xl">
+        <h2 className="text-2xl md:text-3xl font-display font-bold mb-3">Pro srovnání: Grok (xAI) za 1M tokenů</h2>
+        <p className="text-muted-foreground mb-6 max-w-2xl">
+          Grok 4.3 je na vstupu levnější než GPT-5 a na výstupu výrazně levnější. Grok 4.7 stojí na vstupu
+          víc, ale výstup je pořád pod GPT-5. Tipy na úsporu najdeš v článku{" "}
+          <Link to="/blog/grok-token-optimization" className="text-primary hover:underline">
+            jak optimalizovat tokeny u Grok API
+          </Link>.
+        </p>
+        <GrokPricingTable />
       </section>
 
       <section className="container mx-auto px-4 py-10 max-w-5xl">
