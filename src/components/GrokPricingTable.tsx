@@ -4,7 +4,7 @@ export function GrokPricingTable() {
   return (
     <div className="not-prose">
       <div className="overflow-x-auto rounded-xl border border-border/40">
-        <table className="w-full text-sm">
+        <table className="w-full text-sm whitespace-nowrap">
           <thead>
             <tr className="bg-muted/40">
               <th className="px-4 py-3 text-left font-semibold">Model</th>
