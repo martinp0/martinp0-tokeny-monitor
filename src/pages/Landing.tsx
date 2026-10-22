@@ -116,6 +116,32 @@ export default function Landing() {
 
   useEffect(() => {
     setHasSession(readStoredSession());
+
+    // Email confirmation / magic links land on "/" with tokens in the URL.
+    // Load the auth client immediately so it can store the session before
+    // the user navigates away and the tokens are lost.
+    const { hash, search } = window.location;
+    const hasAuthParams =
+      /(?:^|[#&])(access_token|refresh_token|error_description)=/.test(hash) ||
+      /[?&](code|token_hash|error_description)=/.test(search);
+    if (!hasAuthParams) return;
+
+    let cancelled = false;
+    let unsubscribe = () => {};
+    import("@/integrations/supabase/client").then(({ supabase }) => {
+      if (cancelled) return;
+      const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+        if (!cancelled) setHasSession(!!session);
+      });
+      unsubscribe = () => data.subscription.unsubscribe();
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (!cancelled) setHasSession(!!session);
+      });
+    });
+    return () => {
+      cancelled = true;
+      unsubscribe();
+    };
   }, []);
 
   const ctaHref = hasSession ? "/dashboard" : "/auth";
