@@ -1,5 +1,6 @@
 import BlogPostLayout from "@/components/BlogPostLayout";
 import { Link } from "react-router-dom";
+import { GrokPricingTable } from "@/components/GrokPricingTable";
 
 export default function BlogGrokTokens() {
   return (
