@@ -80,9 +80,11 @@ struct MenuContent: View {
             Divider()
             HStack {
                 Button { Task { await model.refresh() } } label: { Image(systemName: "arrow.clockwise") }
-                    .disabled(model.loading).help("Obnovit")
+                    .disabled(model.loading).help("Obnovit (⌘R)")
+                    .keyboardShortcut("r", modifiers: .command)
                 Button("Dashboard") { openURL(URL(string: "https://tokeny.pohl.uk/dashboard")!) }
-                Button { showSettings.toggle() } label: { Image(systemName: "gearshape") }.help("Nastavení")
+                Button { showSettings.toggle() } label: { Image(systemName: "gearshape") }.help("Nastavení (⌘,)")
+                    .keyboardShortcut(",", modifiers: .command)
                 Spacer()
                 Toggle("Po přihlášení", isOn: $launchAtLogin)
                     .toggleStyle(.checkbox).font(.caption)
@@ -91,6 +93,7 @@ struct MenuContent: View {
                         catch { launchAtLogin = SMAppService.mainApp.status == .enabled }
                     }
                 Button("Konec") { NSApplication.shared.terminate(nil) }
+                    .keyboardShortcut("q", modifiers: .command)
             }
         }
         .padding(14)
