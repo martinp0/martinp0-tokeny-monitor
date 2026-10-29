@@ -93,6 +93,7 @@ struct MenuContent: View {
                         catch { launchAtLogin = SMAppService.mainApp.status == .enabled }
                     }
                 Button("Konec") { NSApplication.shared.terminate(nil) }
+                    .help("Konec (⌘Q)")
                     .keyboardShortcut("q", modifiers: .command)
             }
         }
