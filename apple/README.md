@@ -33,3 +33,9 @@ cd apple && xcodegen generate && open Tokeny.xcodeproj
 
 Ve všech targetech nastav Team. Capabilities jsou v `project.yml`: App Groups `group.cz.martinpohl.tokeny`,
 Keychain Sharing `cz.martinpohl.tokeny.shared` a na Macu App Sandbox s Outgoing Connections.
+
+## Zkratky, Spotlight a tlačítko Akce (App Intents)
+
+`SharedUI/TokenyIntents.swift` (iPhone i Mac): **Útrata za AI dnes** (dnes, měsíc, odhad, rozpočet) a **Je rozpočet na AI v pořádku?** (vrací Ano/Ne pro automatizace). Jsou to App Shortcuts, takže se samy objeví ve Zkratkách, ve Spotlightu a pro tlačítko Akce. Siri anglicky („How much did I spend today in Tokeny“), cs/sk názvy v `SharedUI/AppShortcuts.xcstrings`.
+
+`Shared/PrivacyInfo.xcprivacy`: privacy manifest pro všechny cíle (UserDefaults v App Group: CA92.1, 1C8F.1; žádný tracking ani sběr dat).
