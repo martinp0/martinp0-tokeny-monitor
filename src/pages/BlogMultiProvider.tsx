@@ -67,10 +67,11 @@ export default function BlogMultiProvider() {
 
       <h2>Bezpečnost klíčů</h2>
       <p>
-        API klíče se ukládají do <code>provider_credentials</code> s column-level
-        GRANT — browser je <strong>nikdy</strong> nedostane zpět ven. Sync běží
-        na serveru přes Edge Function se service-role přístupem. Pokud klíč
-        smažeš, smaže se okamžitě a sync se zastaví.
+        API klíče se na serveru ukládají zašifrované v Supabase Vault — v tabulce
+        zůstane jen odkaz na šifrovaný záznam a náhled posledních 4 znaků. Browser
+        klíč <strong>nikdy</strong> nedostane zpět ven; dešifruje ho jen Edge
+        Function se service-role přístupem ve chvíli syncu. Pokud klíč smažeš,
+        smaže se okamžitě i z Vaultu a sync se zastaví.
       </p>
 
       <h2>Jak začít</h2>
