@@ -203,7 +203,7 @@ export function ProviderConnections() {
             <DialogHeader>
               <DialogTitle>Připojit API providera</DialogTitle>
               <DialogDescription>
-                Klíč je uložen v zabezpečené tabulce — nikdy se neposílá zpět do prohlížeče.
+                Klíč se na serveru zašifruje (Supabase Vault) a nikdy se neposílá zpět do prohlížeče, uvidíš jen poslední 4 znaky.
                 Sync běží na serveru přes Edge Function.
               </DialogDescription>
             </DialogHeader>

@@ -67,7 +67,7 @@ All functions are under `supabase/functions/`. They run on Deno and import from 
 | `mcp` | Streamable MCP server (Hono + `mcp-lite` 0.10: `mcp.tool(name, def)`, `transport.bind(mcp)`); Bearer token hashed against `mcp_tokens.token_hash`; every tool is scoped to the token owner's `user_id` and aggregates in SQL |
 | `usage-summary` | JSON summary for the native apps and widgets. Accepts a Supabase user JWT (free plan clamped to 30 days, no forecast) or a Pro `orm_` token |
 | `check-budget` | Checks monthly spend vs `budget_alerts` (service-role JWT only) |
-| `save-provider-credential` | Writes `api_key` to `provider_credentials` using service role (clients cannot read/write `api_key`). Only `openrouter`, `anthropic`, `openai` are accepted |
+| `save-provider-credential` | Stores the key encrypted in Supabase Vault via the `save_provider_credential` RPC (service role only); the row keeps `api_key_secret_id` + a masked `key_preview`. Only `openrouter`, `anthropic`, `openai` are accepted |
 | `create-mcp-token` | Generates a random token, stores `sha256(token)` in `mcp_tokens` |
 | `get-exchange-rate` | Fetches USD/CZK rate from ČNB, stores in `exchange_rates` |
 | `get-shared-dashboard` / `og-dashboard` | Public share-token snapshot (paged, max 50k rows) / OG image (SQL aggregate) |
@@ -79,7 +79,7 @@ Shared code lives in `supabase/functions/_shared/`. `sync-core.ts` and `paginate
 ### Database Schema (key tables)
 
 - **`activity_rows`**: central fact table. Unique key is **`(user_id, generation_id)`** — every upsert must use `onConflict: "user_id,generation_id"` (synthetic sync ids are identical across users). `created_at` is TEXT (ISO-ish). Aggregate with the `activity_aggregate(p_user_id, p_from, p_to, p_model, p_provider, p_group_by)` RPC (security invoker, RLS applies). `provider_source` ∈ `{openrouter, anthropic, openai}`. `request_count` is 1 for per-generation rows, N for Admin API bucket rows. RLS: users see only their own `user_id` rows.
-- **`provider_credentials`**: stores API keys for direct-sync providers (`openrouter`, `anthropic`, `openai` only). `api_key` column is REVOKED from `authenticated` role — reads/writes must go through the `save-provider-credential` edge function (service role).
+- **`provider_credentials`**: stores API keys for direct-sync providers (`openrouter`, `anthropic`, `openai` only). Keys are encrypted at rest in Supabase Vault (`api_key_secret_id` → `vault.secrets`); there is no plaintext column. Only `service_role` can call `save_provider_credential` / `get_provider_credential_key` / `delete_provider_credentials` (helpers in `supabase/functions/_shared/credential-keys.ts`). `authenticated` can SELECT metadata columns, UPDATE label/enabled/organization_id and DELETE its own rows (an AFTER DELETE trigger drops the Vault secret); it cannot INSERT. SQL tests: `PGURL=postgres://… ./supabase/tests/run-vault-test.sh` (needs Postgres with the supabase_vault extension).
 - **`mcp_tokens`**: MCP bearer tokens. Only the `sha256` hash is stored.
 - **`budget_alerts`**: one row per user, monthly budget + email threshold.
 - **`shared_dashboards`**: share tokens with optional expiry and filters blob.

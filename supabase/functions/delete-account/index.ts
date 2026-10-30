@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { deleteCredentials } from "../_shared/credential-keys.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -39,6 +40,18 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
+
+    // Provider credentials first, with their encrypted keys in Vault. Stop if this fails, so no
+    // key outlives the account (the ON DELETE CASCADE + trigger is only the safety net).
+    try {
+      await deleteCredentials(supabaseAdmin, user.id);
+    } catch (e) {
+      console.error("delete-account credential delete error", e instanceof Error ? e.message : e);
+      return new Response(JSON.stringify({ error: "Internal server error" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     // Delete user data in order
     await supabaseAdmin.from("activity_rows").delete().eq("user_id", user.id);

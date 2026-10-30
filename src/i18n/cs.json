@@ -221,7 +221,7 @@
         },
         {
           "q": "Jak jsou chráněná moje data?",
-          "a": "Data leží v Postgresu u Supabase a každý řádek je svázaný s tvým účtem pravidly Row-Level Security. API klíče providerů se ukládají jen na serveru a do prohlížeče se nikdy nevracejí. Účet i všechna data můžeš kdykoli smazat v profilu."
+          "a": "Data leží v Postgresu u Supabase a každý řádek je svázaný s tvým účtem pravidly Row-Level Security. API klíče providerů jsou na serveru zašifrované v Supabase Vault a do prohlížeče se nikdy nevracejí (vidíš jen poslední 4 znaky). Účet i všechna data můžeš kdykoli smazat v profilu."
         },
         {
           "q": "Kolik to stojí?",

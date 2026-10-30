@@ -221,7 +221,7 @@
         },
         {
           "q": "How is my data protected?",
-          "a": "Data lives in Supabase Postgres and every row is tied to your account with Row-Level Security policies. Provider API keys are stored server-side only and never sent back to the browser. You can delete your account and all data at any time from your profile."
+          "a": "Data lives in Supabase Postgres and every row is tied to your account with Row-Level Security policies. Provider API keys are encrypted at rest in Supabase Vault and never sent back to the browser (you only see the last 4 characters). You can delete your account and all data at any time from your profile."
         },
         {
           "q": "How much does it cost?",

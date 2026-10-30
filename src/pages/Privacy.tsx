@@ -48,7 +48,7 @@ const CS: Copy = {
       ul: [
         "Účet: e-mail, ID uživatele a údaje o přihlášení (heslo ukládá Supabase Auth pouze jako hash). Při přihlášení přes Google nebo Apple dostaneme od nich e-mail a identifikátor účtu; u Apple to může být anonymní přeposílací adresa.",
         "Profil: zobrazované jméno a odkaz na avatar, pokud je vyplníte.",
-        "API klíče poskytovatelů (OpenRouter, Anthropic, OpenAI), které sami připojíte. Ukládáme je v databázi na serveru; prohlížeč ani aplikace je zpět nedostanou (vidíte jen zkrácený náhled). Nejsou šifrované zvlášť aplikací, chrání je přístupová práva databáze a šifrování úložiště u Supabase. Doporučujeme připojovat klíče jen s oprávněním ke čtení nákladů, kde to poskytovatel umožňuje.",
+        "API klíče poskytovatelů (OpenRouter, Anthropic, OpenAI), které sami připojíte. Na serveru je ukládáme zašifrované (Supabase Vault, autentizované šifrování s klíčem uloženým mimo databázi). Dešifrují se jen v serverové funkci ve chvíli synchronizace; prohlížeč ani aplikace je nikdy nedostanou, vidíte jen poslední 4 znaky. Doporučujeme připojovat klíče jen s oprávněním ke čtení nákladů, kde to poskytovatel umožňuje.",
         "Údaje o využití AI, které stáhneme od poskytovatelů pomocí vašich klíčů: čas, model, poskytovatel, počty tokenů, cena, doba generování, název aplikace a název API klíče u poskytovatele. Neukládáme obsah vašich promptů ani odpovědí.",
         "Nastavení: měsíční rozpočet, práh upozornění a případně e-mail pro upozornění.",
         "Tokeny pro MCP server (ukládáme jen jejich hash) a sdílené odkazy na dashboard, pokud je vytvoříte.",
@@ -97,7 +97,7 @@ const CS: Copy = {
     {
       h: "7. Zrušení účtu",
       p: [
-        "Účet zrušíte v Nastavení na webu nebo v aplikaci pro iPhone či Mac. Smažeme tím účet, profil, připojené klíče, údaje o využití, nastavení upozornění, MCP tokeny a sdílené odkazy. Předplatné Pro před zrušením účtu prosím ukončete ve správě předplatného (Stripe), zrušení účtu ho samo neukončí.",
+        "Účet zrušíte v Nastavení na webu nebo v aplikaci pro iPhone či Mac. Smažeme tím účet, profil, připojené (zašifrované) klíče, údaje o využití, nastavení upozornění, MCP tokeny a sdílené odkazy. Předplatné Pro před zrušením účtu prosím ukončete ve správě předplatného (Stripe), zrušení účtu ho samo neukončí.",
       ],
     },
     {
@@ -137,7 +137,7 @@ const EN: Copy = {
       ul: [
         "Account: e-mail, user ID and sign-in data (Supabase Auth stores passwords only as a hash). If you sign in with Google or Apple, we receive your e-mail and account identifier from them; with Apple this can be a private relay address.",
         "Profile: display name and avatar link, if you set them.",
-        "Provider API keys (OpenRouter, Anthropic, OpenAI) that you connect. They are stored in the database on the server; neither the browser nor the apps can read them back (you only see a short preview). They are not separately encrypted by the app; they are protected by database access rules and Supabase's storage encryption. Where the provider allows it, connect a key that can only read usage and costs.",
+        "Provider API keys (OpenRouter, Anthropic, OpenAI) that you connect. They are encrypted at rest on the server (Supabase Vault, authenticated encryption with a key kept outside the database). They are decrypted only inside a server function when a sync runs; the browser and the apps never receive them, you only see the last 4 characters. Where the provider allows it, connect a key that can only read usage and costs.",
         "AI usage data we fetch from your providers with your keys: time, model, provider, token counts, cost, generation time, app name and the key's name at the provider. We do not store the content of your prompts or responses.",
         "Settings: monthly budget, alert threshold and, optionally, an e-mail address for alerts.",
         "MCP server tokens (only their hash is stored) and shared dashboard links, if you create them.",
@@ -186,7 +186,7 @@ const EN: Copy = {
     {
       h: "7. Deleting your account",
       p: [
-        "Delete your account in Settings on the web or in the iPhone or Mac app. This deletes the account, profile, connected keys, usage data, alert settings, MCP tokens and shared links. Please cancel Pro in subscription management (Stripe) first; deleting the account does not cancel it by itself.",
+        "Delete your account in Settings on the web or in the iPhone or Mac app. This deletes the account, profile, connected (encrypted) keys, usage data, alert settings, MCP tokens and shared links. Please cancel Pro in subscription management (Stripe) first; deleting the account does not cancel it by itself.",
       ],
     },
     {

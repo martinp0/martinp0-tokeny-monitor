@@ -8,6 +8,7 @@ import { runCredentialSync, type Credential } from "./sync-runner.ts";
 import type { SyncProvider } from "./sync-core.ts";
 import { getIsPro, proRequired } from "./entitlements.ts";
 import { syncableCredentialIds } from "./plan.ts";
+import { loadCredentialKey, MissingKeyError } from "./credential-keys.ts";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -32,7 +33,7 @@ export async function handleUserSync(req: Request, provider: SyncProvider): Prom
     const svc = serviceClient();
     const { data: cred, error } = await svc
       .from("provider_credentials")
-      .select("id, user_id, provider, api_key, enabled, last_synced_at")
+      .select("id, user_id, provider, enabled, last_synced_at")
       .eq("id", credentialId)
       .eq("user_id", user.id)
       .maybeSingle();
@@ -54,7 +55,16 @@ export async function handleUserSync(req: Request, provider: SyncProvider): Prom
 
     const end = parseDate(body?.ending_at ?? body?.end_time);
     const start = parseDate(body?.starting_at ?? body?.start_time);
-    const outcome = await runCredentialSync(svc, cred as Credential, {
+    // The key is decrypted from Vault only now, after ownership, provider and plan checks.
+    let apiKey: string;
+    try {
+      apiKey = await loadCredentialKey(svc, cred.id);
+    } catch (e) {
+      if (e instanceof MissingKeyError) return json({ error: e.message }, 400);
+      throw e;
+    }
+    const credential: Credential = { ...(cred as Omit<Credential, "api_key">), api_key: apiKey };
+    const outcome = await runCredentialSync(svc, credential, {
       start,
       end,
       bucketWidth: body?.bucket_width === "1h" ? "1h" : "1d",
