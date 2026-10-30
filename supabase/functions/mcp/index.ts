@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { McpServer, StreamableHttpTransport } from "mcp-lite";
 import { createClient } from "@supabase/supabase-js";
+import { isProSubscription, proRequiredBody } from "../_shared/plan.ts";
 
 // Tokens are sha256 hashes (matched against mcp_tokens.token_hash).
 async function sha256Hex(s: string): Promise<string> {
@@ -13,6 +14,17 @@ function svc() {
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
   );
+}
+
+/** MCP access is a Pro feature — checked on every request so a lapsed subscription stops access. */
+async function userIsPro(userId: string): Promise<boolean> {
+  const { data, error } = await svc()
+    .from("subscriptions")
+    .select("status, current_period_end")
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (error) console.error("mcp: subscription lookup failed", error.message);
+  return isProSubscription(data);
 }
 
 async function authUser(req: Request): Promise<string | null> {
@@ -189,6 +201,7 @@ app.onError((err, c) => {
 app.all("/*", async (c) => {
   const userId = await authUser(c.req.raw);
   if (!userId) return c.json({ error: "Unauthorized – Bearer token required" }, 401);
+  if (!(await userIsPro(userId))) return c.json(proRequiredBody("mcp"), 403);
   return await userCtx.run(userId, () => httpHandler(c.req.raw));
 });
 

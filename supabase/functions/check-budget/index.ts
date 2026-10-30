@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { getIsPro } from "../_shared/entitlements.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -57,6 +58,11 @@ Deno.serve(async (req) => {
     const results: any[] = [];
 
     for (const alert of alerts ?? []) {
+      // Budget alerts are a Pro feature; a downgraded user's stored alert stays dormant.
+      if (!(await getIsPro(supabase, alert.user_id))) {
+        results.push({ user_id: alert.user_id, skipped: "not_pro" });
+        continue;
+      }
       // SQL-side sum (public.activity_aggregate) – a plain select is capped at 1000 rows.
       const { data: agg, error: aggError } = await supabase.rpc("activity_aggregate", {
         p_user_id: alert.user_id,

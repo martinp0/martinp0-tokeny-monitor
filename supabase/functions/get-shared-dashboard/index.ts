@@ -1,5 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { fetchAllPages } from "../_shared/paginate.ts";
+import { getIsPro } from "../_shared/entitlements.ts";
+import { freeHistoryFloor } from "../_shared/plan.ts";
 
 // Shared dashboards are public; cap the payload. Totals beyond this are flagged as truncated.
 const MAX_SHARED_ROWS = 50_000;
@@ -53,19 +55,24 @@ Deno.serve(async (req) => {
     }
 
     // Fetch activity data for the user (paged: PostgREST returns at most 1000 rows per request)
+    // Owner on the free plan (e.g. after a downgrade): the share shows the free window only.
+    const historyFrom = (await getIsPro(supabase, share.user_id)) ? null : freeHistoryFloor();
     let rows: any[] = [];
     let truncated = false;
     let rowsError: unknown = null;
     try {
       const res = await fetchAllPages<any>(
-        (from, to) =>
-          supabase
+        (from, to) => {
+          let q = supabase
             .from("activity_rows")
             .select("*")
-            .eq("user_id", share.user_id)
+            .eq("user_id", share.user_id);
+          if (historyFrom) q = q.gte("created_at", historyFrom);
+          return q
             .order("created_at", { ascending: false })
             .order("id", { ascending: true })
-            .range(from, to),
+            .range(from, to);
+        },
         { maxRows: MAX_SHARED_ROWS },
       );
       rows = res.rows;
@@ -97,6 +104,7 @@ Deno.serve(async (req) => {
         created_at: share.created_at,
         rows,
         truncated,
+        history_from: historyFrom,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );

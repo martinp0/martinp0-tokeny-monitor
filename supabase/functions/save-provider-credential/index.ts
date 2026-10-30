@@ -8,6 +8,8 @@
 // Returns: { id, provider, label, key_preview, enabled, last_synced_at }
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
+import { getIsPro } from "../_shared/entitlements.ts";
+import { canAddProvider, proRequiredBody } from "../_shared/plan.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -85,6 +87,22 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
+
+    // Free plan: one connected provider. Re-saving (rotating) the existing key is always allowed.
+    if (!(await getIsPro(svc, userRes.user.id))) {
+      const { data: existing, error: exErr } = await svc
+        .from("provider_credentials")
+        .select("id, provider, label")
+        .eq("user_id", userRes.user.id);
+      if (exErr) throw exErr;
+      const list = existing ?? [];
+      const replacing = list.find((c) => c.provider === provider && c.label === label)?.id ?? null;
+      if (!canAddProvider(false, list.map((c) => c.id), replacing)) {
+        return new Response(JSON.stringify(proRequiredBody("multi_provider")), {
+          status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
 
     // Upsert by (user_id, provider, label) — overwrite if user re-saves with same label.
     const row = {

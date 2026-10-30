@@ -1,13 +1,15 @@
 // Read-only spend summary for the native apps (macOS menu bar, Apple Watch widget).
 //
 // Auth: the same personal tokens as the MCP server (Settings → MCP tokens; stored only as
-// sha256 in mcp_tokens.token_hash). GET only, never writes user data, returns aggregates only
+// sha256 in mcp_tokens.token_hash), Pro plan required. GET only, never writes user data, returns aggregates only
 // (no prompts, no request rows, no credentials). Uses the same activity_rows / budget_alerts /
 // exchange_rates tables as the web dashboard.
 //
 //   GET /functions/v1/usage-summary?tz=Europe/Prague
 //   Authorization: Bearer orm_...
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { getIsPro } from "../_shared/entitlements.ts";
+import { proRequiredBody } from "../_shared/plan.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -59,6 +61,8 @@ Deno.serve(async (req) => {
   const { data: tok } = await svc.from("mcp_tokens").select("user_id").eq("token_hash", hash).maybeSingle();
   if (!tok?.user_id) return json({ error: "Unauthorized" }, 401);
   const userId: string = tok.user_id;
+  // Personal API tokens (MCP + native widgets) are a Pro feature; a lapsed plan stops access.
+  if (!(await getIsPro(svc, userId))) return json(proRequiredBody("mcp"), 403);
   await svc.from("mcp_tokens").update({ last_used_at: new Date().toISOString() }).eq("token_hash", hash);
 
   try {

@@ -3,6 +3,8 @@
 //   - if user has uploaded a custom og_image_path -> 302 redirect to public URL
 //   - otherwise renders an SVG with KPI summary (Content-Type: image/svg+xml)
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { getIsPro } from "../_shared/entitlements.ts";
+import { freeHistoryFloor } from "../_shared/plan.ts";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -147,8 +149,10 @@ Deno.serve(async (req) => {
 
     // Otherwise compute KPIs and render SVG
     // SQL-side aggregation (public.activity_aggregate): no 1000-row truncation.
+    const ownerIsPro = await getIsPro(supabase, share.user_id);
     const { data: byModel } = await supabase.rpc("activity_aggregate", {
       p_user_id: share.user_id,
+      p_from: ownerIsPro ? null : freeHistoryFloor(),
       p_group_by: "model",
     });
     let totalCost = 0;

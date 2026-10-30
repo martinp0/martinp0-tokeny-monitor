@@ -1,4 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { getIsPro } from "../_shared/entitlements.ts";
+import { proRequiredBody } from "../_shared/plan.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -34,16 +36,25 @@ Deno.serve(async (req) => {
       });
     }
 
-    const body = await req.json().catch(() => ({}));
-    const name = body.name ?? "MCP Token";
-
-    const token = genToken();
-    const hash = await sha256Hex(token);
-
     const svc = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
+
+    // MCP access is a Pro feature.
+    if (!(await getIsPro(svc, userRes.user.id))) {
+      return new Response(JSON.stringify(proRequiredBody("mcp")), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const body = await req.json().catch(() => ({}));
+    const name = String(body.name ?? "MCP Token").slice(0, 60);
+
+    const token = genToken();
+    const hash = await sha256Hex(token);
+
     const { error } = await svc.from("mcp_tokens").insert({
       user_id: userRes.user.id,
       token_hash: hash,

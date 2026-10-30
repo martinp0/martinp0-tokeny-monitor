@@ -6,6 +6,8 @@
 import { corsHeaders, getCallingUser, json, serviceClient } from "./http.ts";
 import { runCredentialSync, type Credential } from "./sync-runner.ts";
 import type { SyncProvider } from "./sync-core.ts";
+import { getIsPro, proRequired } from "./entitlements.ts";
+import { syncableCredentialIds } from "./plan.ts";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -38,6 +40,17 @@ export async function handleUserSync(req: Request, provider: SyncProvider): Prom
     if (!cred) return json({ error: "Credential not found" }, 404);
     if (cred.provider !== provider) return json({ error: `Wrong provider for sync-${provider}` }, 400);
     if (!cred.enabled) return json({ error: "Credential is disabled" }, 400);
+
+    // Free plan: only the user's first connected provider syncs (others stay stored after a
+    // downgrade, but are inactive until they upgrade again).
+    if (!(await getIsPro(svc, user.id))) {
+      const { data: all, error: allErr } = await svc
+        .from("provider_credentials")
+        .select("id, created_at")
+        .eq("user_id", user.id);
+      if (allErr) throw allErr;
+      if (!syncableCredentialIds(all ?? [], false).has(cred.id)) return proRequired("multi_provider");
+    }
 
     const end = parseDate(body?.ending_at ?? body?.end_time);
     const start = parseDate(body?.starting_at ?? body?.start_time);

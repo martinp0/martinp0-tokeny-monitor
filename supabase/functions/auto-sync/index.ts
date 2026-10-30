@@ -4,13 +4,12 @@
 // `x-auto-sync-secret: <AUTO_SYNC_SECRET>`. Not callable by end users (verify_jwt = false,
 // authenticated by the shared secret only).
 //
-// Each run picks the credentials that are due (never attempted, or last attempted more than
+// Pro users only. Each run picks the credentials that are due (never attempted, or last attempted more than
 // MIN_INTERVAL ago), oldest first, and syncs them sequentially until the time budget is spent.
 // Incremental window: 3 days back for already-synced credentials, 30 days for the first sync.
 // Rows are always written with the credential owner's user_id.
 import { corsHeaders, json, safeEqual, serviceClient } from "../_shared/http.ts";
 import { runCredentialSync, type Credential } from "../_shared/sync-runner.ts";
-import { SUPPORTED_SYNC_PROVIDERS } from "../_shared/sync-core.ts";
 
 const MIN_INTERVAL_MS = 55 * 60 * 1000;
 const TIME_BUDGET_MS = 110_000; // stay well below the edge function wall-clock limit
@@ -33,16 +32,13 @@ Deno.serve(async (req) => {
   const svc = serviceClient();
   const dueBefore = new Date(Date.now() - MIN_INTERVAL_MS).toISOString();
 
-  const { data: creds, error } = await svc
-    .from("provider_credentials")
-    .select("id, user_id, provider, api_key, enabled, last_synced_at")
-    .eq("enabled", true)
-    .in("provider", [...SUPPORTED_SYNC_PROVIDERS])
-    // last_sync_attempt_at (not last_synced_at) so a permanently failing key is retried at most
-    // once per interval and cannot starve healthy credentials.
-    .or(`last_sync_attempt_at.is.null,last_sync_attempt_at.lt.${dueBefore}`)
-    .order("last_sync_attempt_at", { ascending: true, nullsFirst: true })
-    .limit(MAX_PER_RUN);
+  // Pro users only (auto-sync is a Pro feature). The RPC filters by plan in SQL and orders by
+  // last_sync_attempt_at (not last_synced_at) so a permanently failing key is retried at most
+  // once per interval and cannot starve healthy credentials.
+  const { data: creds, error } = await svc.rpc("auto_sync_due_credentials", {
+    p_due_before: dueBefore,
+    p_limit: MAX_PER_RUN,
+  });
   if (error) {
     console.error("auto-sync: failed to load credentials", error.message);
     return json({ error: "Internal server error" }, 500);

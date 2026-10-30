@@ -1,4 +1,6 @@
 import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { getIsPro } from "../_shared/entitlements.ts";
+import { proRequiredBody } from "../_shared/plan.ts";
 
 // deno-lint-ignore no-explicit-any
 type Db = SupabaseClient<any, "public", any>;
@@ -196,18 +198,8 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
-    const { data: sub } = await svc
-      .from("subscriptions")
-      .select("status, current_period_end")
-      .eq("user_id", userRes.user.id)
-      .in("status", ["active", "trialing"])
-      .gt("current_period_end", new Date().toISOString())
-      .maybeSingle();
-    if (!sub) {
-      return new Response(JSON.stringify({ error: "Pro subscription required" }), {
-        status: 403,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    if (!(await getIsPro(svc, userRes.user.id))) {
+      return jsonResponse(proRequiredBody("ai_agent"), 403);
     }
 
     const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
