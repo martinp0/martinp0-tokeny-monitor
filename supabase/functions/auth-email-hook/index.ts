@@ -7,14 +7,15 @@ import { MagicLinkEmail } from '../_shared/email-templates/magic-link.tsx'
 import { RecoveryEmail } from '../_shared/email-templates/recovery.tsx'
 import { EmailChangeEmail } from '../_shared/email-templates/email-change.tsx'
 import { ReauthenticationEmail } from '../_shared/email-templates/reauthentication.tsx'
+import { planAuthEmails, verifyStandardWebhook, type HookPayload } from '../_shared/auth-email.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-const SITE_NAME = "Tokeny Monitor"
-const ROOT_DOMAIN = "tokeny.pohl.uk"
+const SITE_NAME = "Tokeny"
+const ROOT_DOMAIN = "tokeny.martinpohl.cz"
 const FROM_DOMAIN = "notify.tokeny.pohl.uk"
 
 const EMAIL_SUBJECTS: Record<string, string> = {
@@ -33,29 +34,6 @@ const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
   recovery: RecoveryEmail,
   email_change: EmailChangeEmail,
   reauthentication: ReauthenticationEmail,
-}
-
-// Verify Supabase Auth Hook HMAC-SHA256 signature.
-// Supabase signs the raw body with the webhook secret and puts the result
-// in the Authorization header as "Bearer <base64_signature>".
-async function verifySupabaseSignature(req: Request, rawBody: string): Promise<boolean> {
-  const secret = Deno.env.get('SUPABASE_AUTH_HOOK_SECRET')
-  if (!secret) return false
-
-  const authHeader = req.headers.get('authorization') ?? ''
-  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : authHeader
-  if (!token) return false
-
-  const key = await crypto.subtle.importKey(
-    'raw',
-    new TextEncoder().encode(secret),
-    { name: 'HMAC', hash: 'SHA-256' },
-    false,
-    ['verify'],
-  )
-
-  const signatureBytes = Uint8Array.from(atob(token), (c) => c.charCodeAt(0))
-  return crypto.subtle.verify('HMAC', key, signatureBytes, new TextEncoder().encode(rawBody))
 }
 
 async function sendViaResend(params: {
@@ -95,83 +73,75 @@ Deno.serve(async (req) => {
   try {
     const rawBody = await req.text()
 
-    const isValid = await verifySupabaseSignature(req, rawBody)
-    if (!isValid) {
-      console.error('Invalid auth hook signature')
-      return new Response(JSON.stringify({ error: 'Invalid signature' }), {
+    // Supabase signs auth hooks with Standard Webhooks; secret "v1,whsec_..." from Auth → Hooks.
+    const secret = Deno.env.get('SEND_EMAIL_HOOK_SECRET') ?? Deno.env.get('SUPABASE_AUTH_HOOK_SECRET')
+    const verified = await verifyStandardWebhook(secret, req.headers, rawBody)
+    if (!verified.ok) {
+      console.error('auth-email-hook: invalid signature', verified.reason)
+      return new Response(JSON.stringify({ error: { http_code: 401, message: 'Invalid signature' } }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
 
-    // Supabase Send Email Hook payload format
-    const payload = JSON.parse(rawBody)
-    const emailType: string = payload?.email_data?.email_action_type ?? ''
-    const recipientEmail: string = payload?.user?.email ?? payload?.email_data?.email ?? ''
-    const confirmationUrl: string = payload?.email_data?.redirect_to ?? payload?.email_data?.url ?? ''
-    const token: string = payload?.email_data?.token ?? ''
-    const oldEmail: string = payload?.email_data?.old_email ?? ''
-    const newEmail: string = payload?.email_data?.new_email ?? recipientEmail
-
-    if (!recipientEmail || !emailType) {
-      return new Response(JSON.stringify({ error: 'Missing email or action type' }), {
-        status: 400,
+    const payload = JSON.parse(rawBody) as HookPayload
+    const emailType = payload?.email_data?.email_action_type ?? ''
+    const emails = planAuthEmails(payload, Deno.env.get('SUPABASE_URL')!, `https://${ROOT_DOMAIN}/`)
+    if (emails.length === 0) {
+      // Not templated here (e.g. *_notification types) or nothing to send — acknowledge.
+      console.warn('auth-email-hook: nothing to send for', emailType)
+      return new Response(JSON.stringify({}), {
+        status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
 
-    const EmailTemplate = EMAIL_TEMPLATES[emailType]
-    if (!EmailTemplate) {
-      console.warn('Unknown email type', emailType)
-      return new Response(JSON.stringify({ error: `Unknown email type: ${emailType}` }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
-    }
-
-    const templateProps = {
-      siteName: SITE_NAME,
-      siteUrl: `https://${ROOT_DOMAIN}`,
-      recipient: recipientEmail,
-      confirmationUrl,
-      token,
-      email: recipientEmail,
-      oldEmail,
-      newEmail,
-    }
-
-    const html = await renderAsync(React.createElement(EmailTemplate, templateProps))
-    const text = await renderAsync(React.createElement(EmailTemplate, templateProps), { plainText: true })
-
-    await sendViaResend({
-      to: recipientEmail,
-      from: `${SITE_NAME} <noreply@${FROM_DOMAIN}>`,
-      subject: EMAIL_SUBJECTS[emailType] ?? 'Notification',
-      html,
-      text,
-    })
-
-    // Log to DB for observability
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     )
-    await supabase.from('email_send_log').insert({
-      message_id: crypto.randomUUID(),
-      template_name: emailType,
-      recipient_email: recipientEmail,
-      status: 'sent',
-    })
 
-    console.log('Auth email sent', { emailType, email: recipientEmail })
-    return new Response(JSON.stringify({ success: true }), {
+    for (const mail of emails) {
+      const EmailTemplate = EMAIL_TEMPLATES[mail.type]
+      const templateProps = {
+        siteName: SITE_NAME,
+        siteUrl: `https://${ROOT_DOMAIN}`,
+        recipient: mail.to,
+        confirmationUrl: mail.confirmationUrl,
+        token: mail.token,
+        email: mail.to,
+        oldEmail: mail.oldEmail,
+        newEmail: mail.newEmail,
+      }
+
+      const html = await renderAsync(React.createElement(EmailTemplate, templateProps))
+      const text = await renderAsync(React.createElement(EmailTemplate, templateProps), { plainText: true })
+
+      await sendViaResend({
+        to: mail.to,
+        from: `${SITE_NAME} <noreply@${FROM_DOMAIN}>`,
+        subject: EMAIL_SUBJECTS[mail.type] ?? 'Notification',
+        html,
+        text,
+      })
+
+      // Log to DB for observability (best effort)
+      await supabase.from('email_send_log').insert({
+        message_id: crypto.randomUUID(),
+        template_name: mail.type,
+        recipient_email: mail.to,
+        status: 'sent',
+      })
+    }
+
+    console.log('Auth email sent', { emailType, count: emails.length })
+    return new Response(JSON.stringify({}), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   } catch (error) {
     console.error('auth-email-hook error:', error)
-    const message = error instanceof Error ? error.message : 'Unknown error'
-    return new Response(JSON.stringify({ error: message }), {
+    return new Response(JSON.stringify({ error: { http_code: 500, message: 'Failed to send email' } }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
