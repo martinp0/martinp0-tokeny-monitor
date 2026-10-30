@@ -21,11 +21,12 @@ import {
   CheckCircle2,
   Smartphone,
   ExternalLink,
-  Heart,
-  Coffee,
   Github,
 } from "lucide-react";
 import { useCurrency } from "@/hooks/useCurrency";
+import { csCopy } from "@/lib/cs-typography";
+
+const hit = "inline-flex items-center justify-center min-h-[44px] min-w-[44px] px-2 transition-colors hover:text-foreground";
 
 function readStoredSession() {
   try {
@@ -48,37 +49,31 @@ const FEATURES = [
     icon: DollarSign,
     title: "Náklady v CZK i USD",
     desc: "Přepínej měnu jedním klikem. Aktuální kurz ČNB se stahuje automaticky.",
-    color: "from-[hsl(270,95%,65%)] to-[hsl(320,90%,65%)]",
   },
   {
     icon: BarChart3,
     title: "Detailní grafy",
-    desc: "Spotřeba tokenů, výkon modelů, latence, providery — vše na jednom místě.",
-    color: "from-[hsl(175,85%,55%)] to-[hsl(200,90%,60%)]",
+    desc: "Spotřeba tokenů, výkon modelů, latence, providery – vše na jednom místě.",
   },
   {
     icon: Upload,
     title: "Import z CSV",
     desc: "Stáhni si activity export z OpenRouter a nahraj ho jedním tažením myši.",
-    color: "from-[hsl(45,100%,60%)] to-[hsl(320,90%,65%)]",
   },
   {
     icon: Zap,
     title: "Real-life srovnání",
     desc: "Kolik espress, piv nebo pizz by se za tvoje API náklady dalo koupit?",
-    color: "from-[hsl(140,80%,55%)] to-[hsl(175,85%,55%)]",
   },
   {
     icon: Shield,
     title: "Bezpečné a privátní",
     desc: "Tvoje data zůstávají v šifrovaném cloudu, viditelná jen tobě.",
-    color: "from-[hsl(270,95%,65%)] to-[hsl(200,90%,60%)]",
   },
   {
     icon: Smartphone,
     title: "Funguje všude",
     desc: "Web, mobil, tablet i jako nativní app pro iOS a Android.",
-    color: "from-[hsl(320,90%,65%)] to-[hsl(45,100%,60%)]",
   },
 ];
 
@@ -109,8 +104,18 @@ const FAQS = [
   },
 ];
 
+const features = FEATURES.map((item) => ({ ...item, title: csCopy(item.title), desc: csCopy(item.desc) }));
+const faqs = FAQS.map((item) => ({ q: csCopy(item.q), a: csCopy(item.a) }));
+const steps = [
+  { n: "01", t: csCopy("Vytvoř si účet"), d: csCopy("Registrace přes e-mail nebo Google. Trvá to 10 vteřin.") },
+  { n: "02", t: csCopy("Nahraj CSV"), d: csCopy("Stáhni activity export z openrouter.ai/activity a nahraj.") },
+  { n: "03", t: csCopy("Sleduj a optimalizuj"), d: csCopy("Filtry podle modelů, datumů a providerů. Export do PNG/PDF.") },
+];
+
 export default function Landing() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const copy = (value: string) => (i18n.language?.startsWith("en") ? value : csCopy(value));
+  const label = (key: string) => copy(t(key));
   const { currency, toggle: toggleCurrency } = useCurrency();
   const [hasSession, setHasSession] = useState(false);
 
@@ -145,7 +150,7 @@ export default function Landing() {
   }, []);
 
   const ctaHref = hasSession ? "/dashboard" : "/auth";
-  const ctaLabel = hasSession ? t("nav.openDashboard") : t("nav.startFree");
+  const ctaLabel = hasSession ? label("nav.openDashboard") : label("nav.startFree");
 
   return (
     <div className="min-h-screen max-w-full bg-background bg-mesh text-foreground">
@@ -183,46 +188,35 @@ export default function Landing() {
         })}</script>
       </Helmet>
       {/* Nav */}
-      <header className="sticky top-0 z-50 border-b border-white/[0.06] glass">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-2 min-w-0">
-          <Link to="/" className="flex items-center gap-2 sm:gap-3 min-w-0">
-            <div className="h-8 w-8 shrink-0 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-              <Activity className="h-4 w-4 text-white" />
+      <header
+        className="sticky top-0 z-50 border-b border-white/[0.06] glass"
+        style={{
+          paddingTop: "env(safe-area-inset-top)",
+          paddingLeft: "env(safe-area-inset-left)",
+          paddingRight: "env(safe-area-inset-right)",
+        }}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-1 flex items-center justify-between gap-2 min-w-0">
+          <Link to="/" className="flex items-center gap-2 sm:gap-3 min-w-0 min-h-11" aria-label="OpenRouter Monitor">
+            <div className="h-8 w-8 shrink-0 rounded-lg bg-primary flex items-center justify-center">
+              <Activity className="h-4 w-4 text-primary-foreground" />
             </div>
-            <span className="text-sm sm:text-lg font-bold gradient-text tracking-tight truncate">OpenRouter Monitor</span>
+            <span className="text-sm sm:text-lg font-semibold tracking-tight truncate">OpenRouter Monitor</span>
           </Link>
-          <nav className="hidden md:flex items-center gap-8 text-sm font-mono text-muted-foreground">
-            <a href="#features" className="hover:text-foreground transition-colors">{t("nav.features")}</a>
-            <a href="#demo" className="hover:text-foreground transition-colors">{t("nav.demo")}</a>
-            <a href="#how" className="hover:text-foreground transition-colors">{t("nav.howItWorks")}</a>
-            <a href="#faq" className="hover:text-foreground transition-colors">{t("nav.faq")}</a>
+          <nav className="hidden md:flex items-center gap-6 text-sm text-muted-foreground">
+            <a href="#features" className={hit}>{label("nav.features")}</a>
+            <a href="#demo" className={hit}>{label("nav.demo")}</a>
+            <a href="#how" className={hit}>{label("nav.howItWorks")}</a>
+            <a href="#faq" className={hit}>{label("nav.faq")}</a>
           </nav>
           <div className="flex items-center gap-1 sm:gap-2 shrink-0">
-            <a
-              href="https://buymeacoffee.com/martinpohlp"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-gradient-to-r from-[hsl(35,100%,60%)]/20 to-[hsl(20,90%,55%)]/20 border border-[hsl(35,100%,60%)]/30 text-[hsl(35,100%,70%)] text-xs font-mono hover:from-[hsl(35,100%,60%)]/30 hover:to-[hsl(20,90%,55%)]/30 transition-all"
-            >
-              <Coffee className="h-3 w-3" />
-              {t("hero.buyMeCoffeeShort")}
-            </a>
             <LanguageSwitcher className="px-2 sm:px-3" />
-            {!hasSession && (
-              <Link to="/auth">
-                <Button variant="ghost" size="sm" className="font-mono text-xs hidden sm:inline-flex">
-                  {t("nav.login")}
-                </Button>
-              </Link>
-            )}
-            <Link to={ctaHref}>
-              <Button
-                size="sm"
-                className="gap-1.5 font-mono text-xs px-2.5 sm:px-3 bg-gradient-to-r from-primary to-[hsl(320,90%,65%)] hover:opacity-90 transition-opacity border-0"
-              >
-                {ctaLabel}
-                <ArrowRight className="h-3.5 w-3.5" />
-              </Button>
+            <Link
+              to={ctaHref}
+              aria-label={hasSession ? label("nav.openDashboard") : label("nav.login")}
+              className="inline-flex items-center min-h-11 px-3 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {hasSession ? label("nav.openDashboard") : label("nav.login")}
             </Link>
           </div>
         </div>
@@ -231,75 +225,59 @@ export default function Landing() {
       <main>
       {/* Hero */}
       <section className="relative px-4 sm:px-6 pt-20 pb-16 max-w-7xl mx-auto text-center">
-        <div className="inline-flex max-w-full items-center gap-2 px-3 py-1 rounded-full glass border-white/[0.08] text-xs font-mono text-muted-foreground mb-8 animate-fade-in">
-          <Sparkles className="h-3 w-3 text-accent" />
-          Přehled nákladů AI tokenů v reálném čase
+        <div className="inline-flex max-w-full items-center gap-2 px-3 py-1 rounded-full glass border-white/[0.08] text-xs text-muted-foreground mb-8 animate-fade-in">
+          <Sparkles className="h-3 w-3 text-primary" />
+          {csCopy("Přehled nákladů AI tokenů v reálném čase")}
         </div>
-        <h1 className="text-5xl md:text-7xl font-bold tracking-tight leading-[1.05] mb-6">
-          Zjisti, kolik tě <br className="hidden md:block" />
-          <span className="gradient-text">opravdu stojí AI</span>
+        <h1 className="text-5xl md:text-7xl font-semibold tracking-tight leading-[1.05] mb-6">
+          {csCopy("Zjisti, kolik tě")} <br className="hidden md:block" />
+          {csCopy("opravdu stojí")} <span className="text-primary">AI</span>
         </h1>
-        <p className="max-w-2xl mx-auto text-lg md:text-xl text-muted-foreground mb-10 font-mono">
-          Krásný dashboard pro tvoji OpenRouter aktivitu. Sleduj spotřebu, optimalizuj
-          modely a převáděj náklady do <span className="text-accent">CZK i USD</span>.
+        <p className="max-w-2xl mx-auto text-lg md:text-xl text-muted-foreground mb-10">
+          {csCopy("Krásný dashboard pro tvoji OpenRouter aktivitu. Sleduj spotřebu, optimalizuj modely a převáděj náklady do")}{" "}
+          <span className="text-foreground">{csCopy("CZK i USD")}</span>.
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-4">
-          <Link to={ctaHref}>
-            <Button
-              size="lg"
-              className="gap-2 font-mono bg-gradient-to-r from-primary to-[hsl(320,90%,65%)] hover:opacity-90 transition-opacity border-0 glow-md"
-            >
+          <Button asChild size="lg" className="min-h-11 w-full sm:w-auto">
+            <Link to={ctaHref}>
               {ctaLabel}
               <ArrowRight className="h-4 w-4" />
-            </Button>
-          </Link>
-          <a href="#demo">
-            <Button size="lg" variant="outline" className="gap-2 font-mono glass glass-hover border-white/[0.08]">
+            </Link>
+          </Button>
+          <Button asChild size="lg" variant="outline" className="min-h-11 w-full sm:w-auto gap-2 bg-transparent">
+            <a href="#demo">
               <LineChart className="h-4 w-4" />
-              Vyzkoušet demo
-            </Button>
-          </a>
+              {csCopy("Vyzkoušet demo")}
+            </a>
+          </Button>
         </div>
-        <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs font-mono text-muted-foreground">
+        <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
           <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-accent" />Zdarma</span>
           <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-accent" />Bez instalace</span>
           <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-accent" />CZ rozhraní</span>
-        </div>
-        <div className="mt-6 flex flex-col items-center gap-2">
-          <a
-            href="https://buymeacoffee.com/martinpohlp"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex max-w-full items-center justify-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-[hsl(35,100%,60%)]/20 to-[hsl(20,90%,55%)]/20 border border-[hsl(35,100%,60%)]/30 text-[hsl(35,100%,70%)] text-sm font-mono hover:from-[hsl(35,100%,60%)]/30 hover:to-[hsl(20,90%,55%)]/30 hover:border-[hsl(35,100%,60%)]/50 transition-all group text-center"
-          >
-            <Coffee className="h-4 w-4 group-hover:scale-110 transition-transform" />
-            Líbí se ti to? Kup mi kafe ☕
-            <Heart className="h-3 w-3 opacity-60 group-hover:opacity-100 transition-opacity" />
-          </a>
         </div>
       </section>
 
       {/* Features */}
       <section id="features" className="px-4 sm:px-6 py-20 max-w-7xl mx-auto">
         <div className="text-center mb-14">
-          <h2 className="text-3xl md:text-5xl font-bold mb-4">
-            Vše, co potřebuješ pro <span className="gradient-text">kontrolu AI nákladů</span>
+          <h2 className="text-3xl md:text-5xl font-semibold mb-4">
+            {csCopy("Vše, co potřebuješ pro kontrolu AI nákladů")}
           </h2>
-          <p className="text-muted-foreground font-mono max-w-2xl mx-auto">
-            Žádné tabulky v Excelu. Žádné dohady. Jen čisté grafy a přehledná čísla.
+          <p className="text-muted-foreground max-w-2xl mx-auto">
+            {csCopy("Žádné tabulky v Excelu. Žádné dohady. Jen čisté grafy a přehledná čísla.")}
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {FEATURES.map(({ icon: Icon, title, desc, color }, i) => (
+          {features.map(({ icon: Icon, title, desc }, i) => (
             <Card
               key={title}
-              className="glass glass-hover relative overflow-hidden group animate-fade-in opacity-0"
+              className="glass relative overflow-hidden group animate-fade-in opacity-0"
               style={{ animationDelay: `${i * 80}ms`, animationFillMode: "forwards" }}
             >
-              <div className={`absolute inset-0 bg-gradient-to-br ${color} opacity-0 group-hover:opacity-[0.08] transition-opacity duration-500`} />
               <CardContent className="p-6 relative">
-                <div className={`h-10 w-10 rounded-lg bg-gradient-to-br ${color} flex items-center justify-center mb-4`}>
-                  <Icon className="h-5 w-5 text-white" />
+                <div className="h-10 w-10 rounded-lg bg-primary/15 text-primary flex items-center justify-center mb-4">
+                  <Icon className="h-5 w-5" />
                 </div>
                 <h3 className="text-lg font-bold mb-2">{title}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
@@ -312,59 +290,52 @@ export default function Landing() {
       {/* Live Demo */}
       <section id="demo" className="px-4 sm:px-6 py-20 max-w-[1600px] mx-auto">
         <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/15 text-accent text-xs font-mono mb-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/15 text-accent text-xs mb-4">
             <Activity className="h-3 w-3" />
-            Live demo s ukázkovými daty
+            {csCopy("Live demo s ukázkovými daty")}
           </div>
           <h2 className="text-3xl md:text-5xl font-bold mb-4">
-            Takhle to <span className="gradient-text">vypadá uvnitř</span>
+            {csCopy("Takhle to vypadá uvnitř")}
           </h2>
-          <p className="text-muted-foreground font-mono max-w-2xl mx-auto mb-6">
-            Žádný login, žádná registrace. Hraj si s grafy hned teď.
+          <p className="text-muted-foreground max-w-2xl mx-auto mb-6">
+            {csCopy("Žádný login, žádná registrace. Hraj si s grafy hned teď.")}
           </p>
           <Button
             variant="outline"
-            size="sm"
             onClick={toggleCurrency}
-            className="gap-1.5 border-border hover:bg-secondary hover:text-foreground font-mono text-xs"
+            className="min-h-11 px-4 bg-transparent"
           >
-            Přepnout do {currency === "CZK" ? "USD ($)" : "CZK (Kč)"}
+            {csCopy("Přepnout do")} {currency === "CZK" ? "USD ($)" : "CZK (Kč)"}
           </Button>
         </div>
 
         <LandingDemoGate />
 
         <div className="mt-10 text-center">
-          <p className="text-sm text-muted-foreground font-mono mb-4">
-            Líbí se ti to? Nahraj svoje vlastní data a sleduj <span className="text-accent">opravdové náklady</span>.
+          <p className="text-sm text-muted-foreground mb-4">
+            {csCopy("Líbí se ti to? Nahraj svoje vlastní data a sleduj")}{" "}
+            <span className="text-foreground">{csCopy("opravdové náklady")}</span>.
           </p>
-          <Link to={ctaHref}>
-            <Button
-              size="lg"
-              className="gap-2 font-mono bg-gradient-to-r from-primary to-[hsl(320,90%,65%)] hover:opacity-90 transition-opacity border-0 glow-md"
-            >
+          <Button asChild size="lg" variant="outline" className="min-h-11 bg-transparent">
+            <Link to={ctaHref}>
               {ctaLabel}
               <ArrowRight className="h-4 w-4" />
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
       </section>
 
       {/* How it works */}
       <section id="how" className="px-4 sm:px-6 py-20 max-w-5xl mx-auto">
         <h2 className="text-3xl md:text-5xl font-bold mb-12 text-center">
-          3 kroky k <span className="gradient-text">dokonalému přehledu</span>
+          {csCopy("3 kroky k dokonalému přehledu")}
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {[
-            { n: "01", t: "Vytvoř si účet", d: "Registrace přes email nebo Google. Trvá to 10 vteřin." },
-            { n: "02", t: "Nahraj CSV", d: "Stáhni activity export z openrouter.ai/activity a nahraj." },
-            { n: "03", t: "Sleduj a optimalizuj", d: "Filtry podle modelů, datumů a providerů. Export do PNG/PDF." },
-          ].map(({ n, t, d }) => (
+          {steps.map(({ n, t: stepTitle, d }) => (
             <Card key={n} className="glass border-white/[0.08]">
               <CardContent className="p-6">
-                <div className="text-5xl font-mono font-bold gradient-text mb-3">{n}</div>
-                <h3 className="text-lg font-bold mb-2">{t}</h3>
+                <div className="text-5xl font-mono font-semibold text-primary mb-3">{n}</div>
+                <h3 className="text-lg font-semibold mb-2">{stepTitle}</h3>
                 <p className="text-sm text-muted-foreground">{d}</p>
               </CardContent>
             </Card>
@@ -375,25 +346,25 @@ export default function Landing() {
       {/* FAQ */}
       <section id="faq" className="px-4 sm:px-6 py-20 max-w-4xl mx-auto">
         <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/15 text-primary text-xs font-mono mb-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/15 text-primary text-xs mb-4">
             <Sparkles className="h-3 w-3" />
-            Nejčastější dotazy
+            {csCopy("Nejčastější dotazy")}
           </div>
           <h2 className="text-3xl md:text-5xl font-bold mb-4">
-            Co lidi <span className="gradient-text">nejvíc zajímá</span>
+            {csCopy("Co lidi nejvíc zajímá")}
           </h2>
-          <p className="text-muted-foreground font-mono">
-            Krátké odpovědi na otázky, které dostávám pořád.
+          <p className="text-muted-foreground">
+            {csCopy("Krátké odpovědi na otázky, které dostávám pořád.")}
           </p>
         </div>
         <Accordion type="single" collapsible className="space-y-3">
-          {FAQS.map((item, i) => (
+          {faqs.map((item, i) => (
             <AccordionItem
               key={i}
               value={`faq-${i}`}
-              className="glass border-white/[0.08] rounded-xl px-5 data-[state=open]:glow-sm transition-shadow"
+              className="border-border rounded-xl px-5"
             >
-              <AccordionTrigger className="text-left font-bold hover:no-underline py-5 min-w-0 gap-3">
+              <AccordionTrigger className="text-left font-semibold hover:no-underline py-3 min-h-11 min-w-0 gap-3">
                 <span className="min-w-0 flex-1">{item.q}</span>
               </AccordionTrigger>
               <AccordionContent className="text-sm text-muted-foreground leading-relaxed pb-5">
@@ -415,24 +386,25 @@ export default function Landing() {
           <Card className="glass glass-hover border-white/[0.08] overflow-hidden">
             <CardContent className="p-8 md:p-10 flex flex-col md:flex-row items-start md:items-center gap-6 md:gap-10">
               <div className="flex items-center gap-4">
-                <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-primary via-[hsl(320,90%,65%)] to-accent flex items-center justify-center text-xl font-bold text-white shrink-0 glow-sm">
+                <div className="h-14 w-14 rounded-2xl bg-primary flex items-center justify-center text-xl font-semibold text-primary-foreground shrink-0">
                   MP
                 </div>
                 <div>
-                  <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-muted-foreground mb-1">
-                    Indie maker
+                  <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1">
+                    {csCopy("Indie maker")}
                   </div>
                   <div className="text-lg font-bold">Martin Pohl</div>
                 </div>
               </div>
               <div className="flex-1">
                 <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
-                  Tokeny Monitor staví <span className="text-foreground font-medium">Martin</span> —
-                  IT engineer za <span className="text-foreground">Apple MDM, Identity & SSO</span> rolloutsy
-                  a indie web projekty. Mrkni na jeho práci a další experimenty.
+                  {csCopy("Tokeny Monitor staví")} <span className="text-foreground font-medium">Martin</span>
+                  {" – "}
+                  {csCopy("IT engineer za")} <span className="text-foreground">Apple MDM, Identity & SSO</span>{" "}
+                  {csCopy("rolloutsy a indie web projekty. Mrkni na jeho práci a další experimenty.")}
                 </p>
               </div>
-              <div className="flex items-center gap-2 text-sm font-mono text-accent group-hover:gap-3 transition-all shrink-0">
+              <div className="flex items-center gap-2 text-sm text-accent group-hover:gap-3 transition-all shrink-0">
                 martin.pohl.uk
                 <ExternalLink className="h-4 w-4" />
               </div>
@@ -441,145 +413,105 @@ export default function Landing() {
         </a>
       </section>
 
-      {/* Support — Buy Me a Coffee */}
-      <section className="px-4 sm:px-6 py-12 max-w-3xl mx-auto text-center">
-        <div className="glass rounded-2xl border-[hsl(35,100%,60%)]/20 p-6 sm:p-8 md:p-10 relative overflow-hidden max-w-full">
-          <div className="absolute inset-0 overflow-hidden rounded-[inherit] pointer-events-none" aria-hidden>
-            <div className="absolute inset-0 bg-gradient-to-br from-[hsl(35,100%,60%)]/5 via-transparent to-[hsl(20,90%,55%)]/5" />
-            <div className="absolute top-0 right-0 h-24 w-24 bg-[hsl(35,100%,60%)]/10 rounded-full blur-2xl" />
-          </div>
-          <div className="relative">
-            <div className="h-12 w-12 rounded-full bg-gradient-to-br from-[hsl(35,100%,60%)] to-[hsl(20,90%,55%)] flex items-center justify-center mx-auto mb-5 shadow-lg shadow-[hsl(35,100%,60%)]/20">
-              <Coffee className="h-6 w-6 text-white" />
-            </div>
-            <h3 className="text-xl md:text-2xl font-bold mb-3">
-              Podpoř vývoj <span className="gradient-text">kávou</span>
-            </h3>
-            <p className="text-sm text-muted-foreground font-mono max-w-lg mx-auto mb-6 leading-relaxed">
-              Tokeny Monitor je zdarma a open-source. Pokud ti šetří čas nebo peníze, můžeš
-              poděkovat symbolickým kafem. Každá podpora motivuje k dalšímu vylepšování. 💜
-            </p>
-            <a
-              href="https://buymeacoffee.com/martinpohlp"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Button
-                size="lg"
-                className="gap-2 font-mono bg-gradient-to-r from-[hsl(35,100%,60%)] to-[hsl(20,90%,55%)] hover:opacity-90 transition-opacity border-0 text-white shadow-lg shadow-[hsl(35,100%,60%)]/25 hover:shadow-[hsl(35,100%,60%)]/40"
-              >
-                <Heart className="h-4 w-4" />
-                Buy Me a Coffee
-                <ExternalLink className="h-3.5 w-3.5 opacity-60" />
-              </Button>
-            </a>
-          </div>
-        </div>
-      </section>
-
       {/* Open Source */}
       <section className="px-4 sm:px-6 py-12 max-w-3xl mx-auto text-center">
         <div className="glass rounded-2xl border-white/[0.08] p-8 md:p-10 flex flex-col items-center">
-          <div className="h-12 w-12 rounded-full bg-gradient-to-br from-[hsl(0,0%,20%)] to-[hsl(0,0%,40%)] flex items-center justify-center mb-5">
+          <div className="h-12 w-12 rounded-full bg-secondary flex items-center justify-center mb-5">
             <Github className="h-6 w-6 text-white" />
           </div>
           <h3 className="text-xl md:text-2xl font-bold mb-3">
-            100 % <span className="gradient-text">open-source</span>
+            100 % open-source
           </h3>
-          <p className="text-sm text-muted-foreground font-mono max-w-lg mx-auto mb-6 leading-relaxed">
-            Celý kód je veřejný na GitHubu. Forkni si repo, rozjeď lokálně přes Docker
-            a uprav si dashboard podle sebe. Pull requesty vítány!
+          <p className="text-sm text-muted-foreground max-w-lg mx-auto mb-6 leading-relaxed">
+            {csCopy("Celý kód je veřejný na GitHubu. Forkni si repo, rozjeď lokálně přes Docker a uprav si dashboard podle sebe. Pull requesty vítány!")}
           </p>
-          <a
-            href="https://github.com/martinp0/martinp0-tokeny-monitor"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Button
-              size="lg"
-              className="gap-2 font-mono glass glass-hover border-white/[0.08]"
-              variant="outline"
+          <Button asChild size="lg" variant="outline" className="min-h-11 gap-2 bg-transparent">
+            <a
+              href="https://github.com/martinp0/martinp0-tokeny-monitor"
+              target="_blank"
+              rel="noopener noreferrer"
             >
               <Github className="h-4 w-4" />
-              Zobrazit na GitHubu
+              {csCopy("Zobrazit na GitHubu")}
               <ExternalLink className="h-3.5 w-3.5 opacity-60" />
-            </Button>
-          </a>
+            </a>
+          </Button>
         </div>
       </section>
 
       {/* Final CTA */}
       <section className="px-4 sm:px-6 py-24 max-w-4xl mx-auto text-center">
-        <div className="rounded-3xl glass border-white/[0.08] p-6 sm:p-10 md:p-12 glow-md relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10 pointer-events-none" />
-          <Globe className="h-12 w-12 text-accent mx-auto mb-6 relative" />
+        <div className="rounded-3xl border border-border bg-card p-6 sm:p-10 md:p-12 relative overflow-hidden">
+          <Globe className="h-12 w-12 text-primary mx-auto mb-6 relative" />
           <h2 className="text-3xl md:text-5xl font-bold mb-4 relative">
-            Připraven/a převzít <span className="gradient-text">kontrolu nad AI náklady?</span>
+            {csCopy("Připraven/a převzít kontrolu nad AI náklady?")}
           </h2>
-          <p className="text-muted-foreground font-mono mb-8 relative">
-            Začni během minuty. Žádná kreditka.
+          <p className="text-muted-foreground mb-8 relative">
+            {csCopy("Začni během minuty. Žádná kreditka.")}
           </p>
           <div className="relative">
-            <Link to={ctaHref}>
-              <Button
-                size="lg"
-                className="gap-2 font-mono bg-gradient-to-r from-primary to-[hsl(320,90%,65%)] hover:opacity-90 transition-opacity border-0"
-              >
+            <Button asChild size="lg" className="min-h-11">
+              <Link to={ctaHref}>
                 {ctaLabel}
                 <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
         </div>
       </section>
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-white/[0.06] px-4 sm:px-6 py-8">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-xs font-mono text-muted-foreground min-w-0">
+      <footer
+        className="border-t border-white/[0.06] pt-6"
+        style={{
+          paddingBottom: "max(1.5rem, env(safe-area-inset-bottom))",
+          paddingLeft: "max(1rem, env(safe-area-inset-left))",
+          paddingRight: "max(1rem, env(safe-area-inset-right))",
+        }}
+      >
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-muted-foreground min-w-0">
           <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 max-w-full text-center">
-            <Activity className="h-3.5 w-3.5" />
+            <Activity className="h-4 w-4" aria-hidden="true" />
             <span>
-              OpenRouter Monitor · {new Date().getFullYear()} · crafted by{" "}
+              OpenRouter Monitor · {new Date().getFullYear()} ·{" "}
               <a
                 href="https://martin.pohl.uk?utm_source=tokeny.pohl.uk&utm_medium=footer"
                 target="_blank"
                 rel="noopener author"
-                className="text-foreground hover:text-accent transition-colors underline-offset-4 hover:underline"
+                className={`${hit} text-foreground`}
               >
                 Martin Pohl
               </a>
             </span>
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 max-w-full md:justify-end">
+          <div className="flex flex-wrap items-center justify-center gap-x-1 gap-y-1 max-w-full md:justify-end">
             <a
               href="https://buymeacoffee.com/martinpohlp"
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-[hsl(35,100%,70%)] transition-colors flex items-center gap-1.5 px-2 py-1 rounded-full bg-[hsl(35,100%,60%)]/10 border border-[hsl(35,100%,60%)]/20"
+              className={hit}
             >
-              <Coffee className="h-3 w-3 text-[hsl(35,100%,70%)]" />
-              <span className="text-[hsl(35,100%,70%)]">Support</span>
+              {csCopy("Kup mi kafe")}
             </a>
             <a
               href="https://martin.pohl.uk?utm_source=tokeny.pohl.uk&utm_medium=footer_nav"
               target="_blank"
               rel="noopener author"
-              className="hover:text-foreground transition-colors"
+              className={hit}
             >
               martin.pohl.uk
             </a>
-            <Link to="/auth" className="hover:text-foreground transition-colors">Přihlášení</Link>
+            <Link to="/auth" className={hit}>{csCopy("Přihlášení")}</Link>
             <a
               href="https://github.com/martinp0/martinp0-tokeny-monitor"
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-foreground transition-colors flex items-center gap-1"
+              className={hit}
             >
-              <Github className="h-3 w-3" />
               GitHub
             </a>
-            <a href="https://openrouter.ai" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">OpenRouter</a>
+            <a href="https://openrouter.ai" target="_blank" rel="noopener noreferrer" className={hit}>OpenRouter</a>
           </div>
         </div>
       </footer>

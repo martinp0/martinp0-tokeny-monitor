@@ -65,9 +65,13 @@
     @apply border-border;
   }
 
+  html {
+    color-scheme: dark;
+  }
+
   body {
     @apply bg-background text-foreground;
-    font-family: "Space Grotesk", "Space Grotesk Fallback", sans-serif;
+    font-family: Inter, "Inter Fallback", ui-sans-serif, system-ui, sans-serif;
     overflow-wrap: break-word;
   }
 
