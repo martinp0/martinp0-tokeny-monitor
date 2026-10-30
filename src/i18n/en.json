@@ -229,7 +229,11 @@
         },
         {
           "q": "What is the MCP server?",
-          "a": "MCP (Model Context Protocol) lets AI clients such as Claude Desktop or Cursor read your stats. Generate a token in Settings, paste it into your client config and ask right in the chat."
+          "a": "MCP (Model Context Protocol) lets AI clients such as Claude, Cursor or Grok Bot read your stats. Generate a token in Settings, paste it into your client config and ask right in the chat."
+        },
+        {
+          "q": "How do I connect Tokeny to Grok Bot?",
+          "a": "Create a token in Settings → MCP server (Pro). In Grok Bot, ask a bot to add a custom MCP server with the URL shown in Settings and the header Authorization: Bearer <token>; enter the token in the masked secret field. Then type @tokeny in the chat and ask about your spend. It works the same way as Cursor or Claude."
         }
       ]
     },
@@ -330,5 +334,36 @@
     "requests": "Requests",
     "avgTime": "Avg. response",
     "tokens": "Total tokens"
+  },
+  "mcpClients": {
+    "intro": "Every client needs the server URL and the header Authorization: Bearer {{token}}. Replace {{token}} with a token created above (it is shown only once). Create a separate token per client so you can revoke each one on its own.",
+    "new": "New",
+    "copy": "Copy: {{what}}",
+    "copied": "Copied",
+    "fields": {
+      "name": "Name",
+      "url": "Server URL",
+      "headerName": "Header name",
+      "headerValue": "Header value",
+      "command": "Command"
+    },
+    "grok": {
+      "step1": "Create a token above, e.g. named “Grok Bot”, and copy it.",
+      "step2": "In Grok Bot, open a chat with any bot and send the message below. When it asks for the token, paste it into the masked secret field, not into the normal chat.",
+      "step3": "Then type @tokeny in the chat and ask, for example: “How much did I spend on AI this month?”",
+      "promptLabel": "Message for Grok Bot",
+      "prompt": "Add a custom MCP server named {{name}} at {{url}}. It needs the header Authorization with the value Bearer followed by my Tokeny MCP token. Ask me for the token in a masked secret request and don't show it in the chat.",
+      "manual": "Manual setup (Grok Bot's custom MCP server form)",
+      "note": "Use the header, not OAuth sign-in – Tokeny doesn't issue tokens via OAuth. MCP is part of Pro."
+    },
+    "cursor": {
+      "hint": "Settings → MCP → Add new MCP server, or put this into ~/.cursor/mcp.json:"
+    },
+    "claudeCode": {
+      "hint": "Run in a terminal:"
+    },
+    "claudeDesktop": {
+      "hint": "Claude Desktop connects to remote servers through mcp-remote (needs Node.js). Add to claude_desktop_config.json:"
+    }
   }
 }

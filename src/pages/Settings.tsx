@@ -18,6 +18,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { UpgradeModal } from "@/components/UpgradeModal";
 import { ProGate } from "@/components/ProGate";
 import type { BillingInterval } from "@/config/pricing";
+import { McpClientGuides } from "@/components/settings/McpClientGuides";
 
 interface BudgetAlert {
   id: string;
@@ -159,7 +160,7 @@ const Settings = () => {
     <div className="min-h-screen bg-background">
       <Helmet>
         <title>Nastavení – budget alerty a MCP tokeny | Tokeny</title>
-        <meta name="description" content="Spravuj měsíční budget alerty, MCP tokeny pro Claude/Cursor/Zed a propojené API providery." />
+        <meta name="description" content="Spravuj měsíční budget alerty, MCP tokeny pro Grok Bot, Claude, Cursor a Zed a propojené API providery." />
         <link rel="canonical" href="https://tokeny.martinpohl.cz/settings" />
         <meta name="robots" content="noindex,nofollow" />
         <meta property="og:title" content="Nastavení – Tokeny" />
@@ -286,7 +287,7 @@ const Settings = () => {
         <Card className="glass border-border">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
-              <Key className="h-4 w-4 text-primary" /> MCP server – přístup z Claude Desktop / Cursor
+              <Key className="h-4 w-4 text-primary" /> MCP server – Grok Bot, Claude, Cursor
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -341,19 +342,7 @@ const Settings = () => {
               </div>
             )}
 
-            <details className="rounded-lg bg-secondary/30 p-3">
-              <summary className="text-xs font-semibold cursor-pointer">Návod: Claude Desktop config</summary>
-              <pre className="mt-2 text-xs font-mono overflow-x-auto bg-background/50 p-2 rounded">
-{`{
-  "mcpServers": {
-    "openrouter-monitor": {
-      "url": "${mcpUrl}",
-      "headers": { "Authorization": "Bearer <TVŮJ_TOKEN>" }
-    }
-  }
-}`}
-              </pre>
-            </details>
+            <McpClientGuides url={mcpUrl} />
             </div>
             </ProGate>
           </CardContent>

@@ -229,7 +229,11 @@
         },
         {
           "q": "Co je MCP server?",
-          "a": "MCP (Model Context Protocol) umožní AI klientům jako Claude Desktop nebo Cursor číst tvoje statistiky. V Nastavení si vygeneruješ token, vložíš ho do konfigurace klienta a můžeš se ptát přímo v chatu."
+          "a": "MCP (Model Context Protocol) umožní AI klientům jako Claude, Cursor nebo Grok Bot číst tvoje statistiky. V Nastavení si vygeneruješ token, vložíš ho do konfigurace klienta a můžeš se ptát přímo v chatu."
+        },
+        {
+          "q": "Jak propojím Tokeny s Grok Botem?",
+          "a": "V Nastavení → MCP server si vytvoř token (Pro). V Grok Botu pak požádej bota, ať přidá vlastní MCP server s adresou z Nastavení a hlavičkou Authorization: Bearer <token>; token zadej do maskovaného pole. Potom v chatu napiš @tokeny a ptej se na své útraty. Funguje to stejně jako u Cursoru nebo Claude."
         }
       ]
     },
@@ -330,5 +334,36 @@
     "requests": "Požadavky",
     "avgTime": "Prům. odpověď",
     "tokens": "Tokeny celkem"
+  },
+  "mcpClients": {
+    "intro": "Každý klient potřebuje adresu serveru a hlavičku Authorization: Bearer {{token}}. Místo {{token}} vlož token vytvořený výše (zobrazí se jen jednou). Pro každého klienta si vytvoř vlastní token, ať ho můžeš samostatně zrušit.",
+    "new": "Nové",
+    "copy": "Zkopírovat: {{what}}",
+    "copied": "Zkopírováno",
+    "fields": {
+      "name": "Název",
+      "url": "URL serveru",
+      "headerName": "Název hlavičky",
+      "headerValue": "Hodnota hlavičky",
+      "command": "Příkaz"
+    },
+    "grok": {
+      "step1": "Nahoře vytvoř token, třeba s názvem „Grok Bot“, a zkopíruj si ho.",
+      "step2": "V Grok Botu otevři chat s libovolným botem a pošli mu zprávu níže. Až si řekne o token, vlož ho do maskovaného pole pro tajné údaje, ne do běžného chatu.",
+      "step3": "Pak v chatu napiš @tokeny a zeptej se třeba: „Kolik jsem tento měsíc utratil za AI?“",
+      "promptLabel": "Zpráva pro Grok Bota",
+      "prompt": "Přidej vlastní (custom) MCP server s názvem {{name}} na adrese {{url}}. Potřebuje hlavičku Authorization s hodnotou Bearer a za ní můj Tokeny MCP token. O token si řekni přes maskovaný formulář pro tajné údaje, nezobrazuj ho v chatu.",
+      "manual": "Ruční nastavení (formulář pro vlastní MCP server v Grok Botu)",
+      "note": "Použij hlavičku, ne přihlášení přes OAuth – Tokeny tokeny přes OAuth nevydávají. MCP je součástí Pro."
+    },
+    "cursor": {
+      "hint": "Settings → MCP → Add new MCP server, nebo vlož do ~/.cursor/mcp.json:"
+    },
+    "claudeCode": {
+      "hint": "Spusť v terminálu:"
+    },
+    "claudeDesktop": {
+      "hint": "Claude Desktop připojí vzdálený server přes mcp-remote (potřebuje Node.js). Vlož do claude_desktop_config.json:"
+    }
   }
 }
