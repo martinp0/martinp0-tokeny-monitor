@@ -1,0 +1,70 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "How much did I spend today in ${applicationName}": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kolik jsem dnes utratil v ${applicationName}"
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Koľko som dnes minul v ${applicationName}"
+          }
+        }
+      }
+    },
+    "${applicationName} usage": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spotřeba v ${applicationName}"
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spotreba v ${applicationName}"
+          }
+        }
+      }
+    },
+    "Check ${applicationName}": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zkontroluj ${applicationName}"
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Skontroluj ${applicationName}"
+          }
+        }
+      }
+    },
+    "Is my AI budget OK in ${applicationName}": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je rozpočet na AI v pořádku v ${applicationName}"
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je rozpočet na AI v poriadku v ${applicationName}"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}
