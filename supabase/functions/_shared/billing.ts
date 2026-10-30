@@ -161,6 +161,8 @@ export interface WebhookDeps {
   /** user_id of an existing subscriptions row for this Stripe customer, if any. */
   userIdByCustomer(customerId: string): Promise<string | null>;
   getExisting(userId: string): Promise<ExistingSubscription | null>;
+  /** False when the user has deleted their account (events for its canceled subscription still arrive). */
+  userExists?(userId: string): Promise<boolean>;
   /** Upsert ON CONFLICT (user_id). Must throw on DB error so Stripe retries. */
   upsert(row: SubscriptionRow): Promise<void>;
   log?(msg: string, extra?: Record<string, unknown>): void;
@@ -191,6 +193,11 @@ export async function handleStripeEvent(event: StripeEventLike, deps: WebhookDep
     deps.log?.("stripe-webhook: no user for subscription", { subId, customerId, type: event.type });
     // Not retryable — acknowledge so Stripe stops retrying; it is logged for manual follow-up.
     return { action: "skipped", reason: "no_user", subscriptionId: subId };
+  }
+
+  if (deps.userExists && !(await deps.userExists(userId))) {
+    // Account deleted (delete-account cancels the subscription first): nothing to store, don't retry.
+    return { action: "skipped", reason: "user_deleted", subscriptionId: subId };
   }
 
   const row = toSubscriptionRow(sub, userId);

@@ -97,7 +97,7 @@ const CS: Copy = {
     {
       h: "7. Zrušení účtu",
       p: [
-        "Účet zrušíte v Nastavení na webu nebo v aplikaci pro iPhone či Mac. Smažeme tím účet, profil, připojené klíče, údaje o využití, nastavení upozornění, MCP tokeny a sdílené odkazy. Předplatné Pro před zrušením účtu prosím ukončete ve správě předplatného (Stripe), zrušení účtu ho samo neukončí.",
+        "Účet zrušíte v Nastavení na webu nebo v aplikaci pro iPhone či Mac. Smažeme tím účet, profil, připojené klíče, údaje o využití, nastavení upozornění, MCP tokeny a sdílené odkazy. Pokud máte předplatné Pro, zrušení účtu ho ve Stripe okamžitě ukončí, bez dalších plateb a bez vrácení peněz za zbývající část období. Faktury a záznamy o platbách zůstávají u Stripe po dobu, kterou vyžadují účetní a daňové předpisy.",
       ],
     },
     {
@@ -186,7 +186,7 @@ const EN: Copy = {
     {
       h: "7. Deleting your account",
       p: [
-        "Delete your account in Settings on the web or in the iPhone or Mac app. This deletes the account, profile, connected keys, usage data, alert settings, MCP tokens and shared links. Please cancel Pro in subscription management (Stripe) first; deleting the account does not cancel it by itself.",
+        "Delete your account in Settings on the web or in the iPhone or Mac app. This deletes the account, profile, connected keys, usage data, alert settings, MCP tokens and shared links. If you have Pro, deleting the account cancels it in Stripe immediately: no further charges and no refund for the rest of the period. Invoices and payment records stay with Stripe for as long as accounting and tax law requires.",
       ],
     },
     {

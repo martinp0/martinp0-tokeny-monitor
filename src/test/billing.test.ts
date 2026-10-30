@@ -118,6 +118,19 @@ describe("handleStripeEvent", () => {
     expect(d.retrieveSubscription).not.toHaveBeenCalled();
   });
 
+  it("skips (no retry, no write) events for a deleted account", async () => {
+    const d = deps({ userExists: vi.fn(async () => false) });
+    const r = await handleStripeEvent(ev("customer.subscription.deleted", { id: "sub_1", object: "subscription" }), d);
+    expect(r).toEqual({ action: "skipped", reason: "user_deleted", subscriptionId: "sub_1" });
+    expect(d.upsert).not.toHaveBeenCalled();
+  });
+
+  it("writes normally when the user still exists", async () => {
+    const d = deps({ userExists: vi.fn(async () => true) });
+    const r = await handleStripeEvent(ev("customer.subscription.updated", { id: "sub_1", object: "subscription" }), d);
+    expect(r).toMatchObject({ action: "upserted", userId: USER });
+  });
+
   it("ignores one-off checkout sessions", async () => {
     const d = deps();
     const r = await handleStripeEvent(ev("checkout.session.completed", { mode: "payment", subscription: null }), d);

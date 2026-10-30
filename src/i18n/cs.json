@@ -109,11 +109,11 @@
     "exportButton": "Exportovat data",
     "exporting": "Exportuji…",
     "dangerZone": "Nebezpečná zóna",
-    "deleteDesc": "Smazání účtu je nevratné. Všechna tvá data (activity rows, profil, budget alerty, MCP tokeny) budou trvale odstraněna.",
+    "deleteDesc": "Smazání účtu je nevratné. Všechna tvá data (activity rows, profil, budget alerty, MCP tokeny) budou trvale odstraněna a případné předplatné Pro se okamžitě ukončí.",
     "deleteAccount": "Smazat účet",
     "deleting": "Mažu…",
     "confirmDelete": "Opravdu smazat účet?",
-    "confirmDeleteDesc": "Tato akce je nevratná. Všechna data budou trvale smazána a nebude možné je obnovit.",
+    "confirmDeleteDesc": "Tato akce je nevratná. Všechna data budou trvale smazána a nebude možné je obnovit. Předplatné Pro se ukončí hned, bez vrácení peněz za zbytek období.",
     "cancel": "Zrušit",
     "confirmYes": "Ano, smazat vše"
   },
@@ -234,6 +234,10 @@
         {
           "q": "Jak propojím Tokeny s Grok Botem?",
           "a": "V Nastavení → MCP server si vytvoř token (Pro). V Grok Botu pak požádej bota, ať přidá vlastní MCP server s adresou z Nastavení a hlavičkou Authorization: Bearer <token>; token zadej do maskovaného pole. Potom v chatu napiš @tokeny a ptej se na své útraty. Funguje to stejně jako u Cursoru nebo Claude."
+        },
+        {
+          "q": "Co se stane s předplatným Pro, když smažu účet?",
+          "a": "Smazáním účtu se předplatné Pro ve Stripe okamžitě ukončí, takže ti už nic dalšího nestrhneme. Za zbytek zaplaceného období peníze automaticky nevracíme. Faktury zůstávají u Stripe kvůli účetním předpisům. Pokud chceš Pro jen zrušit a účet si nechat, použij správu předplatného v Nastavení."
         }
       ]
     },
