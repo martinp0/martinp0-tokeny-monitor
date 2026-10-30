@@ -1,4 +1,7 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+
+// deno-lint-ignore no-explicit-any
+type Db = SupabaseClient<any, "public", any>;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -77,101 +80,111 @@ const tools = [
   },
 ];
 
+type AggRow = {
+  bucket: string;
+  cost_total: number;
+  request_count: number;
+  row_count: number;
+  tokens_prompt: number;
+  tokens_completion: number;
+  tokens_reasoning: number;
+  generation_time_ms_sum: number;
+  timed_rows: number;
+};
+
+const isDate = (v: unknown): v is string => typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v);
+
+// All aggregation happens in SQL (public.activity_aggregate, security invoker) using the
+// caller's JWT, so RLS scopes it to the caller's rows and nothing is truncated at 1000 rows.
+async function aggregate(
+  supabase: Db,
+  groupBy: string,
+  args: { model?: string; provider?: string; from_date?: string; to_date?: string } = {},
+): Promise<AggRow[]> {
+  const { data, error } = await supabase.rpc("activity_aggregate", {
+    p_group_by: groupBy,
+    p_model: typeof args.model === "string" && args.model ? args.model : null,
+    p_provider: typeof args.provider === "string" && args.provider ? args.provider : null,
+    p_from: isDate(args.from_date) ? args.from_date : null,
+    p_to: isDate(args.to_date) ? args.to_date : null,
+  });
+  if (error) throw new Error(`activity_aggregate failed: ${error.message}`);
+  return (data ?? []) as AggRow[];
+}
+
 async function executeTool(
   name: string,
   args: any,
-  supabase: ReturnType<typeof createClient>,
+  supabase: Db,
 ): Promise<any> {
   if (name === "list_models") {
-    const { data } = await supabase.from("activity_rows").select("model_permaslug, provider_name").limit(2000);
-    const models = [...new Set((data ?? []).map((r: any) => r.model_permaslug))];
-    const providers = [...new Set((data ?? []).map((r: any) => r.provider_name))];
-    return { models, providers, total_models: models.length };
+    const [models, providers] = await Promise.all([aggregate(supabase, "model"), aggregate(supabase, "provider")]);
+    return { models: models.map((r) => r.bucket), providers: providers.map((r) => r.bucket), total_models: models.length };
   }
 
   if (name === "query_stats") {
-    let q = supabase.from("activity_rows").select("*").limit(5000);
-    if (args.model) q = q.eq("model_permaslug", args.model);
-    if (args.provider) q = q.eq("provider_name", args.provider);
-    if (args.from_date) q = q.gte("created_at", args.from_date);
-    if (args.to_date) q = q.lte("created_at", args.to_date + "T23:59:59");
-    const { data } = await q;
-    const rows = (data ?? []) as any[];
+    const groupBy = ["model", "provider", "day", "hour", "none"].includes(args?.group_by) ? args.group_by : "none";
+    const rows = await aggregate(supabase, groupBy, args ?? {});
     if (rows.length === 0) return { count: 0, message: "Žádná data pro dané filtry." };
-
-    const limit = args.limit ?? 10;
-    const groupBy = args.group_by;
-    const grouper = (r: any) => {
-      if (groupBy === "model") return r.model_permaslug;
-      if (groupBy === "provider") return r.provider_name;
-      if (groupBy === "day") return (r.created_at as string).substring(0, 10);
-      if (groupBy === "hour") return (r.created_at as string).substring(0, 13);
-      return "all";
-    };
-    const buckets: Record<string, { cost: number; requests: number; tokens: number; gen_ms: number }> = {};
-    for (const r of rows) {
-      const k = grouper(r);
-      if (!buckets[k]) buckets[k] = { cost: 0, requests: 0, tokens: 0, gen_ms: 0 };
-      buckets[k].cost += r.cost_total;
-      buckets[k].requests += r.request_count ?? 1;
-      buckets[k].tokens += r.tokens_prompt + r.tokens_completion + r.tokens_reasoning;
-      buckets[k].gen_ms += r.generation_time_ms;
-    }
-    const groups = Object.entries(buckets)
-      .map(([k, v]) => ({
-        key: k,
-        cost_usd: +v.cost.toFixed(4),
-        requests: v.requests,
-        tokens: v.tokens,
-        avg_latency_ms: Math.round(v.gen_ms / v.requests),
-        cost_per_1k_tokens: v.tokens > 0 ? +((v.cost / v.tokens) * 1000).toFixed(5) : 0,
-      }))
-      .sort((a, b) => b.cost_usd - a.cost_usd)
-      .slice(0, limit);
+    const limit = Math.max(1, Math.min(Number(args?.limit) || 10, 100));
+    const groups = rows
+      .map((r) => {
+        const tokens = Number(r.tokens_prompt) + Number(r.tokens_completion) + Number(r.tokens_reasoning);
+        const cost = Number(r.cost_total);
+        return {
+          key: r.bucket,
+          cost_usd: +cost.toFixed(4),
+          requests: Number(r.request_count),
+          tokens,
+          avg_latency_ms: Number(r.timed_rows) > 0 ? Math.round(Number(r.generation_time_ms_sum) / Number(r.timed_rows)) : null,
+          cost_per_1k_tokens: tokens > 0 ? +((cost / tokens) * 1000).toFixed(5) : 0,
+        };
+      })
+      .sort((a, b) => b.cost_usd - a.cost_usd);
     return {
-      total_rows: rows.length,
-      total_cost_usd: +rows.reduce((s, r) => s + r.cost_total, 0).toFixed(4),
-      groups,
+      total_rows: rows.reduce((s, r) => s + Number(r.row_count), 0),
+      total_requests: rows.reduce((s, r) => s + Number(r.request_count), 0),
+      total_cost_usd: +rows.reduce((s, r) => s + Number(r.cost_total), 0).toFixed(4),
+      groups: groups.slice(0, limit),
     };
   }
 
   if (name === "detect_anomalies") {
-    const { data } = await supabase.from("activity_rows").select("created_at, cost_total, model_permaslug").limit(5000);
-    const rows = (data ?? []) as any[];
-    if (rows.length === 0) return { anomalies: [] };
-    const byDay: Record<string, number> = {};
-    for (const r of rows) {
-      const d = (r.created_at as string).substring(0, 10);
-      byDay[d] = (byDay[d] ?? 0) + r.cost_total;
-    }
-    const values = Object.values(byDay);
+    const days = await aggregate(supabase, "day");
+    if (days.length === 0) return { anomalies: [] };
+    const values = days.map((d) => Number(d.cost_total));
     const mean = values.reduce((a, b) => a + b, 0) / values.length;
     const std = Math.sqrt(values.reduce((s, v) => s + (v - mean) ** 2, 0) / values.length);
-    const anomalies = Object.entries(byDay)
-      .filter(([, v]) => v > mean + 2 * std)
-      .map(([day, cost]) => ({ day, cost_usd: +cost.toFixed(4), times_avg: +(cost / mean).toFixed(2) }));
-    return { mean_daily_usd: +mean.toFixed(4), std_usd: +std.toFixed(4), anomalies };
+    const anomalies = days
+      .filter((d) => Number(d.cost_total) > mean + 2 * std)
+      .map((d) => ({ day: d.bucket, cost_usd: +Number(d.cost_total).toFixed(4), times_avg: mean > 0 ? +(Number(d.cost_total) / mean).toFixed(2) : null }))
+      .sort((a, b) => a.day.localeCompare(b.day));
+    return { mean_daily_usd: +mean.toFixed(4), std_usd: +std.toFixed(4), days: days.length, anomalies };
   }
 
   return { ui_action: name, args };
 }
 
+const jsonResponse = (body: unknown, status = 200) =>
+  new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
-  try {
-    const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
-    if (!ANTHROPIC_API_KEY) throw new Error("ANTHROPIC_API_KEY not configured");
+  if (req.method !== "POST") return jsonResponse({ error: "Method not allowed" }, 405);
 
+  try {
+    // Authenticate first: unauthenticated callers always get 401, regardless of server config.
     const authHeader = req.headers.get("Authorization") ?? "";
+    if (!/^Bearer\s+\S+$/i.test(authHeader)) return jsonResponse({ error: "Unauthorized" }, 401);
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_ANON_KEY")!,
       { global: { headers: { Authorization: authHeader } } },
     );
 
-    const { data: userRes } = await supabase.auth.getUser();
-    if (!userRes.user) {
+    const { data: userRes } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }));
+    if (!userRes?.user) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -197,7 +210,13 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { messages } = await req.json();
+    const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
+    if (!ANTHROPIC_API_KEY) {
+      console.error("chat-agent: ANTHROPIC_API_KEY is not configured");
+      return jsonResponse({ error: "AI asistent je dočasně nedostupný." }, 503);
+    }
+
+    const { messages } = await req.json().catch(() => ({ messages: null }));
 
     // Input validation to prevent API cost abuse
     if (!Array.isArray(messages)) {
@@ -214,7 +233,7 @@ Deno.serve(async (req) => {
     }
     const MAX_CONTENT_CHARS = 4000;
     for (const m of messages) {
-      if (!m || typeof m !== "object" || typeof m.role !== "string") {
+      if (!m || typeof m !== "object" || !["user", "assistant", "system"].includes(m.role)) {
         return new Response(JSON.stringify({ error: "invalid message shape" }), {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },

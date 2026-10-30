@@ -1,4 +1,7 @@
-import { createClient } from 'npm:@supabase/supabase-js@2'
+import { createClient, type SupabaseClient } from 'npm:@supabase/supabase-js@2'
+
+// deno-lint-ignore no-explicit-any
+type Db = SupabaseClient<any, any, any>
 
 const MAX_RETRIES = 5
 const DEFAULT_BATCH_SIZE = 10
@@ -59,7 +62,7 @@ function isRateLimited(error: unknown): boolean {
 }
 
 async function moveToDlq(
-  supabase: ReturnType<typeof createClient>,
+  supabase: Db,
   queue: string,
   msg: { msg_id: number; message: Record<string, unknown> },
   reason: string

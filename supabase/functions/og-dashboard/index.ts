@@ -146,19 +146,20 @@ Deno.serve(async (req) => {
     }
 
     // Otherwise compute KPIs and render SVG
-    const { data: rows } = await supabase
-      .from("activity_rows")
-      .select("cost_total, tokens_prompt, tokens_completion, model_permaslug")
-      .eq("user_id", share.user_id)
-      .limit(5000);
-
+    // SQL-side aggregation (public.activity_aggregate): no 1000-row truncation.
+    const { data: byModel } = await supabase.rpc("activity_aggregate", {
+      p_user_id: share.user_id,
+      p_group_by: "model",
+    });
     let totalCost = 0;
     let totalTokens = 0;
+    let totalRequests = 0;
     const modelMap: Record<string, number> = {};
-    (rows || []).forEach((r: any) => {
+    ((byModel as any[]) || []).forEach((r: any) => {
       totalCost += Number(r.cost_total || 0);
       totalTokens += Number(r.tokens_prompt || 0) + Number(r.tokens_completion || 0);
-      const m = r.model_permaslug || "unknown";
+      totalRequests += Number(r.request_count || 0);
+      const m = r.bucket || "unknown";
       modelMap[m] = (modelMap[m] || 0) + Number(r.cost_total || 0);
     });
     const topModel = (Object.entries(modelMap).sort((a, b) => b[1] - a[1])[0]?.[0] || "")
@@ -175,7 +176,7 @@ Deno.serve(async (req) => {
       label: share.label || "Sdílený dashboard",
       owner: profile?.display_name || "Anonym",
       totalCost,
-      totalRequests: rows?.length || 0,
+      totalRequests,
       totalTokens,
       topModel,
     });

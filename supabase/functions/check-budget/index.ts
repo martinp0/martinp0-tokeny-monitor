@@ -57,13 +57,14 @@ Deno.serve(async (req) => {
     const results: any[] = [];
 
     for (const alert of alerts ?? []) {
-      const { data: rows } = await supabase
-        .from("activity_rows")
-        .select("cost_total")
-        .eq("user_id", alert.user_id)
-        .gte("created_at", monthStart.toISOString().substring(0, 10));
-
-      const monthCost = (rows ?? []).reduce((s, r: any) => s + r.cost_total, 0);
+      // SQL-side sum (public.activity_aggregate) – a plain select is capped at 1000 rows.
+      const { data: agg, error: aggError } = await supabase.rpc("activity_aggregate", {
+        p_user_id: alert.user_id,
+        p_from: monthStart.toISOString().substring(0, 10),
+        p_group_by: "none",
+      });
+      if (aggError) throw new Error(aggError.message);
+      const monthCost = Number((agg as any[] | null)?.[0]?.cost_total ?? 0);
       const pct = (monthCost / Number(alert.monthly_budget_usd)) * 100;
 
       const shouldNotify =
@@ -92,7 +93,7 @@ Deno.serve(async (req) => {
     });
   } catch (e) {
     console.error(e);
-    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "err" }), {
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

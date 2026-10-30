@@ -67,7 +67,11 @@ Deno.serve(async (req) => {
       .from("subscriptions")
       .upsert(payload, { onConflict: "user_id" });
 
-    if (error) console.error("upsertSubscription error:", error);
+    if (error) {
+      // Throw so the webhook answers 500 and Stripe retries, instead of silently losing the update.
+      console.error("upsertSubscription error:", error);
+      throw new Error(`upsertSubscription failed: ${error.message}`);
+    }
   }
 
   try {

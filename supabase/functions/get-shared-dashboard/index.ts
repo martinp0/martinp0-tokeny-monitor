@@ -1,4 +1,8 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { fetchAllPages } from "../_shared/paginate.ts";
+
+// Shared dashboards are public; cap the payload. Totals beyond this are flagged as truncated.
+const MAX_SHARED_ROWS = 50_000;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -48,13 +52,27 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Fetch activity data for the user
-    const { data: rows, error: rowsError } = await supabase
-      .from("activity_rows")
-      .select("*")
-      .eq("user_id", share.user_id)
-      .order("created_at", { ascending: false })
-      .limit(5000);
+    // Fetch activity data for the user (paged: PostgREST returns at most 1000 rows per request)
+    let rows: any[] = [];
+    let truncated = false;
+    let rowsError: unknown = null;
+    try {
+      const res = await fetchAllPages<any>(
+        (from, to) =>
+          supabase
+            .from("activity_rows")
+            .select("*")
+            .eq("user_id", share.user_id)
+            .order("created_at", { ascending: false })
+            .order("id", { ascending: true })
+            .range(from, to),
+        { maxRows: MAX_SHARED_ROWS },
+      );
+      rows = res.rows;
+      truncated = res.truncated;
+    } catch (e) {
+      rowsError = e;
+    }
 
     if (rowsError) {
       console.error("get-shared-dashboard rows error", rowsError);
@@ -77,7 +95,8 @@ Deno.serve(async (req) => {
         filters: share.filters,
         owner: profile?.display_name || "Anonym",
         created_at: share.created_at,
-        rows: rows || [],
+        rows,
+        truncated,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );

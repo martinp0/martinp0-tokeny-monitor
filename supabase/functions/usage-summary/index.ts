@@ -84,6 +84,7 @@ Deno.serve(async (req) => {
         .eq("user_id", userId)
         .gte("created_at", since.toISOString())
         .order("created_at", { ascending: true })
+        .order("id", { ascending: true }) // deterministic paging (created_at ties)
         .range(from, from + PAGE - 1);
       if (error) throw error;
       rows.push(...((data ?? []) as Row[]));
