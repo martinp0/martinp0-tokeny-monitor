@@ -5,14 +5,15 @@ import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 
 interface Props {
-  /** Saves the CSV; reports success/failure itself (see useDashboardData.loadCSV). */
-  onUpload: (text: string, name: string) => Promise<unknown> | void;
+  /** Imports the CSV and reports progress 0..1; reports success/failure itself (see useDashboardData.importFile). */
+  onUpload: (file: File, onProgress: (fraction: number) => void) => Promise<unknown> | void;
 }
 
 export function OnboardingEmptyState({ onUpload }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState(0);
 
   const handleFile = useCallback(async (file: File) => {
     if (!file.name.toLowerCase().endsWith(".csv")) {
@@ -20,24 +21,16 @@ export function OnboardingEmptyState({ onUpload }: Props) {
       return;
     }
     setUploading(true);
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      const text = e.target?.result as string;
-      if (text) {
-        try {
-          await onUpload(text, file.name);
-        } catch (err) {
-          toast.error("Nahrávání selhalo");
-          console.error(err);
-        }
-      }
+    setProgress(0);
+    try {
+      await onUpload(file, setProgress);
+    } catch (err) {
+      toast.error("Nahrávání selhalo");
+      console.error(err);
+    } finally {
       setUploading(false);
-    };
-    reader.onerror = () => {
-      toast.error("Soubor se nepodařilo přečíst");
-      setUploading(false);
-    };
-    reader.readAsText(file);
+      setProgress(0);
+    }
   }, [onUpload]);
 
   const onDrop = useCallback((e: React.DragEvent) => {
@@ -58,7 +51,7 @@ export function OnboardingEmptyState({ onUpload }: Props) {
           Nahrajte první CSV a začněte
         </h2>
         <p className="text-muted-foreground max-w-xl mx-auto">
-          Pro zobrazení dashboardu potřebujeme váš export z OpenRouteru. Stačí pár kliknutí.
+          Pro zobrazení dashboardu potřebujeme váš export z OpenRouteru, nebo export využití z Cursoru či Grok Botu. Stačí pár kliknutí.
         </p>
       </div>
 
@@ -96,7 +89,7 @@ export function OnboardingEmptyState({ onUpload }: Props) {
             className="gap-2 tabular-nums"
           >
             <FileSpreadsheet className="h-4 w-4" />
-            {uploading ? "Nahrávám…" : "Vybrat CSV soubor"}
+            {uploading ? `Nahrávám… ${Math.round(progress * 100)} %` : "Vybrat CSV soubor"}
           </Button>
         </div>
       </Card>

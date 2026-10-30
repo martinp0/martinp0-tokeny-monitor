@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           api_key_name: string
           app_name: string
+          billing_type: string | null
           byok_usage_inference: number
           cancelled: boolean
           cost_cache: number
@@ -37,6 +38,7 @@ export type Database = {
           request_count: number
           streamed: boolean
           time_to_first_token_ms: number
+          tokens_cache_write: number
           tokens_cached: number
           tokens_completion: number
           tokens_prompt: number
@@ -48,6 +50,7 @@ export type Database = {
         Insert: {
           api_key_name?: string
           app_name?: string
+          billing_type?: string | null
           byok_usage_inference?: number
           cancelled?: boolean
           cost_cache?: number
@@ -67,6 +70,7 @@ export type Database = {
           request_count?: number
           streamed?: boolean
           time_to_first_token_ms?: number
+          tokens_cache_write?: number
           tokens_cached?: number
           tokens_completion?: number
           tokens_prompt?: number
@@ -78,6 +82,7 @@ export type Database = {
         Update: {
           api_key_name?: string
           app_name?: string
+          billing_type?: string | null
           byok_usage_inference?: number
           cancelled?: boolean
           cost_cache?: number
@@ -97,6 +102,7 @@ export type Database = {
           request_count?: number
           streamed?: boolean
           time_to_first_token_ms?: number
+          tokens_cache_write?: number
           tokens_cached?: number
           tokens_completion?: number
           tokens_prompt?: number

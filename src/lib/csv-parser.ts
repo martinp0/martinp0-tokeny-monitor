@@ -1,6 +1,9 @@
 import Papa from "papaparse";
 
-export type ProviderSource = "openrouter" | "anthropic" | "openai";
+export type ProviderSource = "openrouter" | "anthropic" | "openai" | "cursor" | "grok-bot";
+
+/** Plan-covered vs over-plan usage (Cursor / Grok Bot exports). Absent for other providers. */
+export type BillingType = "included" | "on_demand" | "credits";
 
 export interface ActivityRow {
   generation_id: string;
@@ -28,6 +31,9 @@ export interface ActivityRow {
   api_key_name: string;
   provider_source: ProviderSource;
   request_count: number;
+  /** Cache-write input tokens (part of tokens_prompt). 0 when the provider doesn't report it. */
+  tokens_cache_write?: number;
+  billing_type?: BillingType | null;
 }
 
 const toNum = (v: string | undefined) => {

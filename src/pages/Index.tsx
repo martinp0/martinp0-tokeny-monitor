@@ -6,6 +6,7 @@ import { useExport } from "@/hooks/useExport";
 import { useCurrency } from "@/hooks/useCurrency";
 import { useAuth } from "@/hooks/useAuth";
 import { KpiCards } from "@/components/dashboard/KpiCards";
+import { UsageBreakdownCard } from "@/components/dashboard/UsageBreakdownCard";
 import { CostTimeChart } from "@/components/dashboard/CostTimeChart";
 import { TokensChart } from "@/components/dashboard/TokensChart";
 import { ModelCostChart } from "@/components/dashboard/ModelCostChart";
@@ -41,7 +42,7 @@ import { FREE_LIMITS, type ProFeature } from "@/lib/plan";
 const Index = () => {
   const dashboardRef = useRef<HTMLDivElement>(null);
   const {
-    data, filteredData, fileName, selectedModel, setSelectedModel, loadCSV,
+    data, filteredData, fileName, selectedModel, setSelectedModel, importFile, usageBreakdown,
     dateFilter, setDateFilter, models,
     totalCost, totalRequests, totalTokens, avgGenTime,
     costByModel, costByProvider, timeSeries,
@@ -131,7 +132,7 @@ const Index = () => {
             <DateRangePicker value={dateFilter} onChange={setDateFilter} />
             <span className="text-xs tabular-nums text-muted-foreground truncate max-w-[200px]">{fileName}</span>
 
-            <CsvUpload onUpload={loadCSV} />
+            <CsvUpload onUpload={importFile} />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm" className="gap-2 border-border hover:bg-secondary hover:text-foreground tabular-nums text-xs">
@@ -209,7 +210,7 @@ const Index = () => {
                   )}
                   <div className="space-y-2">
                     <p className="text-xs uppercase tracking-wider text-muted-foreground">Data</p>
-                    <CsvUpload onUpload={loadCSV} />
+                    <CsvUpload onUpload={importFile} />
                     {fileName && <p className="text-xs tabular-nums text-muted-foreground truncate">{fileName}</p>}
                   </div>
                   <div className="space-y-2">
@@ -253,7 +254,7 @@ const Index = () => {
       {/* Dashboard */}
       <main ref={dashboardRef} className="p-3 md:p-6 space-y-4 max-w-[1600px] mx-auto">
         {!loading && !hasUserData ? (
-          <OnboardingEmptyState onUpload={loadCSV} />
+          <OnboardingEmptyState onUpload={importFile} />
         ) : (
           <>
             {!planLoading && !isPro && (
@@ -267,6 +268,7 @@ const Index = () => {
               </div>
             )}
             <KpiCards totalCost={totalCost} totalRequests={totalRequests} totalTokens={totalTokens} avgGenTime={avgGenTime} />
+            {usageBreakdown && <UsageBreakdownCard data={usageBreakdown} />}
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <CostTimeChart data={timeSeries} />

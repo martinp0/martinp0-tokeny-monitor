@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect, useMemo } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { parseCSV, type ActivityRow, type ProviderSource } from "@/lib/csv-parser";
+import { parseCSV, type ActivityRow, type BillingType, type ProviderSource } from "@/lib/csv-parser";
 import { fetchAllPages } from "@/lib/paginate";
 import {
   computeTotals,
@@ -15,6 +15,7 @@ import {
 import sampleCSV from "@/data/sample.csv?raw";
 import { useSubscription } from "@/hooks/useSubscription";
 import { FREE_LIMITS, splitRowsForPlan } from "@/lib/plan";
+import { isUsageExportHeader, streamUsageExport, usageBreakdown } from "@/lib/usage-export";
 
 /** Upper bound of rows loaded into the browser. Beyond this the dashboard says it is truncated. */
 const MAX_DASHBOARD_ROWS = 100_000;
@@ -49,6 +50,8 @@ function mapDbRow(r: DbRow): ActivityRow {
     api_key_name: r.api_key_name as string,
     provider_source: (r.provider_source ?? "openrouter") as ProviderSource,
     request_count: r.request_count ?? 1,
+    tokens_cache_write: (r.tokens_cache_write as number | null) ?? 0,
+    billing_type: (r.billing_type as BillingType | null) ?? null,
   };
 }
 
@@ -57,7 +60,12 @@ export interface CsvImportResult {
   saved: number;
   failed: number;
   error?: string;
+  /** Usage exports only: rows that were already stored (same Billing Item ID) and were left as is. */
+  alreadyImported?: number;
 }
+
+/** Import progress callback, 0..1. */
+export type ImportProgress = (fraction: number) => void;
 
 export function useDashboardData(options: { demoMode?: boolean } = {}) {
   const { demoMode = false } = options;
@@ -71,6 +79,7 @@ export function useDashboardData(options: { demoMode?: boolean } = {}) {
   const [loading, setLoading] = useState<boolean>(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [truncated, setTruncated] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
 
   // Load ALL of the user's rows (paged; PostgREST returns at most 1000 rows per request).
   useEffect(() => {
@@ -125,7 +134,7 @@ export function useDashboardData(options: { demoMode?: boolean } = {}) {
     return () => {
       cancelled = true;
     };
-  }, [demoMode]);
+  }, [demoMode, reloadKey]);
 
   // Upload CSV → save to DB. Errors are surfaced (toast + return value), never swallowed.
   const loadCSV = useCallback(async (text: string, name: string): Promise<CsvImportResult> => {
@@ -182,6 +191,94 @@ export function useDashboardData(options: { demoMode?: boolean } = {}) {
     return { parsed: parsed.length, saved, failed, error: firstError };
   }, [session, isPro, planLoading]);
 
+  /**
+   * Cursor / Grok Bot usage export: parsed in the browser in streaming chunks (the export can be
+   * tens of MB), written in batches as the user (RLS: user_id = auth.uid()), deduplicated on
+   * (user_id, Billing Item ID) so re-importing the same or an overlapping export adds nothing twice.
+   */
+  const importUsageExport = useCallback(async (file: File, onProgress?: ImportProgress): Promise<CsvImportResult> => {
+    const userId = session?.user?.id;
+    if (!userId) {
+      toast.error("Nejsi přihlášen – data nebyla uložena.");
+      return { parsed: 0, saved: 0, failed: 0, error: "not_authenticated" };
+    }
+    if (planLoading) {
+      toast.info("Načítám tvůj tarif – zkus import za okamžik znovu.");
+      return { parsed: 0, saved: 0, failed: 0, error: "plan_loading" };
+    }
+    let saved = 0;
+    let alreadyImported = 0;
+    let failed = 0;
+    let tooOld = 0;
+    let firstError: string | undefined;
+    try {
+      const stats = await streamUsageExport(file, {
+        batchSize: UPSERT_BATCH,
+        onProgress,
+        onBatch: async (rows) => {
+          const { keep, skipped } = splitRowsForPlan(rows, isPro);
+          tooOld += skipped;
+          if (keep.length === 0) return;
+          const { data: inserted, error } = await supabase
+            .from("activity_rows")
+            .upsert(keep.map((r) => ({ ...r, user_id: userId })), {
+              onConflict: "user_id,generation_id",
+              ignoreDuplicates: true,
+            })
+            .select("generation_id");
+          if (error) {
+            failed += keep.length;
+            firstError ??= error.message;
+            return;
+          }
+          const n = inserted?.length ?? 0;
+          saved += n;
+          alreadyImported += keep.length - n;
+        },
+      });
+      const skippedRows = Object.values(stats.skipped).reduce((a, b) => a + b, 0);
+      if (tooOld > 0) {
+        toast.info(
+          `${tooOld.toLocaleString()} řádků starších než ${FREE_LIMITS.historyDays} dní se ve Free neukládá. S Pro importuješ celou historii.`,
+        );
+      }
+      if (skippedRows > 0 || stats.duplicatesInFile > 0) {
+        toast.info(
+          `Přeskočeno ${skippedRows.toLocaleString()} neplatných řádků a ${stats.duplicatesInFile.toLocaleString()} duplicit v souboru.`,
+        );
+      }
+      if (failed > 0) {
+        toast.error(`Uložení ${failed.toLocaleString()} řádků selhalo: ${firstError}`);
+      } else {
+        toast.success(
+          `Import Cursor / Grok Bot: ${saved.toLocaleString()} nových řádků` +
+            (alreadyImported > 0 ? `, ${alreadyImported.toLocaleString()} už bylo uloženo.` : "."),
+        );
+      }
+      if (saved > 0) {
+        setSelectedModel(null);
+        setReloadKey((k) => k + 1);
+      }
+      return { parsed: stats.mapped, saved, failed, alreadyImported, error: firstError };
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      toast.error(`Import selhal: ${msg}`);
+      if (saved > 0) setReloadKey((k) => k + 1);
+      return { parsed: 0, saved, failed, alreadyImported, error: msg };
+    }
+  }, [session, isPro, planLoading]);
+
+  /** Entry point for the upload UI: picks the importer from the CSV header. */
+  const importFile = useCallback(async (file: File, onProgress?: ImportProgress): Promise<CsvImportResult> => {
+    const head = await file.slice(0, 4096).text();
+    if (isUsageExportHeader(head)) return importUsageExport(file, onProgress);
+    const text = await file.text();
+    onProgress?.(0.5);
+    const result = await loadCSV(text, file.name);
+    onProgress?.(1);
+    return result;
+  }, [importUsageExport, loadCSV]);
+
   // Apply date filter first, then model filter
   const dateFiltered = useMemo(() => filterByDate(data, dateFilter), [data, dateFilter]);
   const filteredData = useMemo(
@@ -196,6 +293,7 @@ export function useDashboardData(options: { demoMode?: boolean } = {}) {
   const costByModel = useMemo(() => aggCostByModel(dateFiltered), [dateFiltered]);
   const costByProvider = useMemo(() => aggCostByProvider(dateFiltered), [dateFiltered]);
   const timeSeries = useMemo(() => aggTimeSeries(filteredData), [filteredData]);
+  const usageSplit = useMemo(() => usageBreakdown(filteredData), [filteredData]);
 
   return {
     data,
@@ -206,6 +304,8 @@ export function useDashboardData(options: { demoMode?: boolean } = {}) {
     dateFilter,
     setDateFilter,
     loadCSV,
+    importFile,
+    usageBreakdown: usageSplit,
     models,
     providers,
     totalCost,
