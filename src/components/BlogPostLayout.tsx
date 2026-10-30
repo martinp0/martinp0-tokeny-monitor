@@ -12,12 +12,14 @@ interface BlogPostLayoutProps {
   description: string;
   slug: string;
   date: string;
+  /** Human-readable date shown on the page (defaults to the ISO date). */
+  dateLabel?: string;
   tag: string;
   keywords: string;
   children: ReactNode;
 }
 
-export default function BlogPostLayout({ title, description, slug, date, tag, keywords, children }: BlogPostLayoutProps) {
+export default function BlogPostLayout({ title, description, slug, date, dateLabel, tag, keywords, children }: BlogPostLayoutProps) {
   const url = `https://tokeny.martinpohl.cz/blog/${slug}`;
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -30,6 +32,10 @@ export default function BlogPostLayout({ title, description, slug, date, tag, ke
         <meta property="og:description" content={description} />
         <meta property="og:url" content={url} />
         <meta property="og:type" content="article" />
+        <meta property="og:locale" content="cs_CZ" />
+        <meta property="article:published_time" content={date} />
+        <meta property="article:author" content="Martin Pohl" />
+        <meta name="twitter:card" content="summary_large_image" />
         <script type="application/ld+json">{JSON.stringify({
           "@context": "https://schema.org",
           "@type": "Article",
@@ -68,7 +74,8 @@ export default function BlogPostLayout({ title, description, slug, date, tag, ke
         </Link>
         <div className="flex items-center gap-3 text-xs tabular-nums text-muted-foreground mb-4">
           <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary">{tag}</span>
-          <span className="flex items-center gap-1"><Calendar className="h-3 w-3" /> {date}</span>
+          <span className="flex items-center gap-1"><Calendar className="h-3 w-3" /> <time dateTime={date}>{dateLabel ?? date}</time></span>
+          <span>Martin Pohl</span>
         </div>
         <h1 className="text-3xl md:text-5xl font-bold tracking-tight mb-6">{title}</h1>
         <p className="text-lg text-muted-foreground mb-6">{description}</p>

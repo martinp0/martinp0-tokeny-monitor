@@ -7,6 +7,13 @@ import { PublicHeader } from "@/components/PublicHeader";
 
 const POSTS = [
   {
+    slug: "kolik-stoji-ai-agenti",
+    title: "Kolik doopravdy stojí AI agenti: měsíc dat, 7,3 miliardy tokenů a 859 dolarů",
+    excerpt: "Říjen 2026 z Grok Botu a Cursoru: 85 179 volání, 95 % tokenů z mezipaměti a útrata, která přichází ve skocích.",
+    date: "2026-10-30",
+    tag: "Reálná data",
+  },
+  {
     slug: "grok-token-optimization",
     title: "Jak optimalizovat tokeny u Grok API (xAI): 7 praktických tipů",
     excerpt: "Kratší výstupy, správa historie, prompt caching, výběr modelu a měření. Jak snížit účet za Grok.",
