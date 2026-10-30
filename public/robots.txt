@@ -74,5 +74,8 @@ Allow: /
 Disallow: /dashboard
 Disallow: /settings
 Disallow: /profile
+Disallow: /auth
+Disallow: /reset-password
+Disallow: /shared/
 
-Sitemap: https://tokeny.pohl.uk/sitemap.xml
+Sitemap: https://tokeny.martinpohl.cz/sitemap.xml

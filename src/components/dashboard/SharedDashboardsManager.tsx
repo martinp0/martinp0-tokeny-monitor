@@ -120,11 +120,11 @@ export function SharedDashboardsManager() {
   }
 
   return (
-    <Card className="glass border-white/[0.06]">
+    <Card className="glass border-border">
       <CardHeader>
         <CardTitle className="flex items-center justify-between text-base">
           <span className="flex items-center gap-2">
-            <Share2 className="h-4 w-4 text-accent" /> Sdílené dashboardy & OG obrázky
+            <Share2 className="h-4 w-4 text-primary" /> Sdílené dashboardy & OG obrázky
           </span>
           <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => void load()}>
             <RefreshCw className="h-3.5 w-3.5" />
@@ -137,9 +137,9 @@ export function SharedDashboardsManager() {
         </p>
 
         {loading ? (
-          <div className="text-sm text-muted-foreground font-mono">Načítám…</div>
+          <div className="text-sm text-muted-foreground tabular-nums">Načítám…</div>
         ) : rows.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-white/10 p-6 text-center text-sm text-muted-foreground">
+          <div className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
             Zatím nemáš žádné sdílené dashboardy. Vytvoř první kliknutím na <strong>Sdílet</strong> v dashboardu.
           </div>
         ) : (
@@ -151,13 +151,13 @@ export function SharedDashboardsManager() {
               return (
                 <div
                   key={row.id}
-                  className="rounded-xl border border-white/10 bg-white/[0.02] p-3 grid gap-3 sm:grid-cols-[160px_1fr]"
+                  className="rounded-xl border border-border bg-muted/60 p-3 grid gap-3 sm:grid-cols-[160px_1fr]"
                 >
                   <a
                     href={ogUrl ?? "#"}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block aspect-[1200/630] rounded-lg overflow-hidden bg-secondary/40 border border-white/5"
+                    className="block aspect-[1200/630] rounded-lg overflow-hidden bg-secondary/40 border border-border"
                   >
                     {ogUrl ? (
                       <img
@@ -170,14 +170,14 @@ export function SharedDashboardsManager() {
                   </a>
                   <div className="space-y-2 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-mono text-sm font-semibold truncate">
+                      <span className="tabular-nums text-sm font-semibold truncate">
                         {row.label || "Sdílený dashboard"}
                       </span>
                       <span
-                        className={`text-[10px] font-mono px-2 py-0.5 rounded-full ${
+                        className={`text-xs tabular-nums px-2 py-0.5 rounded-full ${
                           isCustom
-                            ? "bg-accent/15 text-accent border border-accent/30"
-                            : "bg-secondary/60 text-muted-foreground border border-white/10"
+                            ? "bg-primary/10 text-primary border border-accent/30"
+                            : "bg-secondary/60 text-muted-foreground border border-border"
                         }`}
                       >
                         {isCustom ? "vlastní OG" : "auto OG"}
@@ -209,7 +209,7 @@ export function SharedDashboardsManager() {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="font-mono text-xs gap-1.5"
+                        className="tabular-nums text-xs gap-1.5"
                         disabled={busyId === row.id}
                         onClick={() => fileInputs.current[row.id]?.click()}
                       >
@@ -220,7 +220,7 @@ export function SharedDashboardsManager() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="font-mono text-xs gap-1.5"
+                          className="tabular-nums text-xs gap-1.5"
                           disabled={busyId === row.id}
                           onClick={() => void removeOg(row)}
                         >
@@ -231,7 +231,7 @@ export function SharedDashboardsManager() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="font-mono text-xs gap-1.5 text-destructive hover:text-destructive"
+                        className="tabular-nums text-xs gap-1.5 text-destructive hover:text-destructive"
                         disabled={busyId === row.id}
                         onClick={() => void removeShare(row)}
                       >

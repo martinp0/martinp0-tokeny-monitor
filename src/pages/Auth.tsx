@@ -56,23 +56,23 @@ export default function Auth() {
   const title = view === "login" ? "Přihlášení" : view === "register" ? "Registrace" : "Reset hesla";
 
   return (
-    <main className="min-h-screen bg-background bg-mesh flex items-center justify-center p-4">
+    <main className="min-h-screen bg-background flex items-center justify-center p-4">
       <Helmet>
-        <title>{title} – OpenRouter Monitor</title>
-        <meta name="description" content="Přihlaste se nebo si vytvořte účet v OpenRouter Monitoru a začněte sledovat náklady na AI tokeny." />
-        <link rel="canonical" href="https://tokeny.pohl.uk/auth" />
-        <meta property="og:title" content={`${title} – OpenRouter Monitor`} />
-        <meta property="og:description" content="Přihlášení nebo registrace do OpenRouter Monitoru – dashboardu pro náklady na AI tokeny." />
-        <meta property="og:url" content="https://tokeny.pohl.uk/auth" />
+        <title>{title} – Tokeny</title>
+        <meta name="description" content="Přihlaste se nebo si vytvořte účet v Tokenech a začněte sledovat náklady na AI tokeny." />
+        <link rel="canonical" href="https://tokeny.martinpohl.cz/auth" />
+        <meta property="og:title" content={`${title} – Tokeny`} />
+        <meta property="og:description" content="Přihlášení nebo registrace do Tokenech – dashboardu pro náklady na AI tokeny." />
+        <meta property="og:url" content="https://tokeny.martinpohl.cz/auth" />
         <meta name="robots" content="noindex,follow" />
       </Helmet>
-      <Card className="w-full max-w-md glass border-white/[0.08] glow-sm">
+      <Card className="w-full max-w-md glass border-border">
         <CardHeader className="text-center">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+            <div className="h-10 w-10 rounded-xl bg-primary-fill flex items-center justify-center">
               <Activity className="h-5 w-5 text-white" />
             </div>
-            <span className="text-xl font-bold gradient-text">OpenRouter Monitor</span>
+            <span className="text-xl font-bold">Tokeny</span>
           </div>
           <h1 className="text-lg font-semibold text-foreground">{title}</h1>
           <CardTitle className="sr-only">{title}</CardTitle>
@@ -88,7 +88,7 @@ export default function Auth() {
                   placeholder="Tvoje jméno ✏️"
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
-                  className="bg-white/[0.04] border-white/[0.08] font-mono focus:border-primary/50"
+                  className="bg-muted/60 border-border tabular-nums focus:border-primary/50"
                 />
               </div>
             )}
@@ -101,7 +101,7 @@ export default function Auth() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="bg-white/[0.04] border-white/[0.08] font-mono focus:border-primary/50"
+                className="bg-muted/60 border-border tabular-nums focus:border-primary/50"
               />
             </div>
             {view !== "forgot" && (
@@ -115,11 +115,11 @@ export default function Auth() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   minLength={6}
-                  className="bg-white/[0.04] border-white/[0.08] font-mono focus:border-primary/50"
+                  className="bg-muted/60 border-border tabular-nums focus:border-primary/50"
                 />
               </div>
             )}
-            <Button type="submit" disabled={loading} className="w-full gap-2 font-mono bg-gradient-to-r from-primary to-[hsl(320,90%,65%)] hover:opacity-90 transition-opacity border-0">
+            <Button type="submit" disabled={loading} className="w-full gap-2 tabular-nums hover:opacity-90 transition-opacity border-0">
               {view === "login" && <LogIn className="h-4 w-4" />}
               {view === "register" && <UserPlus className="h-4 w-4" />}
               {view === "forgot" && <Mail className="h-4 w-4" />}
@@ -137,17 +137,17 @@ export default function Auth() {
             <div className="mt-5">
               <div className="relative mb-4">
                 <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-white/[0.08]" />
+                  <span className="w-full border-t border-border" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-card px-2 text-muted-foreground font-mono">nebo</span>
+                  <span className="bg-card px-2 text-muted-foreground tabular-nums">nebo</span>
                 </div>
               </div>
               <div className="space-y-2">
                 <Button
                   type="button"
                   variant="outline"
-                  className="w-full gap-2 font-mono glass glass-hover border-white/[0.08]"
+                  className="w-full gap-2 tabular-nums glass glass-hover border-border"
                   onClick={async () => {
                     const { error } = await supabase.auth.signInWithOAuth({
                       provider: "google",
@@ -167,7 +167,7 @@ export default function Auth() {
                 <Button
                   type="button"
                   variant="outline"
-                  className="w-full gap-2 font-mono glass glass-hover border-white/[0.08]"
+                  className="w-full gap-2 tabular-nums glass glass-hover border-border"
                   onClick={async () => {
                     const { error } = await supabase.auth.signInWithOAuth({
                       provider: "apple",
@@ -190,13 +190,13 @@ export default function Auth() {
               <>
                 <button
                   onClick={() => setView("forgot")}
-                  className="block w-full text-sm text-muted-foreground hover:text-foreground transition-colors font-mono"
+                  className="block w-full text-sm text-muted-foreground hover:text-foreground transition-colors tabular-nums"
                 >
                   Zapomněl/a jsi heslo? 🤔
                 </button>
                 <button
                   onClick={() => setView("register")}
-                  className="block w-full text-sm text-muted-foreground hover:text-primary transition-colors font-mono"
+                  className="block w-full text-sm text-muted-foreground hover:text-primary transition-colors tabular-nums"
                 >
                   Nemáš účet? Vytvoř si ho! ✨
                 </button>
@@ -205,7 +205,7 @@ export default function Auth() {
             {view === "register" && (
               <button
                 onClick={() => setView("login")}
-                className="text-sm text-muted-foreground hover:text-primary transition-colors font-mono"
+                className="text-sm text-muted-foreground hover:text-primary transition-colors tabular-nums"
               >
                 Už máš účet? Přihlas se 👋
               </button>
@@ -213,7 +213,7 @@ export default function Auth() {
             {view === "forgot" && (
               <button
                 onClick={() => setView("login")}
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors font-mono flex items-center justify-center gap-1 w-full"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors tabular-nums flex items-center justify-center gap-1 w-full"
               >
                 <ArrowLeft className="h-3 w-3" />
                 Zpátky na login

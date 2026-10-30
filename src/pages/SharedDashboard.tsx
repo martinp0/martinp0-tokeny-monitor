@@ -40,7 +40,7 @@ export default function SharedDashboard() {
       ["property", "og:image:height", "630"],
       ["property", "og:type", "website"],
       ["property", "og:url", pageUrl],
-      ["property", "og:title", "Sdílený dashboard – OpenRouter Monitor"],
+      ["property", "og:title", "Sdílený dashboard – Tokeny"],
       ["name", "twitter:card", "summary_large_image"],
       ["name", "twitter:image", ogImage],
     ];
@@ -144,18 +144,18 @@ export default function SharedDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background bg-mesh flex items-center justify-center">
-        <div className="text-muted-foreground font-mono text-sm">Načítám sdílený dashboard…</div>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-muted-foreground tabular-nums text-sm">Načítám sdílený dashboard…</div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-background bg-mesh flex flex-col items-center justify-center gap-4">
-        <div className="text-destructive font-mono text-sm">{error === "Share not found" ? "Sdílení nenalezeno" : error === "Share expired" ? "Platnost sdílení vypršela" : error}</div>
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4">
+        <div className="text-destructive tabular-nums text-sm">{error === "Share not found" ? "Sdílení nenalezeno" : error === "Share expired" ? "Platnost sdílení vypršela" : error}</div>
         <Link to="/">
-          <Button variant="outline" className="font-mono text-xs">Zpět na úvod</Button>
+          <Button variant="outline" className="tabular-nums text-xs">Zpět na úvod</Button>
         </Link>
       </div>
     );
@@ -164,35 +164,35 @@ export default function SharedDashboard() {
   if (!processed) return null;
 
   return (
-    <div className="min-h-screen bg-background bg-mesh">
+    <div className="min-h-screen bg-background">
       <Helmet>
-        <title>{data?.label ? `${data.label} – Sdílený dashboard` : "Sdílený dashboard"} | OpenRouter Monitor</title>
+        <title>{data?.label ? `${data.label} – Sdílený dashboard` : "Sdílený dashboard"} | Tokeny</title>
         <meta name="description" content={`Sdílený read-only dashboard nákladů na AI tokeny${data?.owner ? ` od ${data.owner}` : ""}.`} />
-        <link rel="canonical" href={`https://tokeny.pohl.uk/shared/${token}`} />
+        <link rel="canonical" href={`https://tokeny.martinpohl.cz/shared/${token}`} />
         <meta name="robots" content="noindex,follow" />
-        <meta property="og:url" content={`https://tokeny.pohl.uk/shared/${token}`} />
+        <meta property="og:url" content={`https://tokeny.martinpohl.cz/shared/${token}`} />
         <meta property="og:title" content={data?.label ? `${data.label} – Sdílený dashboard` : "Sdílený dashboard"} />
       </Helmet>
-      <header className="border-b border-white/[0.06] px-6 py-3 glass">
+      <header className="sticky top-0 z-40 glass-bar pt-safe px-4 sm:px-6 py-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Link to="/" aria-label="Domů" className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+            <Link to="/" aria-label="Domů" className="h-8 w-8 rounded-lg bg-primary-fill flex items-center justify-center">
               <Activity className="h-4 w-4 text-white" />
             </Link>
-            <h1 className="text-lg font-bold gradient-text tracking-tight">Sdílený Dashboard</h1>
-            <span className="flex items-center gap-1 text-xs font-mono text-muted-foreground bg-secondary/50 px-2 py-0.5 rounded-full">
+            <h1 className="text-lg font-bold tracking-tight">Sdílený Dashboard</h1>
+            <span className="flex items-center gap-1 text-xs tabular-nums text-muted-foreground bg-secondary/50 px-2 py-0.5 rounded-full">
               <Eye className="h-3 w-3" /> read-only
             </span>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-xs font-mono text-muted-foreground">
+            <span className="text-xs tabular-nums text-muted-foreground">
               od {data?.owner}
             </span>
             <Button
               variant="outline"
               size="sm"
               onClick={toggleCurrency}
-              className="gap-1.5 border-border hover:bg-secondary hover:text-foreground font-mono text-xs min-w-[60px]"
+              className="gap-1.5 border-border hover:bg-secondary hover:text-foreground tabular-nums text-xs min-w-[60px]"
             >
               {currency === "CZK" ? "Kč" : "$"}
             </Button>

@@ -52,9 +52,9 @@ export default function ResetPassword() {
 
   const head = (
     <Helmet>
-      <title>Reset hesla – OpenRouter Monitor</title>
-      <meta name="description" content="Nastavte si nové heslo k vašemu účtu OpenRouter Monitor." />
-      <link rel="canonical" href="https://tokeny.pohl.uk/reset-password" />
+      <title>Reset hesla – Tokeny</title>
+      <meta name="description" content="Nastavte si nové heslo k vašemu účtu Tokeny." />
+      <link rel="canonical" href="https://tokeny.martinpohl.cz/reset-password" />
       <meta name="robots" content="noindex,nofollow" />
     </Helmet>
   );
@@ -66,10 +66,10 @@ export default function ResetPassword() {
         <Card className="w-full max-w-md bg-card border-border/50">
           <CardContent className="p-8 text-center">
             <h1 className="text-lg font-semibold text-foreground mb-2">Reset hesla</h1>
-            <p className="text-muted-foreground font-mono text-sm">
+            <p className="text-muted-foreground tabular-nums text-sm">
               Neplatný nebo expirovaný odkaz na reset hesla.
             </p>
-            <Button onClick={() => navigate("/auth")} variant="outline" className="mt-4 font-mono">
+            <Button onClick={() => navigate("/auth")} variant="outline" className="mt-4 tabular-nums">
               Zpět na přihlášení
             </Button>
           </CardContent>
@@ -85,7 +85,7 @@ export default function ResetPassword() {
         <CardHeader className="text-center">
           <div className="flex items-center justify-center gap-2 mb-4">
             <Activity className="h-8 w-8 text-primary" />
-            <span className="text-xl font-bold text-foreground">OpenRouter Monitor</span>
+            <span className="text-xl font-bold text-foreground">Tokeny</span>
           </div>
           <h1 className="text-lg font-semibold text-foreground">Nové heslo</h1>
           <CardTitle className="sr-only">Nové heslo</CardTitle>
@@ -102,7 +102,7 @@ export default function ResetPassword() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={6}
-                className="bg-secondary border-border font-mono"
+                className="bg-secondary border-border tabular-nums"
               />
             </div>
             <div className="space-y-1">
@@ -115,10 +115,10 @@ export default function ResetPassword() {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
                 minLength={6}
-                className="bg-secondary border-border font-mono"
+                className="bg-secondary border-border tabular-nums"
               />
             </div>
-            <Button type="submit" disabled={loading} className="w-full gap-2 font-mono">
+            <Button type="submit" disabled={loading} className="w-full gap-2 tabular-nums">
               <KeyRound className="h-4 w-4" />
               {loading ? "Načítání..." : "Nastavit nové heslo"}
             </Button>

@@ -3,7 +3,6 @@ import { HelmetProvider } from "react-helmet-async";
 import { BrowserRouter } from "react-router-dom";
 import { AppProviders, AppRoutes } from "./App.tsx";
 import "./i18n";
-import "./fonts.css";
 import "./index.css";
 
 const rootEl = document.getElementById("root")!;

@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { CurrencyProvider } from "@/hooks/useCurrency";
 import { useAuth } from "@/hooks/useAuth";
 import { HelmetProvider } from "react-helmet-async";
+import { ThemeProvider } from "next-themes";
 import Landing from "./pages/Landing.tsx";
 
 const Auth = lazy(() => import("./pages/Auth.tsx"));
@@ -37,7 +38,7 @@ const queryClient = new QueryClient();
 function RouteFallback() {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center">
-      <div className="text-muted-foreground font-mono text-sm">Načítání...</div>
+      <div className="h-6 w-6 rounded-full border-2 border-muted-foreground/30 border-t-primary animate-spin" role="status" aria-label="Načítání" />
     </div>
   );
 }
@@ -125,14 +126,16 @@ export function AppRoutes() {
 /** Providers that must sit inside the router (currency reads the location). */
 export function AppProviders({ children }: { children: ReactNode }) {
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <CurrencyProvider>
-          <ClientToasters />
-          <Suspense fallback={<RouteFallback />}>{children}</Suspense>
-        </CurrencyProvider>
-      </TooltipProvider>
-    </QueryClientProvider>
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange storageKey="tokeny_theme">
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <CurrencyProvider>
+            <ClientToasters />
+            <Suspense fallback={<RouteFallback />}>{children}</Suspense>
+          </CurrencyProvider>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </ThemeProvider>
   );
 }
 

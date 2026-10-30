@@ -13,6 +13,8 @@ import { toast } from "sonner";
 import { ProviderConnections } from "@/components/dashboard/ProviderConnections";
 import { useSubscription } from "@/hooks/useSubscription";
 import { ProBadge } from "@/components/ProBadge";
+import { PRICING, formatCzk } from "@/config/pricing";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { UpgradeModal } from "@/components/UpgradeModal";
 
 interface BudgetAlert {
@@ -123,28 +125,31 @@ const Settings = () => {
   const tokenNameId = useId();
 
   return (
-    <div className="min-h-screen bg-background bg-mesh">
+    <div className="min-h-screen bg-background">
       <Helmet>
-        <title>Nastavení – budget alerty a MCP tokeny | OpenRouter Monitor</title>
+        <title>Nastavení – budget alerty a MCP tokeny | Tokeny</title>
         <meta name="description" content="Spravuj měsíční budget alerty, MCP tokeny pro Claude/Cursor/Zed a propojené API providery." />
-        <link rel="canonical" href="https://tokeny.pohl.uk/settings" />
+        <link rel="canonical" href="https://tokeny.martinpohl.cz/settings" />
         <meta name="robots" content="noindex,nofollow" />
-        <meta property="og:title" content="Nastavení – OpenRouter Monitor" />
-        <meta property="og:description" content="Budget alerty, MCP tokeny a propojení API providerů v OpenRouter Monitoru." />
-        <meta property="og:url" content="https://tokeny.pohl.uk/settings" />
+        <meta property="og:title" content="Nastavení – Tokeny" />
+        <meta property="og:description" content="Budget alerty, MCP tokeny a propojení API providerů v Tokenech." />
+        <meta property="og:url" content="https://tokeny.martinpohl.cz/settings" />
       </Helmet>
-      <header className="border-b border-white/[0.06] px-6 py-3 glass">
+      <header className="sticky top-0 z-40 glass-bar pt-safe px-4 sm:px-6 py-2">
         <div className="flex items-center justify-between max-w-4xl mx-auto">
-          <Link to="/dashboard" className="flex items-center gap-2 text-sm font-mono text-muted-foreground hover:text-foreground">
+          <Link to="/dashboard" className="flex items-center gap-2 text-sm tabular-nums text-muted-foreground hover:text-foreground">
             <ArrowLeft className="h-4 w-4" />
             Zpět na dashboard
           </Link>
-          <h1 className="text-lg font-bold gradient-text">Nastavení</h1>
+          <div className="flex items-center gap-1">
+            <h1 className="text-[17px] font-semibold tracking-tight mr-1">Nastavení</h1>
+            <ThemeToggle />
+          </div>
         </div>
       </header>
 
       <main className="max-w-4xl mx-auto p-6 space-y-6">
-        <Card className="glass border-white/[0.06]">
+        <Card className="glass border-border">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <Zap className="h-4 w-4 text-primary" /> Předplatné
@@ -159,11 +164,11 @@ const Settings = () => {
                 <p className="text-sm text-muted-foreground">
                   Tvůj plán: <span className="font-semibold text-foreground">Pro</span>
                   {cancelAtPeriodEnd && (
-                    <span className="ml-2 text-xs text-amber-400 font-mono">(nekončí obnovením)</span>
+                    <span className="ml-2 text-xs text-warning tabular-nums">(nekončí obnovením)</span>
                   )}
                 </p>
                 {currentPeriodEnd && (
-                  <p className="font-mono text-xs text-muted-foreground">
+                  <p className="tabular-nums text-xs text-muted-foreground">
                     Obnovení: {new Date(currentPeriodEnd).toLocaleDateString("cs-CZ")}
                   </p>
                 )}
@@ -183,10 +188,10 @@ const Settings = () => {
                 </p>
                 <Button
                   size="sm"
-                  className="bg-gradient-to-r from-primary to-[hsl(320,90%,65%)] text-white gap-1.5"
+                  className="gap-1.5"
                   onClick={() => setUpgradeModalOpen(true)}
                 >
-                  <Zap className="h-3.5 w-3.5" /> Upgradovat na Pro – $7/měsíc
+                  <Zap className="h-3.5 w-3.5" /> Pro – {formatCzk(PRICING.pro.monthly)} / měsíc
                 </Button>
               </div>
             )}
@@ -197,25 +202,25 @@ const Settings = () => {
 
         <ProviderConnections />
 
-        <Card className="glass border-white/[0.06]">
+        <Card className="glass border-border">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
-              <Bell className="h-4 w-4 text-accent" /> Budget alerty
+              <Bell className="h-4 w-4 text-primary" /> Budget alerty
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <Label htmlFor={budgetId} className="text-xs">Měsíční budget (USD)</Label>
-                <Input id={budgetId} type="number" value={budget} onChange={(e) => setBudget(e.target.value)} className="mt-1 font-mono" />
+                <Input id={budgetId} type="number" value={budget} onChange={(e) => setBudget(e.target.value)} className="mt-1 tabular-nums" />
               </div>
               <div>
                 <Label htmlFor={thresholdId} className="text-xs">Alert při (%)</Label>
-                <Input id={thresholdId} type="number" value={threshold} onChange={(e) => setThreshold(e.target.value)} className="mt-1 font-mono" />
+                <Input id={thresholdId} type="number" value={threshold} onChange={(e) => setThreshold(e.target.value)} className="mt-1 tabular-nums" />
               </div>
               <div>
                 <Label htmlFor={emailId} className="text-xs">Notifikační e-mail</Label>
-                <Input id={emailId} type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1 font-mono" />
+                <Input id={emailId} type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1 tabular-nums" />
               </div>
             </div>
             <div className="flex items-center justify-between">
@@ -228,7 +233,7 @@ const Settings = () => {
           </CardContent>
         </Card>
 
-        <Card className="glass border-white/[0.06]">
+        <Card className="glass border-border">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <Key className="h-4 w-4 text-primary" /> MCP server – přístup z Claude Desktop / Cursor
@@ -236,7 +241,7 @@ const Settings = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="rounded-lg bg-secondary/40 p-3 space-y-2">
-              <div className="text-[10px] text-muted-foreground font-mono uppercase flex items-center gap-1">
+              <div className="text-xs text-muted-foreground tabular-nums uppercase flex items-center gap-1">
                 <Terminal className="h-3 w-3" /> MCP endpoint
               </div>
               <div className="flex items-center gap-2">
@@ -255,7 +260,7 @@ const Settings = () => {
 
             {newToken && (
               <div className="rounded-lg bg-accent/10 border border-accent/30 p-3 space-y-2">
-                <div className="text-xs font-semibold text-accent">⚠️ Token zobrazen jen jednou — zkopíruj si ho hned!</div>
+                <div className="text-xs font-semibold text-primary">⚠️ Token zobrazen jen jednou — zkopíruj si ho hned!</div>
                 <div className="flex items-center gap-2">
                   <code className="text-xs font-mono flex-1 break-all">{newToken}</code>
                   <Button variant="ghost" size="icon" aria-label="Zkopírovat token" className="h-7 w-7 shrink-0" onClick={() => { navigator.clipboard.writeText(newToken); toast.success("Zkopírováno"); }}>
@@ -272,7 +277,7 @@ const Settings = () => {
                   <div key={t.id} className="flex items-center justify-between rounded-lg bg-secondary/30 px-3 py-2">
                     <div>
                       <div className="text-sm">{t.name}</div>
-                      <div className="text-[10px] text-muted-foreground font-mono">
+                      <div className="text-xs text-muted-foreground tabular-nums">
                         {t.last_used_at ? `Použit ${new Date(t.last_used_at).toLocaleString("cs-CZ")}` : "Nepoužit"}
                       </div>
                     </div>
@@ -286,7 +291,7 @@ const Settings = () => {
 
             <details className="rounded-lg bg-secondary/30 p-3">
               <summary className="text-xs font-semibold cursor-pointer">Návod: Claude Desktop config</summary>
-              <pre className="mt-2 text-[10px] font-mono overflow-x-auto bg-background/50 p-2 rounded">
+              <pre className="mt-2 text-xs font-mono overflow-x-auto bg-background/50 p-2 rounded">
 {`{
   "mcpServers": {
     "openrouter-monitor": {

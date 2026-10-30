@@ -27,7 +27,7 @@ export function DateRangePicker({ value, onChange }: Props) {
             variant="outline"
             size="sm"
             className={cn(
-              "gap-2 border-border hover:bg-secondary hover:text-foreground font-mono text-xs min-w-[200px] justify-start",
+              "gap-2 border-border hover:bg-secondary hover:text-foreground tabular-nums text-xs min-w-[200px] justify-start",
               !value && "text-muted-foreground"
             )}
           >

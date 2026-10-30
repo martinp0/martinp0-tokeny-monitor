@@ -3,6 +3,7 @@ import { Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { UpgradeModal } from "@/components/UpgradeModal";
 import { useSubscription } from "@/hooks/useSubscription";
+import { PRICING, formatCzk } from "@/config/pricing";
 
 interface Props {
   feature?: string;
@@ -18,7 +19,7 @@ export function ProGate({ feature, children }: Props) {
 
   return (
     <>
-      <div className="glass border-white/[0.08] rounded-xl p-6 flex flex-col items-center gap-3 text-center">
+      <div className="surface rounded-2xl p-6 flex flex-col items-center gap-3 text-center">
         <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
           <Lock className="h-5 w-5 text-primary" />
         </div>
@@ -26,12 +27,11 @@ export function ProGate({ feature, children }: Props) {
           <p className="text-sm font-medium">
             {feature ? `${feature} vyžaduje Pro` : "Tato funkce vyžaduje Pro"}
           </p>
-          <p className="text-xs text-muted-foreground mt-0.5">Upgraduj za $7 / měsíc</p>
+          <p className="text-xs text-muted-foreground mt-0.5">Pro za {formatCzk(PRICING.pro.monthly)} / měsíc</p>
         </div>
         <Button
           size="sm"
-          className="bg-gradient-to-r from-primary to-[hsl(320,90%,65%)] text-white"
-          onClick={() => setModalOpen(true)}
+                    onClick={() => setModalOpen(true)}
         >
           Upgradovat na Pro
         </Button>

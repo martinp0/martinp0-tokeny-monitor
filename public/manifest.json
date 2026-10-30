@@ -1,11 +1,11 @@
 {
-  "name": "OpenRouter Monitor",
-  "short_name": "OR Monitor",
-  "description": "Analytics dashboard for OpenRouter AI usage and costs",
+  "name": "Tokeny",
+  "short_name": "Tokeny",
+  "description": "Přehled nákladů na AI API (OpenRouter, Anthropic, OpenAI) v Kč i USD.",
   "start_url": "/dashboard",
   "display": "standalone",
-  "background_color": "#0c0814",
-  "theme_color": "#a855f7",
+  "background_color": "#f4f4f6",
+  "theme_color": "#f4f4f6",
   "icons": [
     {
       "src": "/icon-192.png",
@@ -19,5 +19,6 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
-  ]
+  ],
+  "lang": "cs"
 }

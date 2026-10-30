@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Zap, Check } from "lucide-react";
+import { Check } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import {
   Dialog,
   DialogContent,
@@ -9,14 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useSubscription } from "@/hooks/useSubscription";
-
-const PRO_FEATURES = [
-  "Neomezené budget alerty",
-  "AI agent chat s historií",
-  "Exporty do CSV a PDF",
-  "Predikce nákladů (AI Forecast)",
-  "Prioritní podpora",
-];
+import { PLAN_FEATURES, PRICING, PRO_CHECKOUT_ENABLED, formatCzk } from "@/config/pricing";
 
 interface Props {
   open: boolean;
@@ -25,6 +19,7 @@ interface Props {
 
 export function UpgradeModal({ open, onOpenChange }: Props) {
   const { startCheckout } = useSubscription();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
 
   async function handleUpgrade() {
@@ -35,34 +30,30 @@ export function UpgradeModal({ open, onOpenChange }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="glass border-white/[0.08] max-w-sm">
+      <DialogContent className="max-w-sm">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-lg">
-            <Zap className="h-5 w-5 text-primary" />
-            Upgradovat na Pro
-          </DialogTitle>
-          <DialogDescription className="text-muted-foreground">
-            Odemkni plný výkon Tokeny monitoru za{" "}
-            <span className="font-mono font-bold text-foreground">$7 / měsíc</span>
+          <DialogTitle className="text-xl">{t("pricing.upgrade")}</DialogTitle>
+          <DialogDescription>
+            <span className="tabular-nums font-semibold text-foreground">
+              {t("pricing.perMonth", { price: formatCzk(PRICING.pro.monthly) })}
+            </span>{" "}
+            · {t("pricing.perYear", { price: formatCzk(PRICING.pro.yearly) })}
           </DialogDescription>
         </DialogHeader>
 
-        <ul className="space-y-2 my-2">
-          {PRO_FEATURES.map((f) => (
-            <li key={f} className="flex items-center gap-2 text-sm">
-              <Check className="h-4 w-4 text-primary shrink-0" />
-              {f}
+        <ul className="space-y-2.5 my-2">
+          {PLAN_FEATURES.pro.map((f) => (
+            <li key={f} className="flex items-start gap-2.5 text-[15px]">
+              <Check className="h-5 w-5 text-primary shrink-0" aria-hidden />
+              {t(`pricing.features.${f}`)}
             </li>
           ))}
         </ul>
 
-        <Button
-          className="w-full bg-gradient-to-r from-primary to-[hsl(320,90%,65%)] text-white"
-          onClick={handleUpgrade}
-          disabled={loading}
-        >
-          {loading ? "Přesměrovávám…" : "Upgradovat na Pro"}
+        <Button size="lg" className="w-full" onClick={handleUpgrade} disabled={loading || !PRO_CHECKOUT_ENABLED}>
+          {!PRO_CHECKOUT_ENABLED ? t("pricing.soon") : loading ? "…" : t("pricing.upgrade")}
         </Button>
+        {!PRO_CHECKOUT_ENABLED && <p className="text-center text-xs text-muted-foreground">{t("pricing.vatNote")}</p>}
       </DialogContent>
     </Dialog>
   );

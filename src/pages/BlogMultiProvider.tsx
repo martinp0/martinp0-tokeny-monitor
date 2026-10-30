@@ -4,8 +4,8 @@ import { Link } from "react-router-dom";
 export default function BlogMultiProvider() {
   return (
     <BlogPostLayout
-      title="Multi-provider monitoring: 7 AI providerů v jednom dashboardu"
-      description="Tokeny Monitor teď podporuje OpenRouter, Anthropic, OpenAI, Google Gemini, Mistral, Groq a xAI (Grok). Proč to dává smysl, jak to funguje a jak začít."
+      title="Multi-provider monitoring: OpenRouter, Anthropic a OpenAI v jednom dashboardu"
+      description="Tokeny spojí útratu z OpenRouteru, Anthropicu a OpenAI do jednoho přehledu. Gemini, Mistral, Groq i Grok uvidíš přes OpenRouter. Proč to dává smysl a jak začít."
       slug="multi-provider-monitoring"
       date="2026-06-30"
       tag="Product update"
@@ -20,9 +20,9 @@ export default function BlogMultiProvider() {
       </p>
 
       <p>
-        Proto v Tokeny Monitor od dneška podporujeme <strong>7 providerů</strong>
-        v jednom přehledu: <em>OpenRouter, Anthropic, OpenAI, Google Gemini,
-        Mistral AI, Groq a xAI (Grok)</em>.
+        Proto Tokeny spojí do jednoho přehledu <strong>OpenRouter, Anthropic
+        a OpenAI</strong>. Modely od Googlu, Mistralu, Groqu nebo xAI uvidíš
+        také — pokud je voláš přes OpenRouter.
       </p>
 
       <h2>Proč multi-provider strategie dává smysl</h2>
@@ -49,18 +49,12 @@ export default function BlogMultiProvider() {
           z Organization settings.</li>
       </ul>
 
-      <h3>Evidence klíče + CSV import (zatím)</h3>
-      <ul>
-        <li><strong>Google Gemini</strong> — billing přes GCP, per-key usage API
-          neexistuje. Klíč si můžeš uložit pro evidenci, data tahej z Google Cloud
-          Billing exportu.</li>
-        <li><strong>Mistral, Groq, xAI</strong> — žádný veřejný per-key usage
-          endpoint. Klíč si uložíš, historická data nahraješ CSV uploadem.</li>
-      </ul>
-
-      <p className="text-sm text-muted-foreground">
-        Pozn.: jakmile kterýkoli z těchto providerů vydá usage API, sync se zapne
-        automaticky — kód je připravený.
+      <h3>Ostatní provideři přes OpenRouter</h3>
+      <p>
+        Google Gemini, Mistral, Groq ani xAI zatím nenabízejí veřejné usage API
+        po jednotlivých klíčích, takže přímé napojení nemáme. Když je ale voláš
+        přes OpenRouter, jejich náklady se v Tokenech objeví stejně jako ostatní
+        modely — z CSV exportu nebo ze synchronizace OpenRouteru.
       </p>
 
       <h2>Jak to vypadá v dashboardu</h2>
@@ -86,14 +80,14 @@ export default function BlogMultiProvider() {
         <li>Vyber providera, vlož klíč (u Anthropic/OpenAI <strong>admin key</strong>,
           ne běžný API key).</li>
         <li>Klikni <em>Sync</em>. U OpenRouter/Anthropic/OpenAI naběhnou data
-          okamžitě, u ostatních použij CSV upload tlačítko vedle.</li>
+          okamžitě, u OpenRouteru můžeš alternativně nahrát CSV export.</li>
         <li>Nastav <Link to="/settings">budget alert</Link>, ať tě každý měsíc
           neminul nečekaný billing shock.</li>
       </ol>
 
       <h2>Praktický playbook: routing podle ceny</h2>
       <p>
-        Když máš všech 7 providerů na jednom dashboardu, najednou je vidět,
+        Když máš všechny providery na jednom dashboardu, najednou je vidět,
         kde se reálně točí peníze. Nejčastější optimalizace, co u zákazníků
         vidíme:
       </p>

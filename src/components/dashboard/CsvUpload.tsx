@@ -47,7 +47,7 @@ export function CsvUpload({ onUpload }: Props) {
         variant="outline"
         size="sm"
         onClick={() => inputRef.current?.click()}
-        className="gap-2 border-border hover:bg-secondary hover:text-foreground font-mono text-xs"
+        className="gap-2 border-border hover:bg-secondary hover:text-foreground tabular-nums text-xs"
       >
         <Upload className="h-3.5 w-3.5" />
         Upload CSV

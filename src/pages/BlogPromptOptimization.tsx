@@ -68,7 +68,7 @@ export default function BlogPromptOptimization() {
 
       <p>
         Bez měření je prompt engineering jen pověra. Skutečné náklady na model napříč experimenty
-        sleduj v <Link to="/auth">Tokeny Monitoru</Link> nebo si je předem spočítej v{" "}
+        sleduj v <Link to="/auth">Tokenech</Link> nebo si je předem spočítej v{" "}
         <Link to="/llm-cost-calculator">kalkulačce</Link>.
       </p>
 

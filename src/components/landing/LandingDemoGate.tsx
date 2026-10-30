@@ -4,13 +4,13 @@ const LandingDemo = lazy(() => import("./LandingDemo"));
 
 function DemoSkeleton() {
   return (
-    <div className="space-y-4 rounded-2xl glass border-white/[0.08] p-3 sm:p-4 md:p-6 min-h-[280px] min-w-0 max-w-full overflow-hidden" aria-hidden>
+    <div className="space-y-4 min-h-[280px] min-w-0 max-w-full overflow-hidden" aria-hidden>
       <div className="grid grid-cols-2 gap-3">
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="h-24 rounded-xl bg-white/[0.04]" />
+          <div key={i} className="h-24 rounded-xl bg-muted/60" />
         ))}
       </div>
-      <div className="h-40 rounded-xl bg-white/[0.03]" />
+      <div className="h-40 rounded-xl bg-muted/60" />
     </div>
   );
 }

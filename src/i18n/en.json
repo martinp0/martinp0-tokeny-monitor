@@ -34,9 +34,9 @@
     "realLifeTitle": "Real-life comparison",
     "realLifeDesc": "How many espressos, beers or pizzas could your API costs buy?",
     "securityTitle": "Secure & private",
-    "securityDesc": "Your data stays in an encrypted cloud, visible only to you.",
+    "securityDesc": "Every row belongs to your account only (Row-Level Security).",
     "mobileTitle": "Works everywhere",
-    "mobileDesc": "Web, mobile, tablet and as a native app for iOS and Android."
+    "mobileDesc": "Designed for iPhone, iPad and Mac. Works in any browser."
   },
   "demo": {
     "badge": "Live demo with sample data",
@@ -72,7 +72,7 @@
   "support": {
     "title": "Support development with",
     "titleHighlight": "a coffee",
-    "desc": "Tokeny Monitor is free and open-source. If it saves you time or money, you can say thanks with a symbolic coffee. Every bit of support motivates further improvements. 💜"
+    "desc": "Tokeny is free and open-source. If it saves you time or money, you can say thanks with a symbolic coffee. Every bit of support motivates further improvements."
   },
   "cta": {
     "title": "Ready to take",
@@ -119,5 +119,188 @@
   },
   "lang": {
     "switch": "CZ"
+  },
+  "theme": {
+    "label": "Appearance",
+    "system": "System",
+    "light": "Light",
+    "dark": "Dark",
+    "switchTo": "Switch to"
+  },
+  "landing": {
+    "metaTitle": "Tokeny – what AI really costs you | AI API spend dashboard",
+    "metaDesc": "Tokeny brings your AI API spend from OpenRouter, Anthropic and OpenAI into one calm dashboard. Costs in CZK and USD, per-model charts, budget alerts and an LLM price calculator. Free.",
+    "nav": {
+      "features": "Features",
+      "demo": "Preview",
+      "pricing": "Pricing",
+      "faq": "FAQ",
+      "menu": "Menu",
+      "skip": "Skip to content"
+    },
+    "hero": {
+      "eyebrow": "For developers, indie makers and small teams",
+      "title1": "What AI",
+      "title2": "really costs you.",
+      "subtitle": "Tokeny brings your spend from OpenRouter, Anthropic and OpenAI into one calm overview. In crowns or dollars — with a heads-up before the bill gets out of hand.",
+      "primary": "Start for free",
+      "secondary": "See the preview",
+      "trust1": "Free forever for individuals",
+      "trust2": "Nothing to install",
+      "trust3": "Open source (MIT)"
+    },
+    "demo": {
+      "eyebrow": "Live preview",
+      "title": "This is your overview.",
+      "subtitle": "Sample OpenRouter data. No sign-in — tap a model to filter.",
+      "switchTo": "Show in {{currency}}"
+    },
+    "features": {
+      "eyebrow": "Features",
+      "title": "Everything that matters. Nothing that doesn't.",
+      "items": {
+        "currency": {
+          "title": "Crowns and dollars",
+          "desc": "Switch currency with one tap. Daily rates from the Czech National Bank."
+        },
+        "charts": {
+          "title": "Per-model insight",
+          "desc": "Cost over time, tokens, latency and providers. Tap a model and everything filters."
+        },
+        "providers": {
+          "title": "OpenRouter, Anthropic, OpenAI",
+          "desc": "CSV import from OpenRouter, or connect the Anthropic and OpenAI Admin APIs."
+        },
+        "alerts": {
+          "title": "Budget alerts",
+          "desc": "Set a monthly limit and get an email as you approach it."
+        },
+        "anomalies": {
+          "title": "Anomaly detection",
+          "desc": "Spot days with unexpected spend right away — like a runaway agent."
+        },
+        "mcp": {
+          "title": "MCP for Claude and Cursor",
+          "desc": "Ask your AI assistant: “How much did I spend on Sonnet last week?”"
+        },
+        "privacy": {
+          "title": "Your data stays yours",
+          "desc": "Every row belongs to your account only (Row-Level Security). API keys stay on the server."
+        },
+        "everywhere": {
+          "title": "iPhone, iPad and Mac",
+          "desc": "Designed mobile-first. Works in any modern browser, nothing to install."
+        }
+      }
+    },
+    "how": {
+      "eyebrow": "How it works",
+      "title": "Get the full picture in two minutes.",
+      "s1t": "Create an account",
+      "s1d": "With email, Google or Apple.",
+      "s2t": "Add your data",
+      "s2d": "Upload a CSV from openrouter.ai/activity, or connect an Admin API key.",
+      "s3t": "Track and save",
+      "s3d": "See which models and apps cost the most, and where to save."
+    },
+    "faq": {
+      "eyebrow": "FAQ",
+      "title": "Frequently asked questions",
+      "items": [
+        {
+          "q": "Which providers do you support?",
+          "a": "OpenRouter (CSV import and API sync), Anthropic and OpenAI (via their Admin Usage APIs). You'll see Gemini, Mistral, Groq or Grok models if you call them through OpenRouter. Direct connections to other providers aren't available yet."
+        },
+        {
+          "q": "How do I upload an OpenRouter CSV?",
+          "a": "On openrouter.ai open Activity and choose Export → CSV. Then drop the file onto the dashboard. Re-uploading is fine — duplicates are skipped by request ID."
+        },
+        {
+          "q": "How do you convert dollars to crowns?",
+          "a": "Providers bill in USD. Tokeny fetches the official Czech National Bank rate once a day. Switch currency with a single tap."
+        },
+        {
+          "q": "How is my data protected?",
+          "a": "Data lives in Supabase Postgres and every row is tied to your account with Row-Level Security policies. Provider API keys are stored server-side only and never sent back to the browser. You can delete your account and all data at any time from your profile."
+        },
+        {
+          "q": "How much does it cost?",
+          "a": "The core dashboard is free. A Pro plan (99 CZK per month or 990 CZK per year) is in the works — with automatic sync, unlimited alerts, cost forecasting and an AI assistant. The free plan stays."
+        },
+        {
+          "q": "What is the MCP server?",
+          "a": "MCP (Model Context Protocol) lets AI clients such as Claude Desktop or Cursor read your stats. Generate a token in Settings, paste it into your client config and ask right in the chat."
+        }
+      ]
+    },
+    "maker": {
+      "by": "Made by",
+      "desc": "Martin Pohl — Apple consultant and independent developer from Prague.",
+      "github": "Source code on GitHub"
+    },
+    "cta": {
+      "title": "Stop guessing what AI costs you.",
+      "subtitle": "Start free, no credit card."
+    },
+    "footer": {
+      "product": "Product",
+      "resources": "Resources",
+      "about": "About",
+      "calculator": "LLM cost calculator",
+      "claude": "Claude API pricing",
+      "gpt": "GPT API pricing",
+      "blog": "Blog",
+      "login": "Sign in",
+      "coffee": "Buy me a coffee",
+      "rights": "Made by Martin Pohl"
+    }
+  },
+  "pricing": {
+    "eyebrow": "Pricing",
+    "title": "Simple pricing.",
+    "subtitle": "Start free. Move to Pro once it starts saving you money.",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "yearlySave": "2 months free",
+    "perMonth": "{{price}} / month",
+    "perYear": "{{price}} / year",
+    "free": "Free",
+    "freeDesc": "For individuals who want to see where the money goes.",
+    "freePrice": "0 CZK",
+    "pro": "Pro",
+    "proDesc": "For people who pay for AI every day and want it under control.",
+    "soon": "Coming soon",
+    "current": "Your plan",
+    "upgrade": "Upgrade to Pro",
+    "notify": "Start for free",
+    "vatNote": "Prices are final. Pro is not on sale yet.",
+    "features": {
+      "dashboard": "Dashboard with charts and filters",
+      "csvImport": "Unlimited CSV import",
+      "currency": "CZK and USD with CNB rates",
+      "calculator": "LLM cost calculator",
+      "oneAlert": "1 budget alert",
+      "mcp": "MCP server (read stats)",
+      "everythingFree": "Everything in Free",
+      "autoSync": "Automatic provider sync",
+      "unlimitedAlerts": "Unlimited budget alerts",
+      "forecast": "Month-end cost forecast",
+      "aiAgent": "AI assistant over your data",
+      "exports": "PDF and PNG export",
+      "sharing": "Shared dashboards",
+      "support": "Priority support"
+    }
+  },
+  "notFound": {
+    "title": "We couldn't find that page.",
+    "desc": "The link may be outdated, or the page has moved.",
+    "home": "Back to home",
+    "calculator": "LLM cost calculator"
+  },
+  "kpi": {
+    "cost": "Total cost",
+    "requests": "Requests",
+    "avgTime": "Avg. response",
+    "tokens": "Total tokens"
   }
 }

@@ -1,10 +1,10 @@
-# OpenRouter Monitor (Tokeny Monitor)
+# Tokeny
 
-> Webová aplikace pro sledování nákladů, spotřeby tokenů a výkonu AI modelů používaných přes OpenRouter. Import dat z CSV, dashboard v CZK i USD, AI agent a MCP server pro Claude / Cursor / Zed.
+> Webová aplikace pro sledování nákladů, spotřeby tokenů a výkonu AI modelů z OpenRouteru, Anthropicu a OpenAI. Import CSV z OpenRouteru, synchronizace přes API, dashboard v CZK i USD, AI agent a MCP server pro Claude / Cursor / Zed.
 
 Autor: Martin Pohl (https://martinpohl.cz) — IT engineer, Apple MDM, Identity & SSO, indie maker.
-Hlavní doména: https://tokeny.pohl.uk
-Zdrojový kód (public repo): https://github.com/martinp0/martinp0-tokeny-monitor
+Hlavní doména: https://tokeny.martinpohl.cz
+Zdrojový kód (public repo): https://github.com/martinp0/tokeny-monitor
 Jazyk obsahu: čeština (částečně EN). Měny: CZK, USD. Kurz: ČNB denní CRON.
 
 ## Co aplikace dělá
@@ -17,22 +17,23 @@ Jazyk obsahu: čeština (částečně EN). Měny: CZK, USD. Kurz: ČNB denní CR
 - Obsahuje AI agenta s tool-callingem nad vlastními daty uživatele.
 
 ## Klíčové stránky
-- [Landing / Dashboard demo](https://tokeny.pohl.uk/) — marketing + ukázka dashboardu s demo daty
-- [Přihlášení / Registrace](https://tokeny.pohl.uk/auth) — Email, Google, Apple
-- [Zábava / AI generace](https://tokeny.pohl.uk/fun) — veřejná stránka s českými vtipy a obrázky generovanými přes Gemini
+- [Landing / Dashboard demo](https://tokeny.martinpohl.cz/) — marketing + ukázka dashboardu s demo daty
+- [Přihlášení / Registrace](https://tokeny.martinpohl.cz/auth) — Email, Google, Apple
+- [Kalkulačka cen LLM](https://tokeny.martinpohl.cz/llm-cost-calculator) — odhad měsíčních nákladů podle modelu
+- [Blog](https://tokeny.martinpohl.cz/blog) — návody k optimalizaci nákladů na AI
 
 ## Bezpečnost a architektura
 - Postgres (Supabase) s Row-Level Security per user_id.
 - Zápisy do DB jdou výhradně přes ověřené Edge Functions s service-role klíčem.
-- Šifrování at rest (AES-256) a TLS in transit.
+- API klíče providerů se ukládají jen na serveru a nevrací se do prohlížeče.
 - GDPR: uživatel může exportovat všechna data do CSV a smazat účet z /profile.
 
 ## Časté otázky
 - **CSV import:** openrouter.ai → Activity → Export → upload na dashboardu. Duplicity se přeskakují.
-- **Auto-sync:** Není. OpenRouter zatím nemá veřejné API pro historii activity.
-- **Cena:** Zdarma, bez kreditky a bez trialu.
+- **Provideři:** OpenRouter (CSV + API), Anthropic a OpenAI (Admin Usage API). Ostatní modely přes OpenRouter.
+- **Cena:** Free tarif zdarma. Pro (99 Kč/měsíc, 990 Kč/rok) se připravuje.
 - **MCP token:** Generuje se v /settings, vkládá se do konfigurace AI klienta (Claude Desktop, Cursor, Zed).
 
 ## Kontakt
 - Web: https://martinpohl.cz
-- Projekt: https://tokeny.pohl.uk
+- Projekt: https://tokeny.martinpohl.cz

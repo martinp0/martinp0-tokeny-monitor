@@ -14,6 +14,9 @@ import { toast } from "sonner";
 // Only providers with a working server-side sync (see supabase/functions/_shared/sync-core.ts).
 type ProviderId = "openrouter" | "anthropic" | "openai";
 
+/** Providers with a real usage sync. Others stay in the type only so existing rows still render. */
+const SUPPORTED_PROVIDERS: ProviderId[] = ["openrouter", "anthropic", "openai"];
+
 interface Credential {
   id: string;
   provider: ProviderId;
@@ -154,7 +157,7 @@ export function ProviderConnections() {
   }
 
   return (
-    <Card className="glass border-white/[0.06]">
+    <Card className="glass border-border">
       <CardHeader className="flex flex-row items-center justify-between space-y-0">
         <CardTitle className="flex items-center gap-2 text-base">
           <Plug className="h-4 w-4 text-primary" /> API integrace
@@ -177,16 +180,16 @@ export function ProviderConnections() {
             <div className="space-y-4">
               <div>
                 <Label className="text-xs">Provider</Label>
-                <div className="mt-1 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
-                  {(Object.keys(PROVIDER_META) as ProviderId[]).map((p) => (
+                <div className="mt-1 grid grid-cols-3 gap-2">
+                  {SUPPORTED_PROVIDERS.map((p) => (
                     <button
                       key={p}
                       type="button"
                       onClick={() => setProvider(p)}
-                      className={`rounded-lg border px-3 py-2 text-sm font-mono transition ${
+                      className={`tap-target rounded-xl border px-3 py-2 text-sm transition ${
                         provider === p
                           ? "border-primary bg-primary/10 text-foreground"
-                          : "border-white/[0.06] bg-secondary/30 text-muted-foreground hover:text-foreground"
+                          : "border-border bg-secondary/30 text-muted-foreground hover:text-foreground"
                       }`}
                     >
                       {PROVIDER_META[p].label}
@@ -202,7 +205,7 @@ export function ProviderConnections() {
               <div>
                 <Label className="text-xs">Štítek</Label>
                 <Input
-                  className="mt-1 font-mono"
+                  className="mt-1 tabular-nums"
                   placeholder="Default"
                   value={label}
                   onChange={(e) => setLabel(e.target.value)}
@@ -212,7 +215,7 @@ export function ProviderConnections() {
               <div>
                 <Label className="text-xs">API klíč</Label>
                 <Input
-                  className="mt-1 font-mono"
+                  className="mt-1 tabular-nums"
                   type="password"
                   placeholder={PROVIDER_META[provider].keyPlaceholder}
                   value={apiKey}
@@ -224,7 +227,7 @@ export function ProviderConnections() {
                 <div>
                   <Label className="text-xs">Organization ID (volitelné)</Label>
                   <Input
-                    className="mt-1 font-mono"
+                    className="mt-1 tabular-nums"
                     placeholder="org-xxxxxx"
                     value={orgId}
                     onChange={(e) => setOrgId(e.target.value)}
@@ -245,10 +248,10 @@ export function ProviderConnections() {
 
       <CardContent className="space-y-2">
         {loading && (
-          <div className="text-xs text-muted-foreground font-mono">Načítám…</div>
+          <div className="text-xs text-muted-foreground tabular-nums">Načítám…</div>
         )}
         {!loading && credentials.length === 0 && (
-          <div className="rounded-lg border border-dashed border-white/[0.08] p-4 text-center text-sm text-muted-foreground">
+          <div className="rounded-lg border border-dashed border-border p-4 text-center text-sm text-muted-foreground">
             Zatím žádné napojení. Přidej první API klíč pro automatický import.
           </div>
         )}
@@ -258,20 +261,20 @@ export function ProviderConnections() {
               <div className="flex items-center gap-2 text-sm">
                 <span className="font-medium">{PROVIDER_META[c.provider].label}</span>
                 <span className="text-muted-foreground">·</span>
-                <span className="font-mono text-xs">{c.label}</span>
-                <code className="text-[10px] font-mono text-muted-foreground bg-secondary/60 px-1.5 py-0.5 rounded">
+                <span className="tabular-nums text-xs">{c.label}</span>
+                <code className="text-xs font-mono text-muted-foreground bg-secondary/60 px-1.5 py-0.5 rounded">
                   {c.key_preview}
                 </code>
               </div>
-              <div className="mt-0.5 flex items-center gap-2 text-[10px] font-mono text-muted-foreground">
+              <div className="mt-0.5 flex items-center gap-2 text-xs tabular-nums text-muted-foreground">
                 {c.last_sync_status === "ok" && (
-                  <span className="flex items-center gap-1 text-emerald-400">
+                  <span className="flex items-center gap-1 text-success">
                     <CheckCircle2 className="h-3 w-3" />
                     {c.rows_imported} řádků
                   </span>
                 )}
                 {c.last_sync_status === "error" && (
-                  <span className="flex items-center gap-1 text-red-400" title={c.last_sync_error ?? ""}>
+                  <span className="flex items-center gap-1 text-destructive" title={c.last_sync_error ?? ""}>
                     <AlertCircle className="h-3 w-3" /> chyba
                   </span>
                 )}

@@ -147,41 +147,41 @@ const Profile = () => {
   const confirmPwdId = useId();
 
   return (
-    <div className="min-h-screen bg-background bg-mesh">
+    <div className="min-h-screen bg-background">
       <Helmet>
-        <title>Profil – účet, heslo a export dat | OpenRouter Monitor</title>
+        <title>Profil – účet, heslo a export dat | Tokeny</title>
         <meta name="description" content="Spravuj svůj profil, změň si heslo, exportuj data nebo smaž účet (GDPR)." />
-        <link rel="canonical" href="https://tokeny.pohl.uk/profile" />
+        <link rel="canonical" href="https://tokeny.martinpohl.cz/profile" />
         <meta name="robots" content="noindex,nofollow" />
-        <meta property="og:title" content="Profil – OpenRouter Monitor" />
-        <meta property="og:description" content="Spravuj svůj účet, heslo a export dat v OpenRouter Monitoru." />
-        <meta property="og:url" content="https://tokeny.pohl.uk/profile" />
+        <meta property="og:title" content="Profil – Tokeny" />
+        <meta property="og:description" content="Spravuj svůj účet, heslo a export dat v Tokenech." />
+        <meta property="og:url" content="https://tokeny.martinpohl.cz/profile" />
       </Helmet>
-      <header className="border-b border-white/[0.06] px-6 py-3 glass">
+      <header className="sticky top-0 z-40 glass-bar pt-safe px-4 sm:px-6 py-2">
         <div className="flex items-center justify-between max-w-4xl mx-auto">
           <Link
             to="/dashboard"
-            className="flex items-center gap-2 text-sm font-mono text-muted-foreground hover:text-foreground"
+            className="flex items-center gap-2 text-sm tabular-nums text-muted-foreground hover:text-foreground"
           >
             <ArrowLeft className="h-4 w-4" />
             Zpět na dashboard
           </Link>
-          <h1 className="text-lg font-bold gradient-text">Profil</h1>
+          <h1 className="text-lg font-bold">Profil</h1>
         </div>
       </header>
 
       <main className="max-w-4xl mx-auto p-6 space-y-6">
         {/* Display name */}
-        <Card className="glass border-white/[0.06]">
+        <Card className="glass border-border">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
-              <User className="h-4 w-4 text-accent" /> Základní údaje
+              <User className="h-4 w-4 text-primary" /> Základní údaje
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
               <Label htmlFor={emailId} className="text-xs">E-mail</Label>
-              <Input id={emailId} value={session?.user.email ?? ""} disabled className="mt-1 font-mono opacity-60" />
+              <Input id={emailId} value={session?.user.email ?? ""} disabled className="mt-1 tabular-nums opacity-60" />
             </div>
             <div>
               <Label htmlFor={nameId} className="text-xs">Zobrazované jméno</Label>
@@ -189,7 +189,7 @@ const Profile = () => {
                 id={nameId}
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
-                className="mt-1 font-mono"
+                className="mt-1 tabular-nums"
                 placeholder="Tvé jméno"
               />
             </div>
@@ -200,7 +200,7 @@ const Profile = () => {
         </Card>
 
         {/* Password */}
-        <Card className="glass border-white/[0.06]">
+        <Card className="glass border-border">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <Lock className="h-4 w-4 text-primary" /> Změna hesla
@@ -214,7 +214,7 @@ const Profile = () => {
                 type="password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                className="mt-1 font-mono"
+                className="mt-1 tabular-nums"
                 placeholder="Min. 6 znaků"
               />
             </div>
@@ -225,7 +225,7 @@ const Profile = () => {
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="mt-1 font-mono"
+                className="mt-1 tabular-nums"
                 placeholder="Znovu stejné heslo"
               />
             </div>
@@ -239,10 +239,10 @@ const Profile = () => {
         <SharedDashboardsManager />
 
         {/* Export */}
-        <Card className="glass border-white/[0.06]">
+        <Card className="glass border-border">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
-              <Download className="h-4 w-4 text-accent" /> Export dat (GDPR)
+              <Download className="h-4 w-4 text-primary" /> Export dat (GDPR)
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -257,7 +257,7 @@ const Profile = () => {
         </Card>
 
         {/* Delete account */}
-        <Card className="glass border-white/[0.06] border-destructive/20">
+        <Card className="glass border-border border-destructive/20">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base text-destructive">
               <Trash2 className="h-4 w-4" /> Nebezpečná zóna
@@ -274,7 +274,7 @@ const Profile = () => {
                   {deleting ? "Mažu…" : "Smazat účet"}
                 </Button>
               </AlertDialogTrigger>
-              <AlertDialogContent className="glass border-white/[0.08]">
+              <AlertDialogContent className="glass border-border">
                 <AlertDialogHeader>
                   <AlertDialogTitle>Opravdu smazat účet?</AlertDialogTitle>
                   <AlertDialogDescription>

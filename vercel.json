@@ -1,4 +1,106 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "rewrites": [
+    {
+      "source": "/auth",
+      "destination": "/app.html"
+    },
+    {
+      "source": "/auth/callback",
+      "destination": "/app.html"
+    },
+    {
+      "source": "/reset-password",
+      "destination": "/app.html"
+    },
+    {
+      "source": "/dashboard",
+      "destination": "/app.html"
+    },
+    {
+      "source": "/settings",
+      "destination": "/app.html"
+    },
+    {
+      "source": "/profile",
+      "destination": "/app.html"
+    },
+    {
+      "source": "/fun",
+      "destination": "/app.html"
+    },
+    {
+      "source": "/shared/:token",
+      "destination": "/app.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=()"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "(?<sub>.*)\\.vercel\\.app"
+        }
+      ],
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "tokeny.pohl.uk"
+        }
+      ],
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        }
+      ]
+    },
+    {
+      "source": "/(auth|auth/.*|reset-password|dashboard|settings|profile|fun|shared/.*)",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex"
+        }
+      ]
+    }
+  ]
 }

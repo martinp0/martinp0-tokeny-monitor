@@ -4,7 +4,7 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => ({
+export default defineConfig(({ mode, isSsrBuild }) => ({
   server: {
     host: "::",
     port: 8080,
@@ -19,4 +19,16 @@ export default defineConfig(({ mode }) => ({
     },
     dedupe: ["react", "react-dom", "react/jsx-runtime", "react/jsx-dev-runtime"],
   },
+  build: isSsrBuild
+    ? undefined
+    : {
+        rollupOptions: {
+          output: {
+            // Keep the chart library (+ d3) in its own cacheable chunk, loaded only by chart routes.
+            manualChunks(id: string) {
+              if (/node_modules\/(recharts|d3-[^/]+|victory-vendor|internmap|decimal\.js-light)\//.test(id)) return "charts";
+            },
+          },
+        },
+      },
 }));

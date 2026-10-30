@@ -29,7 +29,7 @@ export default function LandingDemo() {
   }, [prefetchExchangeRate]);
 
   return (
-    <div className="space-y-4 rounded-2xl glass border-white/[0.08] p-3 sm:p-4 md:p-6 glow-sm min-w-0 max-w-full overflow-hidden">
+    <div className="space-y-4 min-w-0 max-w-full overflow-hidden">
       <KpiCards
         totalCost={totalCost}
         totalRequests={totalRequests}

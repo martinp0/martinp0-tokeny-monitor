@@ -16,7 +16,7 @@ export function LanguageSwitcher({ size = "sm", className }: { size?: "sm" | "de
       variant="ghost"
       size={size}
       onClick={toggle}
-      className={cn("gap-1.5 font-mono text-xs text-muted-foreground hover:text-foreground", className)}
+      className={cn("gap-1.5 tabular-nums text-xs text-muted-foreground hover:text-foreground", className)}
       title="Switch language"
     >
       <Globe className="h-3.5 w-3.5" />

@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, ArrowRight, BookOpen, Calculator, Calendar, FileText } from "lucide-react";
 import { ReactNode } from "react";
 import ShareButtons from "@/components/ShareButtons";
+import { PublicHeader } from "@/components/PublicHeader";
 
 interface BlogPostLayoutProps {
   title: string;
@@ -17,11 +18,11 @@ interface BlogPostLayoutProps {
 }
 
 export default function BlogPostLayout({ title, description, slug, date, tag, keywords, children }: BlogPostLayoutProps) {
-  const url = `https://tokeny.pohl.uk/blog/${slug}`;
+  const url = `https://tokeny.martinpohl.cz/blog/${slug}`;
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Helmet>
-        <title>{title} | Tokeny Monitor</title>
+        <title>{title} | Tokeny</title>
         <meta name="description" content={description} />
         <meta name="keywords" content={keywords} />
         <link rel="canonical" href={url} />
@@ -37,13 +38,13 @@ export default function BlogPostLayout({ title, description, slug, date, tag, ke
           author: { "@type": "Person", name: "Martin Pohl", url: "https://martin.pohl.uk" },
           publisher: {
             "@type": "Organization",
-            name: "Tokeny Monitor",
-            logo: { "@type": "ImageObject", url: "https://tokeny.pohl.uk/icon-512.png" },
+            name: "Tokeny",
+            logo: { "@type": "ImageObject", url: "https://tokeny.martinpohl.cz/icon-512.png" },
           },
           datePublished: date,
           dateModified: date,
           inLanguage: "cs-CZ",
-          image: "https://tokeny.pohl.uk/og-image.png",
+          image: "https://tokeny.martinpohl.cz/og-image.png",
           mainEntityOfPage: { "@type": "WebPage", "@id": url },
           url,
         })}</script>
@@ -51,38 +52,30 @@ export default function BlogPostLayout({ title, description, slug, date, tag, ke
           "@context": "https://schema.org",
           "@type": "BreadcrumbList",
           itemListElement: [
-            { "@type": "ListItem", position: 1, name: "Domů", item: "https://tokeny.pohl.uk/" },
-            { "@type": "ListItem", position: 2, name: "Blog", item: "https://tokeny.pohl.uk/blog" },
+            { "@type": "ListItem", position: 1, name: "Domů", item: "https://tokeny.martinpohl.cz/" },
+            { "@type": "ListItem", position: 2, name: "Blog", item: "https://tokeny.martinpohl.cz/blog" },
             { "@type": "ListItem", position: 3, name: title, item: url },
           ],
         })}</script>
 
       </Helmet>
 
-      <header className="border-b border-border/40 backdrop-blur-sm sticky top-0 z-50 bg-background/80">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link to="/" className="font-display font-bold text-lg gradient-text">Tokeny Monitor</Link>
-          <div className="flex items-center gap-2">
-            <Button asChild variant="ghost" size="sm"><Link to="/blog">Blog</Link></Button>
-            <Button asChild size="sm"><Link to="/auth">Začít zdarma <ArrowRight className="ml-1 h-4 w-4" /></Link></Button>
-          </div>
-        </div>
-      </header>
+      <PublicHeader />
 
       <article className="container mx-auto px-4 py-12 max-w-3xl">
         <Link to="/blog" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-6">
           <ArrowLeft className="h-3 w-3" /> Zpět na blog
         </Link>
-        <div className="flex items-center gap-3 text-xs font-mono text-muted-foreground mb-4">
+        <div className="flex items-center gap-3 text-xs tabular-nums text-muted-foreground mb-4">
           <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary">{tag}</span>
           <span className="flex items-center gap-1"><Calendar className="h-3 w-3" /> {date}</span>
         </div>
-        <h1 className="text-3xl md:text-5xl font-display font-bold tracking-tight mb-6">{title}</h1>
+        <h1 className="text-3xl md:text-5xl font-bold tracking-tight mb-6">{title}</h1>
         <p className="text-lg text-muted-foreground mb-6">{description}</p>
         <div className="mb-10"><ShareButtons url={url} title={title} /></div>
 
         <div className="prose prose-invert max-w-none
-          prose-headings:font-display prose-headings:font-bold prose-headings:tracking-tight
+          prose-headings:prose-headings:font-bold prose-headings:tracking-tight
           prose-h2:text-2xl prose-h2:mt-12 prose-h2:mb-4
           prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-3
           prose-p:text-foreground/90 prose-p:leading-relaxed
@@ -94,7 +87,7 @@ export default function BlogPostLayout({ title, description, slug, date, tag, ke
         </div>
 
         <div className="mt-12">
-          <h3 className="text-lg font-display font-bold mb-4">Související návody a ceníky</h3>
+          <h3 className="text-lg font-bold mb-4">Související návody a ceníky</h3>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
             <Card className="group hover:border-primary/50 transition-colors">
               <CardContent className="p-4">
@@ -150,10 +143,10 @@ export default function BlogPostLayout({ title, description, slug, date, tag, ke
           </div>
         </div>
 
-        <div className="mt-10 p-6 rounded-xl bg-gradient-to-br from-primary/10 to-accent/10 border border-primary/20 text-center">
-          <h3 className="text-xl font-display font-bold mb-2">Sleduj reálné AI náklady, ne jen odhady</h3>
+        <div className="mt-10 p-6 rounded-xl bg-primary/5 border border-primary/20 text-center">
+          <h3 className="text-xl font-bold mb-2">Sleduj reálné AI náklady, ne jen odhady</h3>
           <p className="text-sm text-muted-foreground mb-4">
-            Tokeny Monitor ti ukáže denní spend napříč GPT, Claude a Gemini — v USD i CZK.
+            Tokeny ti ukáže denní spend napříč GPT, Claude a Gemini — v USD i CZK.
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             <Button asChild><Link to="/auth">Začít zdarma <ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
@@ -168,7 +161,7 @@ export default function BlogPostLayout({ title, description, slug, date, tag, ke
 
 
       <footer className="border-t border-border/40 py-8 text-center text-sm text-muted-foreground">
-        © {new Date().getFullYear()} <Link to="/" className="hover:text-foreground">Tokeny Monitor</Link>
+        © {new Date().getFullYear()} <Link to="/" className="hover:text-foreground">Tokeny</Link>
       </footer>
     </div>
   );

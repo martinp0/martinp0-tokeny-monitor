@@ -80,7 +80,7 @@ const LATEST_VERSION = CHANGELOG[0].version;
 const LS_KEY = "tokeny_last_seen_version";
 
 const typeIcon = {
-  feature: <Sparkles className="h-3 w-3 text-accent" />,
+  feature: <Sparkles className="h-3 w-3 text-primary" />,
   fix: <Bug className="h-3 w-3 text-destructive" />,
   improvement: <Zap className="h-3 w-3 text-primary" />,
 };
@@ -116,7 +116,7 @@ export function ChangelogModal() {
         <Button
           variant="ghost"
           size="sm"
-          className="relative gap-1.5 text-muted-foreground hover:text-foreground font-mono text-xs"
+          className="relative gap-1.5 text-muted-foreground hover:text-foreground tabular-nums text-xs"
           title="Co je nového"
         >
           <Megaphone className="h-3.5 w-3.5" />
@@ -125,9 +125,9 @@ export function ChangelogModal() {
           )}
         </Button>
       </DialogTrigger>
-      <DialogContent className="glass border-white/[0.08] max-w-lg">
+      <DialogContent className="glass border-border max-w-lg">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 gradient-text">
+          <DialogTitle className="flex items-center gap-2">
             <Megaphone className="h-5 w-5" />
             Co je nového
           </DialogTitle>
@@ -137,10 +137,10 @@ export function ChangelogModal() {
             {CHANGELOG.map((entry) => (
               <div key={entry.version}>
                 <div className="flex items-center gap-2 mb-2">
-                  <Badge variant="outline" className="font-mono text-xs border-primary/30 text-primary">
+                  <Badge variant="outline" className="tabular-nums text-xs border-primary/30 text-primary">
                     v{entry.version}
                   </Badge>
-                  <span className="text-xs text-muted-foreground font-mono">
+                  <span className="text-xs text-muted-foreground tabular-nums">
                     {new Date(entry.date).toLocaleDateString("cs-CZ")}
                   </span>
                 </div>
@@ -149,7 +149,7 @@ export function ChangelogModal() {
                     <li key={i} className="flex items-start gap-2 text-sm">
                       <span className="mt-0.5 shrink-0">{typeIcon[item.type]}</span>
                       <span>
-                        <span className="text-[10px] font-mono uppercase text-muted-foreground mr-1.5">
+                        <span className="text-xs tabular-nums uppercase text-muted-foreground mr-1.5">
                           {typeLabel[item.type]}
                         </span>
                         {item.text}

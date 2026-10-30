@@ -34,9 +34,9 @@
     "realLifeTitle": "Real-life srovnání",
     "realLifeDesc": "Kolik espress, piv nebo pizz by se za tvoje API náklady dalo koupit?",
     "securityTitle": "Bezpečné a privátní",
-    "securityDesc": "Tvoje data zůstávají v šifrovaném cloudu, viditelná jen tobě.",
+    "securityDesc": "Každý řádek patří jen tvému účtu (Row-Level Security).",
     "mobileTitle": "Funguje všude",
-    "mobileDesc": "Web, mobil, tablet i jako nativní app pro iOS a Android."
+    "mobileDesc": "Navrženo pro iPhone, iPad i Mac. Funguje v každém prohlížeči."
   },
   "demo": {
     "badge": "Live demo s ukázkovými daty",
@@ -72,7 +72,7 @@
   "support": {
     "title": "Podpoř vývoj",
     "titleHighlight": "kávou",
-    "desc": "Tokeny Monitor je zdarma a open-source. Pokud ti šetří čas nebo peníze, můžeš poděkovat symbolickým kafem. Každá podpora motivuje k dalšímu vylepšování. 💜"
+    "desc": "Tokeny je zdarma a open-source. Pokud ti šetří čas nebo peníze, můžeš poděkovat symbolickým kafem. Každá podpora motivuje k dalšímu vylepšování."
   },
   "cta": {
     "title": "Připraven/a převzít",
@@ -119,5 +119,188 @@
   },
   "lang": {
     "switch": "EN"
+  },
+  "theme": {
+    "label": "Vzhled",
+    "system": "Podle systému",
+    "light": "Světlý",
+    "dark": "Tmavý",
+    "switchTo": "Přepnout na"
+  },
+  "landing": {
+    "metaTitle": "Tokeny – kolik tě AI opravdu stojí | Přehled nákladů na AI API v Kč",
+    "metaDesc": "Tokeny spojí útratu za AI API z OpenRouteru, Anthropicu a OpenAI do jednoho přehledu. Náklady v Kč i USD, grafy podle modelů, budget alerty a kalkulačka cen LLM. Zdarma.",
+    "nav": {
+      "features": "Funkce",
+      "demo": "Ukázka",
+      "pricing": "Ceník",
+      "faq": "Otázky",
+      "menu": "Menu",
+      "skip": "Přeskočit na obsah"
+    },
+    "hero": {
+      "eyebrow": "Pro vývojáře, indie makery a malé týmy",
+      "title1": "Kolik tě AI",
+      "title2": "opravdu stojí.",
+      "subtitle": "Tokeny spojí útratu z OpenRouteru, Anthropicu a OpenAI do jednoho klidného přehledu. V korunách i dolarech — a s upozorněním dřív, než účet přeteče.",
+      "primary": "Začít zdarma",
+      "secondary": "Prohlédnout ukázku",
+      "trust1": "Zdarma navždy pro jednotlivce",
+      "trust2": "Bez instalace",
+      "trust3": "Open-source (MIT)"
+    },
+    "demo": {
+      "eyebrow": "Živá ukázka",
+      "title": "Takhle vypadá tvůj přehled.",
+      "subtitle": "Ukázková data z OpenRouteru. Bez přihlášení — klikni na model a filtruj.",
+      "switchTo": "Zobrazit v {{currency}}"
+    },
+    "features": {
+      "eyebrow": "Funkce",
+      "title": "Všechno podstatné. Nic navíc.",
+      "items": {
+        "currency": {
+          "title": "Koruny i dolary",
+          "desc": "Přepni měnu jedním klepnutím. Kurz se denně bere z ČNB."
+        },
+        "charts": {
+          "title": "Přehled podle modelů",
+          "desc": "Náklady v čase, tokeny, latence a provideři. Klepni na model a vše se přefiltruje."
+        },
+        "providers": {
+          "title": "OpenRouter, Anthropic, OpenAI",
+          "desc": "Import CSV z OpenRouteru, nebo napojení přes Admin API u Anthropicu a OpenAI."
+        },
+        "alerts": {
+          "title": "Hlídání rozpočtu",
+          "desc": "Nastav měsíční limit a dostaneš e-mail, jakmile se k němu blížíš."
+        },
+        "anomalies": {
+          "title": "Detekce anomálií",
+          "desc": "Dny s nečekaně vysokou útratou poznáš hned — třeba zacyklený agent."
+        },
+        "mcp": {
+          "title": "MCP pro Claude a Cursor",
+          "desc": "Zeptej se svého AI asistenta: „Kolik jsem minulý týden utratil za Sonnet?“"
+        },
+        "privacy": {
+          "title": "Tvoje data, jen tvoje",
+          "desc": "Každý řádek patří jen tvému účtu (Row-Level Security). API klíče zůstávají na serveru."
+        },
+        "everywhere": {
+          "title": "iPhone, iPad i Mac",
+          "desc": "Navrženo nejdřív pro mobil. Funguje v každém moderním prohlížeči, bez instalace."
+        }
+      }
+    },
+    "how": {
+      "eyebrow": "Jak to funguje",
+      "title": "Za dvě minuty máš přehled.",
+      "s1t": "Vytvoř si účet",
+      "s1d": "E-mailem, přes Google nebo Apple.",
+      "s2t": "Přidej data",
+      "s2d": "Nahraj CSV z openrouter.ai/activity, nebo připoj Admin API klíč.",
+      "s3t": "Sleduj a šetři",
+      "s3d": "Uvidíš, které modely a aplikace stojí nejvíc, a kde ušetřit."
+    },
+    "faq": {
+      "eyebrow": "Otázky",
+      "title": "Časté dotazy",
+      "items": [
+        {
+          "q": "Které providery podporujete?",
+          "a": "OpenRouter (import CSV a synchronizace přes API), Anthropic a OpenAI (přes jejich Admin Usage API). Modely Gemini, Mistral, Groq nebo Grok uvidíš, pokud je voláš přes OpenRouter. Přímé napojení dalších providerů zatím nenabízíme."
+        },
+        {
+          "q": "Jak nahraju CSV z OpenRouteru?",
+          "a": "Na openrouter.ai otevři Activity a dej Export → CSV. Soubor pak přetáhni do dashboardu. Opakované nahrání ničemu nevadí — duplicity se podle ID požadavku přeskočí."
+        },
+        {
+          "q": "Jak převádíte dolary na koruny?",
+          "a": "Provideři účtují v USD. Tokeny jednou denně stáhne oficiální kurz ČNB a přepočítá ho. Měnu přepneš jedním klepnutím."
+        },
+        {
+          "q": "Jak jsou chráněná moje data?",
+          "a": "Data leží v Postgresu u Supabase a každý řádek je svázaný s tvým účtem pravidly Row-Level Security. API klíče providerů se ukládají jen na serveru a do prohlížeče se nikdy nevracejí. Účet i všechna data můžeš kdykoli smazat v profilu."
+        },
+        {
+          "q": "Kolik to stojí?",
+          "a": "Základní přehled je zdarma. Tarif Pro (99 Kč měsíčně nebo 990 Kč ročně) připravujeme — přinese automatickou synchronizaci, neomezené alerty, predikci nákladů a AI asistenta. Free tarif zůstane."
+        },
+        {
+          "q": "Co je MCP server?",
+          "a": "MCP (Model Context Protocol) umožní AI klientům jako Claude Desktop nebo Cursor číst tvoje statistiky. V Nastavení si vygeneruješ token, vložíš ho do konfigurace klienta a můžeš se ptát přímo v chatu."
+        }
+      ]
+    },
+    "maker": {
+      "by": "Vytváří",
+      "desc": "Martin Pohl — Apple konzultant a nezávislý vývojář z Prahy.",
+      "github": "Zdrojový kód na GitHubu"
+    },
+    "cta": {
+      "title": "Přestaň hádat, kolik tě AI stojí.",
+      "subtitle": "Začni zdarma, bez platební karty."
+    },
+    "footer": {
+      "product": "Produkt",
+      "resources": "Zdroje",
+      "about": "O projektu",
+      "calculator": "Kalkulačka cen LLM",
+      "claude": "Ceny Claude API",
+      "gpt": "Ceny GPT API",
+      "blog": "Blog",
+      "login": "Přihlášení",
+      "coffee": "Kup mi kafe",
+      "rights": "Vytvořil Martin Pohl"
+    }
+  },
+  "pricing": {
+    "eyebrow": "Ceník",
+    "title": "Jednoduchý ceník.",
+    "subtitle": "Začni zdarma. Na Pro přejdeš, až ti začne šetřit peníze.",
+    "monthly": "Měsíčně",
+    "yearly": "Ročně",
+    "yearlySave": "2 měsíce zdarma",
+    "perMonth": "{{price}} / měsíc",
+    "perYear": "{{price}} / rok",
+    "free": "Free",
+    "freeDesc": "Pro jednotlivce, kteří chtějí vidět, kam peníze tečou.",
+    "freePrice": "0 Kč",
+    "pro": "Pro",
+    "proDesc": "Pro ty, kdo platí za AI každý den a chtějí to mít pod kontrolou.",
+    "soon": "Připravujeme",
+    "current": "Tvůj tarif",
+    "upgrade": "Přejít na Pro",
+    "notify": "Začít zdarma",
+    "vatNote": "Ceny jsou konečné. Pro zatím není v prodeji.",
+    "features": {
+      "dashboard": "Dashboard s grafy a filtry",
+      "csvImport": "Neomezený import CSV",
+      "currency": "Kč i USD s kurzem ČNB",
+      "calculator": "Kalkulačka cen LLM",
+      "oneAlert": "1 budget alert",
+      "mcp": "MCP server (čtení statistik)",
+      "everythingFree": "Vše z tarifu Free",
+      "autoSync": "Automatická synchronizace providerů",
+      "unlimitedAlerts": "Neomezené budget alerty",
+      "forecast": "Predikce nákladů do konce měsíce",
+      "aiAgent": "AI asistent nad tvými daty",
+      "exports": "Export do PDF a PNG",
+      "sharing": "Sdílené dashboardy",
+      "support": "Prioritní podpora"
+    }
+  },
+  "notFound": {
+    "title": "Tuhle stránku jsme nenašli.",
+    "desc": "Odkaz je možná zastaralý, nebo stránka byla přesunuta.",
+    "home": "Zpět na úvod",
+    "calculator": "Kalkulačka cen LLM"
+  },
+  "kpi": {
+    "cost": "Celkové náklady",
+    "requests": "Požadavky",
+    "avgTime": "Prům. odpověď",
+    "tokens": "Tokeny celkem"
   }
 }

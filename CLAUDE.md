@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Tokeny Monitor is an AI token cost dashboard. Users connect their OpenRouter, Anthropic, or OpenAI accounts and get charts of cost, token usage, latency, and anomalies. Data enters via CSV upload, direct API sync (edge functions), or an MCP server. The frontend is React + Vite; the backend is entirely Supabase (Postgres, Auth, RLS, Edge Functions).
+Tokeny is an AI token cost dashboard. Users connect their OpenRouter, Anthropic, or OpenAI accounts and get charts of cost, token usage, latency, and anomalies. Data enters via CSV upload, direct API sync (edge functions), or an MCP server. The frontend is React + Vite; the backend is entirely Supabase (Postgres, Auth, RLS, Edge Functions).
 
 ## Commands
 

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, Check, DollarSign, TrendingDown, Zap } from "lucide-react";
 import { GrokPricingTable } from "@/components/GrokPricingTable";
+import { PublicHeader } from "@/components/PublicHeader";
 
 const GPT_MODELS = [
   { name: "GPT-4o mini", input: 200, output: 800, use: "Vysoký objem, klasifikace, levný chat" },
@@ -26,16 +27,16 @@ export default function GptApiCost() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Helmet>
-        <title>GPT API Cost 2026 — OpenAI Pricing per Token & Examples | Tokeny Monitor</title>
+        <title>GPT API Cost 2026 — OpenAI Pricing per Token & Examples | Tokeny</title>
         <meta
           name="description"
           content="GPT API cost breakdown for GPT-5, GPT-4o and GPT-4o mini. Per-token pricing, real monthly examples and how to track actual OpenAI spend."
         />
         <meta name="keywords" content="gpt api cost, openai api cost, gpt-4o pricing, gpt-5 pricing, openai pricing, chatgpt api cost, gpt token cost" />
-        <link rel="canonical" href="https://tokeny.pohl.uk/gpt-api-cost" />
+        <link rel="canonical" href="https://tokeny.martinpohl.cz/gpt-api-cost" />
         <meta property="og:title" content="GPT API Cost 2026 — Full OpenAI Pricing Breakdown" />
         <meta property="og:description" content="How much does the GPT API really cost? GPT-5, GPT-4o, mini pricing with real-world monthly examples." />
-        <meta property="og:url" content="https://tokeny.pohl.uk/gpt-api-cost" />
+        <meta property="og:url" content="https://tokeny.martinpohl.cz/gpt-api-cost" />
         <meta property="og:type" content="article" />
         <script type="application/ld+json">{JSON.stringify({
           "@context": "https://schema.org",
@@ -44,7 +45,7 @@ export default function GptApiCost() {
           description: "Per-token pricing for GPT-5, GPT-4o and mini variants with monthly cost examples.",
           author: { "@type": "Person", name: "Martin Pohl", url: "https://martin.pohl.uk" },
           datePublished: "2026-05-19",
-          url: "https://tokeny.pohl.uk/gpt-api-cost",
+          url: "https://tokeny.martinpohl.cz/gpt-api-cost",
         })}</script>
         <script type="application/ld+json">{JSON.stringify({
           "@context": "https://schema.org",
@@ -55,29 +56,21 @@ export default function GptApiCost() {
             { "@type": "Question", name: "Which GPT model is cheapest?",
               acceptedAnswer: { "@type": "Answer", text: "GPT-4o mini is by far the cheapest OpenAI model — roughly 17× cheaper than GPT-4o on input and 8× on output." } },
             { "@type": "Question", name: "How do I track real GPT API spend?",
-              acceptedAnswer: { "@type": "Answer", text: "Connect your OpenAI API key in Tokeny Monitor. The dashboard pulls usage from the OpenAI Admin API and shows daily cost in USD or CZK." } },
+              acceptedAnswer: { "@type": "Answer", text: "Connect your OpenAI API key in Tokeny. The dashboard pulls usage from the OpenAI Admin API and shows daily cost in USD or CZK." } },
             { "@type": "Question", name: "Is GPT-5 worth the price over GPT-4o?",
               acceptedAnswer: { "@type": "Answer", text: "For pure chat GPT-4o is often enough. For complex reasoning, multi-step agents and coding, GPT-5 wins on quality per dollar." } },
           ],
         })}</script>
       </Helmet>
 
-      <header className="border-b border-border/40 backdrop-blur-sm sticky top-0 z-50 bg-background/80">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link to="/" className="font-display font-bold text-lg gradient-text">Tokeny Monitor</Link>
-          <div className="flex items-center gap-2">
-            <Button asChild variant="ghost" size="sm"><Link to="/llm-cost-calculator">Kalkulačka</Link></Button>
-            <Button asChild size="sm"><Link to="/auth">Začít zdarma <ArrowRight className="ml-1 h-4 w-4" /></Link></Button>
-          </div>
-        </div>
-      </header>
+      <PublicHeader />
 
       <section className="container mx-auto px-4 pt-16 pb-10 text-center max-w-4xl">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-mono mb-6">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs tabular-nums mb-6">
           <DollarSign className="h-3 w-3" /> Aktualizováno květen 2026
         </div>
-        <h1 className="text-4xl md:text-6xl font-display font-bold tracking-tight mb-6">
-          GPT API Cost — kolik <span className="gradient-text">opravdu stojí OpenAI</span>
+        <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
+          GPT API Cost — kolik <span className="text-primary">opravdu stojí OpenAI</span>
         </h1>
         <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
           Kompletní rozpis cen GPT-5, GPT-4o a GPT-4o mini. Per-token sazby, reálné měsíční příklady
@@ -90,10 +83,10 @@ export default function GptApiCost() {
       </section>
 
       <section className="container mx-auto px-4 py-6 max-w-5xl">
-        <Card className="relative overflow-hidden border-0 bg-gradient-to-br from-primary/20 via-primary/10 to-transparent">
+        <Card className="relative overflow-hidden border-0 bg-primary/5">
           <CardContent className="p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-4">
             <div>
-              <h3 className="text-xl font-display font-bold mb-1">Spočítat si náklady na GPT API</h3>
+              <h3 className="text-xl font-bold mb-1">Spočítat si náklady na GPT API</h3>
               <p className="text-sm text-muted-foreground">Vyber model, zadej tokeny a zjisti reálný měsíční cost.</p>
             </div>
             <Button asChild size="lg" className="shrink-1">
@@ -106,7 +99,7 @@ export default function GptApiCost() {
       </section>
 
       <section className="container mx-auto px-4 py-10 max-w-5xl">
-        <h2 className="text-2xl md:text-3xl font-display font-bold mb-6 flex items-center gap-2">
+        <h2 className="text-2xl md:text-3xl font-bold mb-6 flex items-center gap-2">
           <Zap className="h-7 w-7 text-primary" /> Ceník GPT modelů — srovnání per token
         </h2>
         <p className="text-muted-foreground mb-6 max-w-2xl">
@@ -130,12 +123,12 @@ export default function GptApiCost() {
               {GPT_MODELS.map((m) => (
                 <tr key={m.name} className="border-b last:border-1 hover:bg-muted/30">
                   <td className="px-4 py-3 font-medium">{m.name}</td>
-                  <td className="px-4 py-3 text-right font-mono text-muted-foreground">${fmt(m.input / 1e6)}</td>
-                  <td className="px-4 py-3 text-right font-mono text-muted-foreground">${fmt(m.input / 1e3)}</td>
-                  <td className="px-4 py-3 text-right font-mono font-semibold text-primary">${m.input / 1e3}</td>
-                  <td className="px-4 py-3 text-right font-mono text-muted-foreground">${fmt(m.output / 1e6)}</td>
-                  <td className="px-4 py-3 text-right font-mono text-muted-foreground">${fmt(m.output / 1e3)}</td>
-                  <td className="px-4 py-3 text-right font-mono font-semibold text-primary">${m.output / 1e3}</td>
+                  <td className="px-4 py-3 text-right tabular-nums text-muted-foreground">${fmt(m.input / 1e6)}</td>
+                  <td className="px-4 py-3 text-right tabular-nums text-muted-foreground">${fmt(m.input / 1e3)}</td>
+                  <td className="px-4 py-3 text-right tabular-nums font-semibold text-primary">${m.input / 1e3}</td>
+                  <td className="px-4 py-3 text-right tabular-nums text-muted-foreground">${fmt(m.output / 1e6)}</td>
+                  <td className="px-4 py-3 text-right tabular-nums text-muted-foreground">${fmt(m.output / 1e3)}</td>
+                  <td className="px-4 py-3 text-right tabular-nums font-semibold text-primary">${m.output / 1e3}</td>
                 </tr>
               ))}
             </tbody>
@@ -147,7 +140,7 @@ export default function GptApiCost() {
               <CardContent className="p-5">
                 <div className="flex items-baseline justify-between mb-2">
                   <h3 className="text-xl font-semibold">{m.name}</h3>
-                  <div className="text-xs text-muted-foreground font-mono">OpenAI</div>
+                  <div className="text-xs text-muted-foreground tabular-nums">OpenAI</div>
                 </div>
                 <div className="flex gap-4 mb-3 text-sm">
                   <div><span className="text-muted-foreground">Input:</span> <strong>${m.input / 1e3}/1M</strong></div>
@@ -161,7 +154,7 @@ export default function GptApiCost() {
       </section>
 
       <section className="container mx-auto px-4 py-10 max-w-5xl">
-        <h2 className="text-2xl md:text-3xl font-display font-bold mb-3">Pro srovnání: Grok (xAI) za 1M tokenů</h2>
+        <h2 className="text-2xl md:text-3xl font-bold mb-3">Pro srovnání: Grok (xAI) za 1M tokenů</h2>
         <p className="text-muted-foreground mb-6 max-w-2xl">
           Grok 4.3 má stejnou cenu vstupu jako GPT-5 ($1.25), ale výstup je 4× levnější. Grok 4.7 stojí na vstupu
           víc, ale výstup je pořád pod GPT-5. Tipy na úsporu najdeš v článku{" "}
@@ -173,7 +166,7 @@ export default function GptApiCost() {
       </section>
 
       <section className="container mx-auto px-4 py-10 max-w-5xl">
-        <h2 className="text-2xl md:text-3xl font-display font-bold mb-6 flex items-center gap-2">
+        <h2 className="text-2xl md:text-3xl font-bold mb-6 flex items-center gap-2">
           <TrendingDown className="h-7 w-7 text-primary" /> Reálné měsíční příklady
         </h2>
         <div className="grid md:grid-cols-3 gap-4">
@@ -181,8 +174,8 @@ export default function GptApiCost() {
             <Card key={e.title}>
               <CardContent className="p-5">
                 <h3 className="font-semibold mb-1">{e.title}</h3>
-                <div className="text-xs text-muted-foreground font-mono mb-3">{e.model} · {e.reqs}</div>
-                <div className="text-3xl font-display font-bold gradient-text">${e.monthly}<span className="text-base text-muted-foreground">/měs</span></div>
+                <div className="text-xs text-muted-foreground tabular-nums mb-3">{e.model} · {e.reqs}</div>
+                <div className="text-3xl font-bold">${e.monthly}<span className="text-base text-muted-foreground">/měs</span></div>
               </CardContent>
             </Card>
           ))}
@@ -194,7 +187,7 @@ export default function GptApiCost() {
       </section>
 
       <section className="container mx-auto px-4 py-10 max-w-3xl">
-        <h2 className="text-2xl md:text-3xl font-display font-bold mb-6 flex items-center gap-2">
+        <h2 className="text-2xl md:text-3xl font-bold mb-6 flex items-center gap-2">
           <Check className="h-7 w-7 text-primary" /> Jak ušetřit na GPT API
         </h2>
         <div className="space-y-3">
@@ -203,7 +196,7 @@ export default function GptApiCost() {
             { text: "Používejte prompt caching — opakovaný system prompt může být až 90% levnější.", link: "/blog/ai-cost-saving", linkText: "Prompt caching taktiky" },
             { text: "Zkracujte system prompty a few-shot příklady — input tokeny rychle narostou.", link: "/blog/prompt-optimization", linkText: "Optimalizace promptů" },
             { text: "Nastavte max_tokens — model jinak rád generuje delší odpovědi než potřebujete.", link: "/blog/ai-cost-saving", linkText: "Další tipy na úspory" },
-            { text: "Sledujte denní spend — bez monitoringu nezachytíte runaway loop nebo bug v promptu.", link: "/auth", linkText: "Sledovat v Tokeny Monitor" },
+            { text: "Sledujte denní spend — bez monitoringu nezachytíte runaway loop nebo bug v promptu.", link: "/auth", linkText: "Sledovat v Tokeny" },
           ].map((t) => (
             <div key={t.text} className="flex gap-3 items-start">
               <Check className="h-5 w-5 text-primary mt-0.5 shrink-0" />
@@ -216,7 +209,7 @@ export default function GptApiCost() {
         </div>
 
         <div className="mt-10 p-5 rounded-xl border border-border/40 bg-muted/30">
-          <h3 className="font-display font-bold text-lg mb-2">Chceš ještě víc ušetřit?</h3>
+          <h3 className="font-bold text-lg mb-2">Chceš ještě víc ušetřit?</h3>
           <p className="text-sm text-muted-foreground mb-4">
             Máme 10 praktických taktik pro snížení LLM nákladů o 40–80 % — od batch API přes prompt compression po cache výsledků.
           </p>
@@ -228,12 +221,12 @@ export default function GptApiCost() {
       </section>
 
       <section className="container mx-auto px-4 py-10 max-w-3xl">
-        <h2 className="text-2xl md:text-3xl font-display font-bold mb-6">FAQ</h2>
+        <h2 className="text-2xl md:text-3xl font-bold mb-6">FAQ</h2>
         <div className="space-y-4">
           {[
             { q: "Kolik stojí GPT API?", a: "GPT-4o mini stojí $0.15 za 1M input tokenů a $0.60 za 1M output. GPT-4o je $2.50/$10. GPT-5 je $1.25/$10." },
             { q: "Který GPT model je nejlevnější?", a: "GPT-4o mini je zdaleka nejlevnější — asi 17× levnější než GPT-4o na inputu." },
-            { q: "Jak sleduju skutečné náklady?", a: "Připojte OpenAI API klíč v Tokeny Monitor. Dashboard tahá data z OpenAI Admin API a ukazuje denní cost v USD nebo CZK." },
+            { q: "Jak sleduju skutečné náklady?", a: "Připojte OpenAI API klíč v Tokeny. Dashboard tahá data z OpenAI Admin API a ukazuje denní cost v USD nebo CZK." },
             { q: "Vyplatí se GPT-5 oproti GPT-4o?", a: "Pro běžný chat často stačí GPT-4o. Pro reasoning, multi-step agenty a coding vede GPT-5 v poměru kvalita/cena." },
           ].map((f) => (
             <Card key={f.q}><CardContent className="p-5">
@@ -245,11 +238,11 @@ export default function GptApiCost() {
       </section>
 
       <section className="container mx-auto px-4 py-16 text-center max-w-2xl">
-        <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
-          Od ceníku k <span className="gradient-text">reálným výdajům</span>
+        <h2 className="text-3xl md:text-4xl font-bold mb-4">
+          Od ceníku k <span className="text-primary">reálným výdajům</span>
         </h2>
         <p className="text-muted-foreground mb-8">
-          Ceník je jen půlka příběhu. Tokeny Monitor ukáže, kolik reálně utrácíte den po dni.
+          Ceník je jen půlka příběhu. Tokeny ukáže, kolik reálně utrácíte den po dni.
         </p>
         <div className="flex flex-wrap justify-center gap-3">
           <Button asChild size="lg"><Link to="/auth">Začít zdarma <ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
@@ -263,7 +256,7 @@ export default function GptApiCost() {
       </section>
 
       <footer className="border-t border-border/40 py-8 text-center text-sm text-muted-foreground">
-        © {new Date().getFullYear()} <Link to="/" className="hover:text-foreground">Tokeny Monitor</Link>
+        © {new Date().getFullYear()} <Link to="/" className="hover:text-foreground">Tokeny</Link>
       </footer>
     </div>
   );

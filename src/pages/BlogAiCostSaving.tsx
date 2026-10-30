@@ -76,7 +76,7 @@ export default function BlogAiCostSaving() {
       <h2>10. Měř, nehádej</h2>
       <p>
         Bez monitoringu nezachytíš runaway loop, infinite agenta nebo bug, který strojí $200/den. Connect
-        OpenAI/Anthropic přes <Link to="/auth">Tokeny Monitor</Link> a sleduj denní spend.
+        OpenAI/Anthropic přes <Link to="/auth">Tokeny</Link> a sleduj denní spend.
       </p>
 
       <h2>Kolik to celkově ušetří?</h2>

@@ -1,17 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { CHART_SERIES, chartTooltipStyle } from "@/lib/chart-theme";
 import { fmtCost } from "@/lib/format";
 import { shortModel } from "@/lib/format";
 import { useCurrency } from "@/hooks/useCurrency";
 
-const COLORS = [
-  "hsl(160, 100%, 50%)",
-  "hsl(190, 100%, 50%)",
-  "hsl(35, 100%, 55%)",
-  "hsl(280, 100%, 65%)",
-  "hsl(340, 100%, 60%)",
-  "hsl(60, 100%, 55%)",
-];
+const COLORS = CHART_SERIES;
 
 interface Props {
   data: { model: string; fullModel: string; cost: number }[];
@@ -26,9 +20,9 @@ export function ModelCostChart({ data, onModelClick, selectedModel }: Props) {
     <Card className="bg-card border-border/50 min-w-0 max-w-full overflow-hidden">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-sm text-muted-foreground uppercase tracking-wider">Náklady dle modelu</CardTitle>
+          <CardTitle className="text-[15px] font-semibold tracking-tight text-foreground">Náklady dle modelu</CardTitle>
           {selectedModel && (
-            <button onClick={() => onModelClick?.(null)} className="text-xs text-primary hover:underline font-mono">
+            <button onClick={() => onModelClick?.(null)} className="text-xs text-primary hover:underline tabular-nums">
               Zrušit filtr
             </button>
           )}
@@ -46,7 +40,7 @@ export function ModelCostChart({ data, onModelClick, selectedModel }: Props) {
               innerRadius={50}
               outerRadius={90}
               strokeWidth={2}
-              stroke="hsl(232, 40%, 10%)"
+              stroke="hsl(var(--card))"
               onClick={(entry) => onModelClick?.(entry.fullModel)}
               className="cursor-pointer"
             >
@@ -55,10 +49,10 @@ export function ModelCostChart({ data, onModelClick, selectedModel }: Props) {
               ))}
             </Pie>
             <Tooltip
-              contentStyle={{ backgroundColor: "hsl(232, 40%, 12%)", border: "1px solid hsl(232, 25%, 18%)", borderRadius: 8, fontFamily: "JetBrains Mono", fontSize: 12 }}
-              formatter={(value: number, _name, item: any) => [fmtCost(value, 6, currency, exchangeRate), item?.payload?.fullModel ?? "Náklady"]}
+              {...chartTooltipStyle}
+              formatter={(value: number, _name, item: { payload?: { fullModel?: string } }) => [fmtCost(value, 6, currency, exchangeRate), item?.payload?.fullModel ?? "Náklady"]}
             />
-            <Legend wrapperStyle={{ fontSize: 11, fontFamily: "JetBrains Mono" }} />
+            <Legend wrapperStyle={{ fontSize: 11 }} />
           </PieChart>
         </ResponsiveContainer>
       </CardContent>
