@@ -1,105 +1,80 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-import Stripe from "https://esm.sh/stripe@14.21.0?target=deno";
+// Stripe webhook → public.subscriptions (one row per user, written only here, service role).
+//
+// Events (configure exactly these on the endpoint):
+//   checkout.session.completed, customer.subscription.created, customer.subscription.updated,
+//   customer.subscription.deleted, invoice.payment_failed
+//
+// Every event re-fetches the CURRENT subscription from Stripe, so out-of-order delivery and
+// retries are harmless (idempotent upsert). The decision logic lives in _shared/billing.ts
+// (unit-tested). Returns 500 on transient errors so Stripe retries; 200 for everything else.
+import { handleStripeEvent, type StripeSubscriptionLike, type SubscriptionRow } from "../_shared/billing.ts";
+import { serviceClient } from "../_shared/http.ts";
+import { stripeClient, type Stripe } from "../_shared/stripe.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, stripe-signature",
-};
+const headers = { "Content-Type": "application/json" };
 
 Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  if (req.method !== "POST") return new Response(JSON.stringify({ error: "Method not allowed" }), { status: 405, headers });
 
-  const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!, {
-    apiVersion: "2024-04-10",
-    httpClient: Stripe.createFetchHttpClient(),
-  });
-
-  const sig = req.headers.get("stripe-signature");
-  if (!sig) {
-    return new Response(JSON.stringify({ error: "Missing stripe-signature" }), { status: 400 });
+  const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
+  if (!webhookSecret) {
+    console.error("stripe-webhook: STRIPE_WEBHOOK_SECRET is not configured");
+    return new Response(JSON.stringify({ error: "Not configured" }), { status: 503, headers });
   }
-  const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET")!;
-  const body = await req.text();
+  const sig = req.headers.get("stripe-signature");
+  if (!sig) return new Response(JSON.stringify({ error: "Missing stripe-signature" }), { status: 400, headers });
 
+  const stripe = stripeClient();
+  const body = await req.text();
   let event: Stripe.Event;
   try {
     event = await stripe.webhooks.constructEventAsync(body, sig, webhookSecret);
   } catch (err) {
-    console.error("Webhook signature verification failed:", err);
-    return new Response(JSON.stringify({ error: "Invalid signature" }), { status: 400 });
+    console.error("stripe-webhook: signature verification failed", err instanceof Error ? err.message : err);
+    return new Response(JSON.stringify({ error: "Invalid signature" }), { status: 400, headers });
   }
 
-  const svc = createClient(
-    Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-  );
-
-  async function upsertSubscription(sub: Stripe.Subscription, customerId: string) {
-    // Prefer user_id from subscription metadata; fall back to existing DB row by customer
-    let resolvedUserId = sub.metadata?.supabase_user_id as string | undefined;
-    if (!resolvedUserId) {
-      const { data } = await svc
-        .from("subscriptions")
-        .select("user_id")
-        .eq("stripe_customer_id", customerId)
-        .maybeSingle();
-      if (!data) {
-        console.warn("No user found for customer", customerId);
-        return;
-      }
-      resolvedUserId = data.user_id as string;
-    }
-    if (!resolvedUserId) return;
-
-    const item = sub.items.data[0];
-    const payload = {
-      user_id: resolvedUserId,
-      stripe_customer_id: customerId,
-      stripe_subscription_id: sub.id,
-      price_id: item?.price.id ?? null,
-      status: sub.status,
-      current_period_start: new Date(sub.current_period_start * 1000).toISOString(),
-      current_period_end: new Date(sub.current_period_end * 1000).toISOString(),
-      cancel_at_period_end: sub.cancel_at_period_end,
-    };
-
-    const { error } = await svc
-      .from("subscriptions")
-      .upsert(payload, { onConflict: "user_id" });
-
-    if (error) {
-      // Throw so the webhook answers 500 and Stripe retries, instead of silently losing the update.
-      console.error("upsertSubscription error:", error);
-      throw new Error(`upsertSubscription failed: ${error.message}`);
-    }
-  }
-
+  const svc = serviceClient();
   try {
-    switch (event.type) {
-      case "checkout.session.completed": {
-        const session = event.data.object as Stripe.Checkout.Session;
-        if (session.mode !== "subscription" || !session.subscription) break;
-        const sub = await stripe.subscriptions.retrieve(session.subscription as string);
-        await upsertSubscription(sub, session.customer as string);
-        break;
-      }
-
-      case "customer.subscription.updated":
-      case "customer.subscription.deleted": {
-        const sub = event.data.object as Stripe.Subscription;
-        await upsertSubscription(sub, sub.customer as string);
-        break;
-      }
-
-      default:
-        break;
-    }
+    const outcome = await handleStripeEvent(event as unknown as { id: string; type: string; data: { object: Record<string, unknown> } }, {
+      retrieveSubscription: async (id) =>
+        (await stripe.subscriptions.retrieve(id)) as unknown as StripeSubscriptionLike,
+      customerUserId: async (customerId) => {
+        const c = await stripe.customers.retrieve(customerId);
+        if ((c as { deleted?: boolean }).deleted) return null;
+        return (c as Stripe.Customer).metadata?.supabase_user_id ?? null;
+      },
+      userIdByCustomer: async (customerId) => {
+        const { data, error } = await svc
+          .from("subscriptions")
+          .select("user_id")
+          .eq("stripe_customer_id", customerId)
+          .limit(1)
+          .maybeSingle();
+        if (error) throw new Error(error.message);
+        return (data?.user_id as string | undefined) ?? null;
+      },
+      getExisting: async (userId) => {
+        const { data, error } = await svc
+          .from("subscriptions")
+          .select("stripe_subscription_id, status, current_period_end")
+          .eq("user_id", userId)
+          .maybeSingle();
+        if (error) throw new Error(error.message);
+        return data ?? null;
+      },
+      upsert: async (row: SubscriptionRow) => {
+        const { error } = await svc
+          .from("subscriptions")
+          .upsert({ ...row, updated_at: new Date().toISOString() }, { onConflict: "user_id" });
+        if (error) throw new Error(error.message);
+      },
+      log: (msg, extra) => console.warn(msg, JSON.stringify(extra ?? {})),
+    });
+    console.log("stripe-webhook", event.type, event.id, JSON.stringify(outcome));
+    return new Response(JSON.stringify({ received: true, ...outcome }), { status: 200, headers });
   } catch (e) {
-    console.error("Webhook handler error:", e);
-    return new Response(JSON.stringify({ error: "Handler error" }), { status: 500 });
+    console.error("stripe-webhook: handler error", event.type, event.id, e instanceof Error ? e.message : e);
+    return new Response(JSON.stringify({ error: "Webhook handler failed" }), { status: 500, headers });
   }
-
-  return new Response(JSON.stringify({ received: true }), {
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
 });

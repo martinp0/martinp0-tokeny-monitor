@@ -1,54 +1,37 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+// Current plan of the calling user (read from public.subscriptions, written by stripe-webhook).
+// Returns { isPro, status, interval, currentPeriodEnd, cancelAtPeriodEnd, hasCustomer }.
+import { corsHeaders, getCallingUser, json, serviceClient } from "../_shared/http.ts";
+import { isProSubscription } from "../_shared/plan.ts";
+import { priceIds } from "../_shared/stripe.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
+  const user = await getCallingUser(req);
+  if (!user) return json({ error: "Unauthorized" }, 401);
+
   try {
-    const authHeader = req.headers.get("Authorization") ?? "";
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
-      { global: { headers: { Authorization: authHeader } } },
-    );
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const svc = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-    );
-
-    const { data } = await svc
+    const { data, error } = await serviceClient()
       .from("subscriptions")
-      .select("current_period_end, status, cancel_at_period_end")
+      .select("stripe_customer_id, price_id, status, current_period_end, cancel_at_period_end")
       .eq("user_id", user.id)
-      .in("status", ["active", "trialing"])
-      .gt("current_period_end", new Date().toISOString())
       .maybeSingle();
+    if (error) throw error;
 
-    return new Response(
-      JSON.stringify({
-        isPro: !!data,
-        currentPeriodEnd: data?.current_period_end ?? null,
-        cancelAtPeriodEnd: data?.cancel_at_period_end ?? false,
-      }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } },
-    );
-  } catch (e) {
-    console.error(e);
-    return new Response(JSON.stringify({ error: "Internal server error" }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    const prices = priceIds();
+    const interval = data?.price_id
+      ? data.price_id === prices.year ? "year" : data.price_id === prices.month ? "month" : null
+      : null;
+    return json({
+      isPro: isProSubscription(data),
+      status: data?.status ?? null,
+      interval,
+      currentPeriodEnd: data?.current_period_end ?? null,
+      cancelAtPeriodEnd: data?.cancel_at_period_end ?? false,
+      hasCustomer: !!data?.stripe_customer_id,
     });
+  } catch (e) {
+    console.error("check-subscription error", e instanceof Error ? e.message : e);
+    return json({ error: "Internal server error" }, 500);
   }
 });
