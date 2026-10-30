@@ -14,9 +14,10 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const ALLOWED_PROVIDERS = new Set([
-  "openrouter", "anthropic", "openai", "gemini", "mistral", "groq", "xai",
-]);
+// Only providers that actually have a working sync implementation. Storing keys for providers
+// we cannot sync (Gemini/Mistral/Groq/xAI were stubs) collects secrets for no benefit.
+// Keep in sync with SUPPORTED_SYNC_PROVIDERS in _shared/sync-core.ts and the DB CHECK constraint.
+const ALLOWED_PROVIDERS = new Set(["openrouter", "anthropic", "openai"]);
 
 function preview(key: string): string {
   if (!key) return "";
@@ -34,11 +35,7 @@ function validateKeyShape(provider: string, key: string): string | null {
   if (provider === "openai" && !k.startsWith("sk-"))
     return "OpenAI keys typically start with sk-";
   if (provider === "openrouter" && !k.startsWith("sk-or-"))
-    return "OpenRouter keys typically start with sk-or-";
-  if (provider === "xai" && !k.startsWith("xai-"))
-    return "xAI keys typically start with xai-";
-  if (provider === "groq" && !k.startsWith("gsk_"))
-    return "Groq keys typically start with gsk_";
+    return "OpenRouter Management keys typically start with sk-or-";
   return null;
 }
 

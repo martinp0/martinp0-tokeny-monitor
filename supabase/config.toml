@@ -23,3 +23,6 @@ project_id = "cfjusewixhycahgxoylm"
     verify_jwt = true
   [functions.check-subscription]
     verify_jwt = true
+  [functions.auto-sync]
+    # Called by pg_cron; authenticated with the x-auto-sync-secret header instead of a JWT.
+    verify_jwt = false
