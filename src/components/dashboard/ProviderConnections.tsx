@@ -14,7 +14,7 @@ import { toast } from "sonner";
 // Only providers with a working server-side sync (see supabase/functions/_shared/sync-core.ts).
 type ProviderId = "openrouter" | "anthropic" | "openai";
 
-/** Providers with a real usage sync. Others stay in the type only so existing rows still render. */
+/** Order of providers in the picker. */
 const SUPPORTED_PROVIDERS: ProviderId[] = ["openrouter", "anthropic", "openai"];
 
 interface Credential {
