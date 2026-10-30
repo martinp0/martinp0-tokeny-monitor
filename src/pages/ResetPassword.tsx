@@ -43,7 +43,7 @@ export default function ResetPassword() {
       if (error) throw error;
       toast.success("Heslo bylo úspěšně změněno");
       navigate("/");
-    } catch (error: any) {
+    } catch {
       toast.error("Heslo se nepodařilo změnit. Zkuste to znovu.");
     } finally {
       setLoading(false);

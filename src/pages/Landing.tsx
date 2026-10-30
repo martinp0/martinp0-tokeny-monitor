@@ -24,6 +24,9 @@ import {
   Github,
 } from "lucide-react";
 import { useCurrency } from "@/hooks/useCurrency";
+import { csCopy } from "@/lib/cs-typography";
+
+const hit = "inline-flex items-center justify-center min-h-[44px] min-w-[44px] px-2 transition-colors hover:text-foreground";
 
 function readStoredSession() {
   try {
@@ -101,8 +104,18 @@ const FAQS = [
   },
 ];
 
+const features = FEATURES.map((item) => ({ ...item, title: csCopy(item.title), desc: csCopy(item.desc) }));
+const faqs = FAQS.map((item) => ({ q: csCopy(item.q), a: csCopy(item.a) }));
+const steps = [
+  { n: "01", t: csCopy("Vytvoř si účet"), d: csCopy("Registrace přes e-mail nebo Google. Trvá to 10 vteřin.") },
+  { n: "02", t: csCopy("Nahraj CSV"), d: csCopy("Stáhni activity export z openrouter.ai/activity a nahraj.") },
+  { n: "03", t: csCopy("Sleduj a optimalizuj"), d: csCopy("Filtry podle modelů, datumů a providerů. Export do PNG/PDF.") },
+];
+
 export default function Landing() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const copy = (value: string) => (i18n.language?.startsWith("en") ? value : csCopy(value));
+  const label = (key: string) => copy(t(key));
   const { currency, toggle: toggleCurrency } = useCurrency();
   const [hasSession, setHasSession] = useState(false);
 
@@ -137,7 +150,7 @@ export default function Landing() {
   }, []);
 
   const ctaHref = hasSession ? "/dashboard" : "/auth";
-  const ctaLabel = hasSession ? t("nav.openDashboard") : t("nav.startFree");
+  const ctaLabel = hasSession ? label("nav.openDashboard") : label("nav.startFree");
 
   return (
     <div className="min-h-screen max-w-full bg-background bg-mesh text-foreground">
@@ -175,28 +188,35 @@ export default function Landing() {
         })}</script>
       </Helmet>
       {/* Nav */}
-      <header className="sticky top-0 z-50 border-b border-white/[0.06] glass">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-2 min-w-0">
-          <Link to="/" className="flex items-center gap-2 sm:gap-3 min-w-0">
+      <header
+        className="sticky top-0 z-50 border-b border-white/[0.06] glass"
+        style={{
+          paddingTop: "env(safe-area-inset-top)",
+          paddingLeft: "env(safe-area-inset-left)",
+          paddingRight: "env(safe-area-inset-right)",
+        }}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-1 flex items-center justify-between gap-2 min-w-0">
+          <Link to="/" className="flex items-center gap-2 sm:gap-3 min-w-0 min-h-11" aria-label="OpenRouter Monitor">
             <div className="h-8 w-8 shrink-0 rounded-lg bg-primary flex items-center justify-center">
               <Activity className="h-4 w-4 text-primary-foreground" />
             </div>
             <span className="text-sm sm:text-lg font-semibold tracking-tight truncate">OpenRouter Monitor</span>
           </Link>
-          <nav className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
-            <a href="#features" className="hover:text-foreground transition-colors">{t("nav.features")}</a>
-            <a href="#demo" className="hover:text-foreground transition-colors">{t("nav.demo")}</a>
-            <a href="#how" className="hover:text-foreground transition-colors">{t("nav.howItWorks")}</a>
-            <a href="#faq" className="hover:text-foreground transition-colors">{t("nav.faq")}</a>
+          <nav className="hidden md:flex items-center gap-6 text-sm text-muted-foreground">
+            <a href="#features" className={hit}>{label("nav.features")}</a>
+            <a href="#demo" className={hit}>{label("nav.demo")}</a>
+            <a href="#how" className={hit}>{label("nav.howItWorks")}</a>
+            <a href="#faq" className={hit}>{label("nav.faq")}</a>
           </nav>
           <div className="flex items-center gap-1 sm:gap-2 shrink-0">
             <LanguageSwitcher className="px-2 sm:px-3" />
             <Link
               to={ctaHref}
-              aria-label={hasSession ? t("nav.openDashboard") : t("nav.login")}
-              className="inline-flex items-center min-h-11 px-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+              aria-label={hasSession ? label("nav.openDashboard") : label("nav.login")}
+              className="inline-flex items-center min-h-11 px-3 text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
-              {hasSession ? t("nav.openDashboard") : t("nav.login")}
+              {hasSession ? label("nav.openDashboard") : label("nav.login")}
             </Link>
           </div>
         </div>
@@ -206,33 +226,30 @@ export default function Landing() {
       {/* Hero */}
       <section className="relative px-4 sm:px-6 pt-20 pb-16 max-w-7xl mx-auto text-center">
         <div className="inline-flex max-w-full items-center gap-2 px-3 py-1 rounded-full glass border-white/[0.08] text-xs text-muted-foreground mb-8 animate-fade-in">
-          <Sparkles className="h-3 w-3 text-accent" />
-          Přehled nákladů AI tokenů v reálném čase
+          <Sparkles className="h-3 w-3 text-primary" />
+          {csCopy("Přehled nákladů AI tokenů v reálném čase")}
         </div>
         <h1 className="text-5xl md:text-7xl font-semibold tracking-tight leading-[1.05] mb-6">
-          Zjisti, kolik tě <br className="hidden md:block" />
-          opravdu stojí <span className="text-primary">AI</span>
+          {csCopy("Zjisti, kolik tě")} <br className="hidden md:block" />
+          {csCopy("opravdu stojí")} <span className="text-primary">AI</span>
         </h1>
         <p className="max-w-2xl mx-auto text-lg md:text-xl text-muted-foreground mb-10">
-          Krásný dashboard pro tvoji OpenRouter aktivitu. Sleduj spotřebu, optimalizuj
-          modely a převáděj náklady do <span className="text-accent">CZK i USD</span>.
+          {csCopy("Krásný dashboard pro tvoji OpenRouter aktivitu. Sleduj spotřebu, optimalizuj modely a převáděj náklady do")}{" "}
+          <span className="text-foreground">{csCopy("CZK i USD")}</span>.
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-4">
-          <Link to={ctaHref}>
-            <Button
-              size="lg"
-              className="gap-2"
-            >
+          <Button asChild size="lg" className="min-h-11 w-full sm:w-auto">
+            <Link to={ctaHref}>
               {ctaLabel}
               <ArrowRight className="h-4 w-4" />
-            </Button>
-          </Link>
-          <a href="#demo">
-            <Button size="lg" variant="outline" className="gap-2">
+            </Link>
+          </Button>
+          <Button asChild size="lg" variant="outline" className="min-h-11 w-full sm:w-auto gap-2 bg-transparent">
+            <a href="#demo">
               <LineChart className="h-4 w-4" />
-              Vyzkoušet demo
-            </Button>
-          </a>
+              {csCopy("Vyzkoušet demo")}
+            </a>
+          </Button>
         </div>
         <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
           <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-accent" />Zdarma</span>
@@ -245,14 +262,14 @@ export default function Landing() {
       <section id="features" className="px-4 sm:px-6 py-20 max-w-7xl mx-auto">
         <div className="text-center mb-14">
           <h2 className="text-3xl md:text-5xl font-semibold mb-4">
-            Vše, co potřebuješ pro kontrolu AI nákladů
+            {csCopy("Vše, co potřebuješ pro kontrolu AI nákladů")}
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Žádné tabulky v Excelu. Žádné dohady. Jen čisté grafy a přehledná čísla.
+            {csCopy("Žádné tabulky v Excelu. Žádné dohady. Jen čisté grafy a přehledná čísla.")}
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {FEATURES.map(({ icon: Icon, title, desc }, i) => (
+          {features.map(({ icon: Icon, title, desc }, i) => (
             <Card
               key={title}
               className="glass relative overflow-hidden group animate-fade-in opacity-0"
@@ -275,21 +292,20 @@ export default function Landing() {
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/15 text-accent text-xs mb-4">
             <Activity className="h-3 w-3" />
-            Live demo s ukázkovými daty
+            {csCopy("Live demo s ukázkovými daty")}
           </div>
           <h2 className="text-3xl md:text-5xl font-bold mb-4">
-            Takhle to vypadá uvnitř
+            {csCopy("Takhle to vypadá uvnitř")}
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto mb-6">
-            Žádný login, žádná registrace. Hraj si s grafy hned teď.
+            {csCopy("Žádný login, žádná registrace. Hraj si s grafy hned teď.")}
           </p>
           <Button
             variant="outline"
-            size="sm"
             onClick={toggleCurrency}
-            className="gap-1.5 border-border hover:bg-secondary hover:text-foreground text-xs"
+            className="min-h-11 px-4 bg-transparent"
           >
-            Přepnout do {currency === "CZK" ? "USD ($)" : "CZK (Kč)"}
+            {csCopy("Přepnout do")} {currency === "CZK" ? "USD ($)" : "CZK (Kč)"}
           </Button>
         </div>
 
@@ -297,35 +313,29 @@ export default function Landing() {
 
         <div className="mt-10 text-center">
           <p className="text-sm text-muted-foreground mb-4">
-            Líbí se ti to? Nahraj svoje vlastní data a sleduj <span className="text-accent">opravdové náklady</span>.
+            {csCopy("Líbí se ti to? Nahraj svoje vlastní data a sleduj")}{" "}
+            <span className="text-foreground">{csCopy("opravdové náklady")}</span>.
           </p>
-          <Link to={ctaHref}>
-            <Button
-              size="lg"
-              className="gap-2"
-            >
+          <Button asChild size="lg" variant="outline" className="min-h-11 bg-transparent">
+            <Link to={ctaHref}>
               {ctaLabel}
               <ArrowRight className="h-4 w-4" />
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
       </section>
 
       {/* How it works */}
       <section id="how" className="px-4 sm:px-6 py-20 max-w-5xl mx-auto">
         <h2 className="text-3xl md:text-5xl font-bold mb-12 text-center">
-          3 kroky k dokonalému přehledu
+          {csCopy("3 kroky k dokonalému přehledu")}
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {[
-            { n: "01", t: "Vytvoř si účet", d: "Registrace přes email nebo Google. Trvá to 10 vteřin." },
-            { n: "02", t: "Nahraj CSV", d: "Stáhni activity export z openrouter.ai/activity a nahraj." },
-            { n: "03", t: "Sleduj a optimalizuj", d: "Filtry podle modelů, datumů a providerů. Export do PNG/PDF." },
-          ].map(({ n, t, d }) => (
+          {steps.map(({ n, t: stepTitle, d }) => (
             <Card key={n} className="glass border-white/[0.08]">
               <CardContent className="p-6">
                 <div className="text-5xl font-mono font-semibold text-primary mb-3">{n}</div>
-                <h3 className="text-lg font-bold mb-2">{t}</h3>
+                <h3 className="text-lg font-semibold mb-2">{stepTitle}</h3>
                 <p className="text-sm text-muted-foreground">{d}</p>
               </CardContent>
             </Card>
@@ -338,23 +348,23 @@ export default function Landing() {
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/15 text-primary text-xs mb-4">
             <Sparkles className="h-3 w-3" />
-            Nejčastější dotazy
+            {csCopy("Nejčastější dotazy")}
           </div>
           <h2 className="text-3xl md:text-5xl font-bold mb-4">
-            Co lidi nejvíc zajímá
+            {csCopy("Co lidi nejvíc zajímá")}
           </h2>
           <p className="text-muted-foreground">
-            Krátké odpovědi na otázky, které dostávám pořád.
+            {csCopy("Krátké odpovědi na otázky, které dostávám pořád.")}
           </p>
         </div>
         <Accordion type="single" collapsible className="space-y-3">
-          {FAQS.map((item, i) => (
+          {faqs.map((item, i) => (
             <AccordionItem
               key={i}
               value={`faq-${i}`}
               className="border-border rounded-xl px-5"
             >
-              <AccordionTrigger className="text-left font-bold hover:no-underline py-5 min-w-0 gap-3">
+              <AccordionTrigger className="text-left font-semibold hover:no-underline py-3 min-h-11 min-w-0 gap-3">
                 <span className="min-w-0 flex-1">{item.q}</span>
               </AccordionTrigger>
               <AccordionContent className="text-sm text-muted-foreground leading-relaxed pb-5">
@@ -381,16 +391,17 @@ export default function Landing() {
                 </div>
                 <div>
                   <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1">
-                    Indie maker
+                    {csCopy("Indie maker")}
                   </div>
                   <div className="text-lg font-bold">Martin Pohl</div>
                 </div>
               </div>
               <div className="flex-1">
                 <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
-                  Tokeny Monitor staví <span className="text-foreground font-medium">Martin</span> —
-                  IT engineer za <span className="text-foreground">Apple MDM, Identity & SSO</span> rolloutsy
-                  a indie web projekty. Mrkni na jeho práci a další experimenty.
+                  {csCopy("Tokeny Monitor staví")} <span className="text-foreground font-medium">Martin</span>
+                  {" – "}
+                  {csCopy("IT engineer za")} <span className="text-foreground">Apple MDM, Identity & SSO</span>{" "}
+                  {csCopy("rolloutsy a indie web projekty. Mrkni na jeho práci a další experimenty.")}
                 </p>
               </div>
               <div className="flex items-center gap-2 text-sm text-accent group-hover:gap-3 transition-all shrink-0">
@@ -412,24 +423,19 @@ export default function Landing() {
             100 % open-source
           </h3>
           <p className="text-sm text-muted-foreground max-w-lg mx-auto mb-6 leading-relaxed">
-            Celý kód je veřejný na GitHubu. Forkni si repo, rozjeď lokálně přes Docker
-            a uprav si dashboard podle sebe. Pull requesty vítány!
+            {csCopy("Celý kód je veřejný na GitHubu. Forkni si repo, rozjeď lokálně přes Docker a uprav si dashboard podle sebe. Pull requesty vítány!")}
           </p>
-          <a
-            href="https://github.com/martinp0/martinp0-tokeny-monitor"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Button
-              size="lg"
-              className="gap-2"
-              variant="outline"
+          <Button asChild size="lg" variant="outline" className="min-h-11 gap-2 bg-transparent">
+            <a
+              href="https://github.com/martinp0/martinp0-tokeny-monitor"
+              target="_blank"
+              rel="noopener noreferrer"
             >
               <Github className="h-4 w-4" />
-              Zobrazit na GitHubu
+              {csCopy("Zobrazit na GitHubu")}
               <ExternalLink className="h-3.5 w-3.5 opacity-60" />
-            </Button>
-          </a>
+            </a>
+          </Button>
         </div>
       </section>
 
@@ -438,71 +444,74 @@ export default function Landing() {
         <div className="rounded-3xl border border-border bg-card p-6 sm:p-10 md:p-12 relative overflow-hidden">
           <Globe className="h-12 w-12 text-primary mx-auto mb-6 relative" />
           <h2 className="text-3xl md:text-5xl font-bold mb-4 relative">
-            Připraven/a převzít kontrolu nad AI náklady?
+            {csCopy("Připraven/a převzít kontrolu nad AI náklady?")}
           </h2>
           <p className="text-muted-foreground mb-8 relative">
-            Začni během minuty. Žádná kreditka.
+            {csCopy("Začni během minuty. Žádná kreditka.")}
           </p>
           <div className="relative">
-            <Link to={ctaHref}>
-              <Button
-                size="lg"
-                className="gap-2"
-              >
+            <Button asChild size="lg" className="min-h-11">
+              <Link to={ctaHref}>
                 {ctaLabel}
                 <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
         </div>
       </section>
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-white/[0.06] px-4 sm:px-6 py-8">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-muted-foreground min-w-0">
+      <footer
+        className="border-t border-white/[0.06] pt-6"
+        style={{
+          paddingBottom: "max(1.5rem, env(safe-area-inset-bottom))",
+          paddingLeft: "max(1rem, env(safe-area-inset-left))",
+          paddingRight: "max(1rem, env(safe-area-inset-right))",
+        }}
+      >
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-muted-foreground min-w-0">
           <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 max-w-full text-center">
-            <Activity className="h-3.5 w-3.5" />
+            <Activity className="h-4 w-4" aria-hidden="true" />
             <span>
-              OpenRouter Monitor · {new Date().getFullYear()} · crafted by{" "}
+              OpenRouter Monitor · {new Date().getFullYear()} ·{" "}
               <a
                 href="https://martin.pohl.uk?utm_source=tokeny.pohl.uk&utm_medium=footer"
                 target="_blank"
                 rel="noopener author"
-                className="text-foreground hover:text-accent transition-colors underline-offset-4 hover:underline"
+                className={`${hit} text-foreground`}
               >
                 Martin Pohl
               </a>
             </span>
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 max-w-full md:justify-end">
+          <div className="flex flex-wrap items-center justify-center gap-x-1 gap-y-1 max-w-full md:justify-end">
             <a
               href="https://buymeacoffee.com/martinpohlp"
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-foreground transition-colors"
+              className={hit}
             >
-              Kup mi kafe
+              {csCopy("Kup mi kafe")}
             </a>
             <a
               href="https://martin.pohl.uk?utm_source=tokeny.pohl.uk&utm_medium=footer_nav"
               target="_blank"
               rel="noopener author"
-              className="hover:text-foreground transition-colors"
+              className={hit}
             >
               martin.pohl.uk
             </a>
-            <Link to="/auth" className="hover:text-foreground transition-colors">Přihlášení</Link>
+            <Link to="/auth" className={hit}>{csCopy("Přihlášení")}</Link>
             <a
               href="https://github.com/martinp0/martinp0-tokeny-monitor"
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-foreground transition-colors flex items-center gap-1"
+              className={hit}
             >
-              <Github className="h-3 w-3" />
               GitHub
             </a>
-            <a href="https://openrouter.ai" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">OpenRouter</a>
+            <a href="https://openrouter.ai" target="_blank" rel="noopener noreferrer" className={hit}>OpenRouter</a>
           </div>
         </div>
       </footer>

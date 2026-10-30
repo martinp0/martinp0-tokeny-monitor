@@ -159,7 +159,7 @@ export default function Auth() {
                 <Button
                   type="button"
                   variant="outline"
-                  className="w-full min-h-11"
+                  className="w-full min-h-11 bg-transparent"
                   onClick={async () => {
                     const { error } = await lovable.auth.signInWithOAuth("google", {
                       redirect_uri: window.location.origin,
@@ -178,7 +178,7 @@ export default function Auth() {
                 <Button
                   type="button"
                   variant="outline"
-                  className="w-full min-h-11"
+                  className="w-full min-h-11 bg-transparent"
                   onClick={async () => {
                     const { error } = await lovable.auth.signInWithOAuth("apple", {
                       redirect_uri: window.location.origin,

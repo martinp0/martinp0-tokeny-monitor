@@ -18,7 +18,7 @@
     "free": "Zdarma",
     "noInstall": "Bez instalace",
     "czInterface": "CZ rozhraní",
-    "buyMeCoffee": "Líbí se ti to? Kup mi kafe ☕",
+    "buyMeCoffee": "Kup mi kafe",
     "buyMeCoffeeShort": "Kup mi kafe"
   },
   "features": {
@@ -72,7 +72,7 @@
   "support": {
     "title": "Podpoř vývoj",
     "titleHighlight": "kávou",
-    "desc": "Tokeny Monitor je zdarma a open-source. Pokud ti šetří čas nebo peníze, můžeš poděkovat symbolickým kafem. Každá podpora motivuje k dalšímu vylepšování. 💜"
+    "desc": "Tokeny Monitor je zdarma a open-source. Pokud ti šetří čas nebo peníze, můžeš poděkovat symbolickým kafem. Každá podpora motivuje k dalšímu vylepšování."
   },
   "cta": {
     "title": "Připraven/a převzít",
@@ -80,7 +80,7 @@
     "subtitle": "Začni během minuty. Žádná kreditka."
   },
   "footer": {
-    "support": "Support",
+    "support": "Kup mi kafe",
     "login": "Přihlášení"
   },
   "dashboard": {
@@ -118,6 +118,7 @@
     "confirmYes": "Ano, smazat vše"
   },
   "lang": {
-    "switch": "EN"
+    "switch": "EN",
+    "switchLabel": "Přepnout jazyk"
   }
 }
