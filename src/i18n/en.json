@@ -290,7 +290,7 @@
       "aiAgent": "AI assistant over your data",
       "exports": "PDF and PNG export",
       "sharing": "Shared dashboards",
-      "mcp": "MCP server and Mac/iPhone widgets",
+      "mcp": "MCP server and API tokens for AI tools",
       "support": "Priority support"
     },
     "trial": "{{days}} days free, then {{price}}",

@@ -1,19 +1,24 @@
-// Read-only spend summary for the native apps (macOS menu bar, Apple Watch widget).
+// Read-only spend summary for the native apps (iPhone, widgets, Apple Watch, macOS menu bar).
 //
-// Auth: the same personal tokens as the MCP server (Settings → MCP tokens; stored only as
-// sha256 in mcp_tokens.token_hash), Pro plan required. GET only, never writes user data, returns aggregates only
-// (no prompts, no request rows, no credentials). Uses the same activity_rows / budget_alerts /
-// exchange_rates tables as the web dashboard.
+// Auth, either:
+//   * a Supabase user JWT (native apps signed in with Sign in with Apple / e-mail). Works on the
+//     Free plan too, with the same limits as the web dashboard: only the last FREE_LIMITS.historyDays
+//     days, no forecast and no previous month. `plan` in the response tells the app what to show.
+//   * a personal token `orm_…` (Settings → MCP tokens; stored only as sha256 in
+//     mcp_tokens.token_hash). Pro plan required, unchanged behaviour for existing clients.
+// GET only, never writes user data, returns aggregates only (no prompts, no request rows, no
+// credentials). Uses the same activity_rows / budget_alerts / exchange_rates tables as the web.
 //
 //   GET /functions/v1/usage-summary?tz=Europe/Prague
-//   Authorization: Bearer orm_...
+//   Authorization: Bearer <user JWT | orm_...>
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { getIsPro } from "../_shared/entitlements.ts";
-import { proRequiredBody } from "../_shared/plan.ts";
+import { freeHistoryFloor, proRequiredBody } from "../_shared/plan.ts";
+import { getCallingUser } from "../_shared/http.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "GET, OPTIONS",
 };
 
@@ -57,13 +62,24 @@ Deno.serve(async (req) => {
   if (!m) return json({ error: "Unauthorized – Bearer token required" }, 401);
 
   const svc = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-  const hash = await sha256Hex(m[1]);
-  const { data: tok } = await svc.from("mcp_tokens").select("user_id").eq("token_hash", hash).maybeSingle();
-  if (!tok?.user_id) return json({ error: "Unauthorized" }, 401);
-  const userId: string = tok.user_id;
-  // Personal API tokens (MCP + native widgets) are a Pro feature; a lapsed plan stops access.
-  if (!(await getIsPro(svc, userId))) return json(proRequiredBody("mcp"), 403);
-  await svc.from("mcp_tokens").update({ last_used_at: new Date().toISOString() }).eq("token_hash", hash);
+  let userId: string;
+  let isPro: boolean;
+  if (m[1].startsWith("orm_")) {
+    const hash = await sha256Hex(m[1]);
+    const { data: tok } = await svc.from("mcp_tokens").select("user_id").eq("token_hash", hash).maybeSingle();
+    if (!tok?.user_id) return json({ error: "Unauthorized" }, 401);
+    userId = tok.user_id;
+    // Personal API tokens (MCP + token-based clients) are a Pro feature; a lapsed plan stops access.
+    if (!(await getIsPro(svc, userId))) return json(proRequiredBody("mcp"), 403);
+    isPro = true;
+    await svc.from("mcp_tokens").update({ last_used_at: new Date().toISOString() }).eq("token_hash", hash);
+  } else {
+    // Supabase session JWT from the native apps.
+    const user = await getCallingUser(req);
+    if (!user) return json({ error: "Unauthorized" }, 401);
+    userId = user.id;
+    isPro = await getIsPro(svc, userId);
+  }
 
   try {
     const tz = validTz(new URL(req.url).searchParams.get("tz"));
@@ -73,7 +89,10 @@ Deno.serve(async (req) => {
     const [y, mo] = monthKey.split("-").map(Number);
     const prevMonthKey = mo === 1 ? `${y - 1}-12` : `${y}-${String(mo - 1).padStart(2, "0")}`;
     // Fetch from 2 days before the previous month (UTC) so every local day is covered.
-    const since = new Date(Date.UTC(mo === 1 ? y - 1 : y, mo === 1 ? 11 : mo - 2, 1) - 2 * 86_400_000);
+    const fullSince = new Date(Date.UTC(mo === 1 ? y - 1 : y, mo === 1 ? 11 : mo - 2, 1) - 2 * 86_400_000);
+    // Free plan: same history window as the web dashboard (RLS twin: free_history_floor()).
+    const freeFloor = new Date(`${freeHistoryFloor(now)}T00:00:00Z`);
+    const since = isPro || freeFloor < fullSince ? fullSince : freeFloor;
     const last30 = new Set(Array.from({ length: 30 }, (_, i) => dayKey(new Date(now.getTime() - i * 86_400_000), tz)));
 
     type Row = {
@@ -133,12 +152,14 @@ Deno.serve(async (req) => {
 
     return json({
       version: 1,
+      plan: isPro ? "pro" : "free",
       generated_at: now.toISOString(),
       tz,
       today: fin(todayAgg),
       month: { ...fin(monthAgg), key: monthKey },
-      previous_month: { ...fin(prevAgg), key: prevMonthKey },
-      forecast_month_usd: round(dayOfMonth > 0 ? (monthAgg.cost_usd / dayOfMonth) * daysInMonth : 0),
+      // Pro only: the previous month is outside the free window and the forecast is a Pro feature.
+      previous_month: isPro ? { ...fin(prevAgg), key: prevMonthKey } : null,
+      forecast_month_usd: isPro ? round(dayOfMonth > 0 ? (monthAgg.cost_usd / dayOfMonth) * daysInMonth : 0) : null,
       budget: budget
         ? { monthly_usd: Number(budget.monthly_budget_usd), threshold_pct: Number(budget.threshold_pct), enabled: !!budget.enabled }
         : null,

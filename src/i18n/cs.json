@@ -290,7 +290,7 @@
       "aiAgent": "AI asistent nad tvými daty",
       "exports": "Export do PDF a PNG",
       "sharing": "Sdílené dashboardy",
-      "mcp": "MCP server a widgety pro Mac a iPhone",
+      "mcp": "MCP server a API tokeny pro AI nástroje",
       "support": "Prioritní podpora"
     },
     "trial": "{{days}} dní zdarma, pak {{price}}",

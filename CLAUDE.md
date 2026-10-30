@@ -65,7 +65,7 @@ All functions are under `supabase/functions/`. They run on Deno and import from 
 | `auto-sync` | Hourly background sync of all enabled credentials (pg_cron → pg_net, header `x-auto-sync-secret` = `AUTO_SYNC_SECRET`; `verify_jwt = false`). |
 | `chat-agent` | Pro-only AI agent (Anthropic `claude-haiku-4-5`, needs `ANTHROPIC_API_KEY`); 401 without auth, 503 if the key is missing. Data tools use the `activity_aggregate` RPC with the caller's JWT (RLS-scoped). UI action tools: `apply_filters`, `set_currency`, `export_data` |
 | `mcp` | Streamable MCP server (Hono + `mcp-lite` 0.10: `mcp.tool(name, def)`, `transport.bind(mcp)`); Bearer token hashed against `mcp_tokens.token_hash`; every tool is scoped to the token owner's `user_id` and aggregates in SQL |
-| `usage-summary` | Token-authenticated (MCP token) JSON summary for widgets / native apps |
+| `usage-summary` | JSON summary for the native apps and widgets. Accepts a Supabase user JWT (free plan clamped to 30 days, no forecast) or a Pro `orm_` token |
 | `check-budget` | Checks monthly spend vs `budget_alerts` (service-role JWT only) |
 | `save-provider-credential` | Writes `api_key` to `provider_credentials` using service role (clients cannot read/write `api_key`). Only `openrouter`, `anthropic`, `openai` are accepted |
 | `create-mcp-token` | Generates a random token, stores `sha256(token)` in `mcp_tokens` |

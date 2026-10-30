@@ -32,8 +32,8 @@ AI API účty umí nenápadně růst. Tokeny ti ukáže, **které modely, provid
 - 🤖 **AI agent** — ptej se dashboardu přirozeným jazykem
 - 🔗 **MCP server** — připoj Claude Desktop, Cursor nebo Zed a ptej se na náklady přímo v chatu
 - 🔒 **Bezpečné základy** — Supabase Auth, RLS, Edge Functions a izolace dat podle uživatele
-- ⌚ **Mac menu bar + Apple Watch** — útrata v liště a v komplikaci, read-only token v Klíčence ([apple/](apple/README.md))
-- 📱 **PWA + mobile** — funguje jako webová i instalovatelná appka, připraveno pro Capacitor
+- 📱 **Nativní appky (ve vývoji)** — iPhone s widgety, Mac menu bar, Apple Watch s komplikací a Zkratky; přihlášení přes Apple nebo e-mail ([apple/](apple/README.md))
+- 🌐 **PWA** — web jde nainstalovat jako appka na plochu
 - 🌐 **SEO/AI discoverability** — sitemap, robots a `llms.txt`
 
 ## 🚀 Live Demo
@@ -168,7 +168,8 @@ bun run build
 | Providers | OpenRouter Activity API, Anthropic Admin API, OpenAI Organization Usage/Costs API |
 | AI | Anthropic API pro chat/fun agent flows |
 | Email | Resend přes Supabase email queue |
-| Mobile | PWA + Capacitor |
+| Apple | SwiftUI (iOS/macOS/watchOS 26), WidgetKit, App Intents, supabase-swift, XcodeGen + Xcode Cloud |
+| Web app | PWA |
 | Testing | Vitest, Playwright |
 | Fonts | Space Grotesk, JetBrains Mono |
 
@@ -186,7 +187,7 @@ bun run build
 ├── supabase/
 │   ├── functions/              # MCP, AI chat, provider sync, email hook, auto-sync
 │   └── migrations/             # SQL migrace včetně multi-provider a cron setupu
-├── apple/                      # macOS menu bar, Apple Watch komplikace, iPhone companion (XcodeGen)
+├── apple/                      # Nativní appky: iPhone + widgety, Mac menu bar, Watch (XcodeGen, Xcode Cloud)
 ├── public/                     # PWA assets, SEO, robots, sitemap, llms.txt
 ├── marketing/                  # Launch copy, blog drafts, screenshots, plan
 ├── Dockerfile                  # Multi-stage build
