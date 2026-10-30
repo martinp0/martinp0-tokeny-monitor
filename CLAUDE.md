@@ -96,3 +96,12 @@ All tables have RLS enabled. Migrations live in `supabase/migrations/` in chrono
 - Edge functions that use the service role key **must** filter by the authenticated user's `user_id` themselves (RLS does not apply to service role). The MCP server, sync functions and `usage-summary` do.
 - Never read more than 1000 rows with one PostgREST request: aggregate in SQL (`activity_aggregate`) or page with `fetchAllPages` and a deterministic order (`created_at`, `id`).
 - Migrations: never edit or rename an applied migration; add a new corrective one (see `20261030120300_subscriptions_consolidate.sql`).
+
+### Plans & billing (Tokeny Pro)
+
+- **Free:** 1 provider, last 30 days of history, CSV import (old rows are dropped client-side; RLS hides them anyway). **Pro** (99 Kč/měsíc, 990 Kč/rok, nejsem plátce DPH): everything else.
+- Plan logic lives in `supabase/functions/_shared/plan.ts` (pure, shared with the frontend via `src/lib/plan.ts`). Pro = status `active | trialing | past_due` and `current_period_end` null or in the future. Keep SQL `public.is_pro()` (migration `20261030130000_pro_entitlements.sql`) in sync with it.
+- Enforcement map — DB/RLS: `activity_rows` SELECT (30 days for free), `budget_alerts` / `shared_dashboards` insert+update, `mcp_tokens` insert, `auto_sync_due_credentials()` (Pro only). Edge functions: `save-provider-credential`, `_shared/user-sync.ts`, `check-budget`, `create-mcp-token`, `mcp`, `usage-summary`, `chat-agent`, `get-shared-dashboard`, `og-dashboard`. UI only: PNG/PDF export (client-side), `<ProGate feature=…>`.
+- A 403 with body `{ error: "pro_required", feature }` means "show the upgrade modal".
+- Stripe: `create-checkout` (body `{ interval: "month" | "year" }`), `create-portal-session`, `check-subscription`, `stripe-webhook` (logic in `_shared/billing.ts`, unit-tested; handles both pre- and post-2025 "basil" shapes where period fields live on subscription items).
+- Function secrets: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_MONTHLY`, `STRIPE_PRICE_YEARLY`, `STRIPE_TRIAL_DAYS` (optional, first subscription only), `APP_URL`; auth emails: `SEND_EMAIL_HOOK_SECRET` (`v1,whsec_…`), `RESEND_API_KEY`.
