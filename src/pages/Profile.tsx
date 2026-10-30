@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { ArrowLeft, User, Lock, Download, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { fetchAllPages } from "@/lib/paginate";
 import { SharedDashboardsManager } from "@/components/dashboard/SharedDashboardsManager";
 
 const Profile = () => {
@@ -80,13 +81,18 @@ const Profile = () => {
     if (!session) return;
     setExporting(true);
     try {
-      const { data, error } = await supabase
-        .from("activity_rows")
-        .select("*")
-        .eq("user_id", session.user.id)
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
+      // Paged: a single select is capped at 1000 rows by PostgREST; a GDPR export must be complete.
+      const { rows: data } = await fetchAllPages<Record<string, unknown>>(
+        (from, to) =>
+          supabase
+            .from("activity_rows")
+            .select("*")
+            .eq("user_id", session.user.id)
+            .order("created_at", { ascending: false })
+            .order("id", { ascending: true })
+            .range(from, to) as unknown as PromiseLike<{ data: Record<string, unknown>[] | null; error: { message: string } | null }>,
+        { maxRows: 10_000_000 },
+      );
       if (!data || data.length === 0) {
         toast.info("Nemáš žádná data k exportu");
         setExporting(false);

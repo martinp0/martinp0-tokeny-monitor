@@ -11,7 +11,8 @@ import {
 import { Plug, Plus, RefreshCw, Trash2, AlertCircle, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 
-type ProviderId = "openrouter" | "anthropic" | "openai" | "gemini" | "mistral" | "groq" | "xai";
+// Only providers with a working server-side sync (see supabase/functions/_shared/sync-core.ts).
+type ProviderId = "openrouter" | "anthropic" | "openai";
 
 interface Credential {
   id: string;
@@ -29,8 +30,8 @@ interface Credential {
 const PROVIDER_META: Record<ProviderId, { label: string; hint: string; docsUrl: string; keyPlaceholder: string }> = {
   openrouter: {
     label: "OpenRouter",
-    hint: "Načti svůj API klíč z openrouter.ai/keys. Stahuje per-request data.",
-    docsUrl: "https://openrouter.ai/keys",
+    hint: "Vyžaduje Management API klíč (openrouter.ai → Settings → Management keys). Stahuje denní využití za posledních 30 dní.",
+    docsUrl: "https://openrouter.ai/settings/management-keys",
     keyPlaceholder: "sk-or-v1-…",
   },
   anthropic: {
@@ -45,31 +46,21 @@ const PROVIDER_META: Record<ProviderId, { label: string; hint: string; docsUrl: 
     docsUrl: "https://platform.openai.com/settings/organization/admin-keys",
     keyPlaceholder: "sk-…",
   },
-  gemini: {
-    label: "Google Gemini",
-    hint: "Gemini nemá per-key usage API — ulož klíč pro evidenci, data importuj přes CSV z Google Cloud Billing.",
-    docsUrl: "https://aistudio.google.com/app/apikey",
-    keyPlaceholder: "AIza…",
-  },
-  mistral: {
-    label: "Mistral AI",
-    hint: "Klíč z console.mistral.ai. Per-key usage zatím není veřejné — použij CSV upload.",
-    docsUrl: "https://console.mistral.ai/api-keys",
-    keyPlaceholder: "…",
-  },
-  groq: {
-    label: "Groq",
-    hint: "Klíč z console.groq.com. Per-key usage API zatím chybí — použij CSV upload.",
-    docsUrl: "https://console.groq.com/keys",
-    keyPlaceholder: "gsk_…",
-  },
-  xai: {
-    label: "xAI (Grok)",
-    hint: "Klíč z console.x.ai. Per-key usage API zatím není veřejné — použij CSV upload.",
-    docsUrl: "https://console.x.ai",
-    keyPlaceholder: "xai-…",
-  },
 };
+
+/** supabase.functions.invoke hides non-2xx bodies behind a generic message; read the real error. */
+async function invokeErrorMessage(error: unknown): Promise<string> {
+  const ctx = (error as { context?: unknown })?.context;
+  if (ctx instanceof Response) {
+    try {
+      const body = await ctx.clone().json();
+      if (body?.error) return String(body.error);
+    } catch {
+      /* not JSON */
+    }
+  }
+  return error instanceof Error ? error.message : String(error);
+}
 
 export function ProviderConnections() {
   const [credentials, setCredentials] = useState<Credential[]>([]);
@@ -91,7 +82,8 @@ export function ProviderConnections() {
       )
       .order("created_at", { ascending: true });
     if (error) toast.error(error.message);
-    else setCredentials((data ?? []) as Credential[]);
+    // Ignore credentials of providers that are no longer supported (removed stub providers).
+    else setCredentials(((data ?? []) as Credential[]).filter((c) => c.provider in PROVIDER_META));
     setLoading(false);
   }
 
@@ -115,7 +107,7 @@ export function ProviderConnections() {
     });
     setSaving(false);
     if (error) {
-      toast.error(error.message);
+      toast.error(await invokeErrorMessage(error));
       return;
     }
     if (data?.error) {
@@ -148,7 +140,7 @@ export function ProviderConnections() {
     });
     setSyncingId(null);
     if (error) {
-      toast.error(error.message);
+      toast.error(`${PROVIDER_META[c.provider].label}: ${await invokeErrorMessage(error)}`);
       await load();
       return;
     }

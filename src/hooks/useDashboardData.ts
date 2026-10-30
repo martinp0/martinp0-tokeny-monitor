@@ -1,8 +1,61 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { parseCSV, type ActivityRow } from "@/lib/csv-parser";
+import { parseCSV, type ActivityRow, type ProviderSource } from "@/lib/csv-parser";
+import { fetchAllPages } from "@/lib/paginate";
+import {
+  computeTotals,
+  costByModel as aggCostByModel,
+  costByProvider as aggCostByProvider,
+  dateRangeOf,
+  filterByDate,
+  timeSeries as aggTimeSeries,
+} from "@/lib/aggregations";
 import sampleCSV from "@/data/sample.csv?raw";
+
+/** Upper bound of rows loaded into the browser. Beyond this the dashboard says it is truncated. */
+const MAX_DASHBOARD_ROWS = 100_000;
+const UPSERT_BATCH = 500;
+
+type DbRow = Record<string, unknown> & { provider_source?: string | null; request_count?: number | null };
+
+function mapDbRow(r: DbRow): ActivityRow {
+  return {
+    generation_id: r.generation_id as string,
+    created_at: r.created_at as string,
+    cost_total: r.cost_total as number,
+    cost_web_search: r.cost_web_search as number,
+    cost_cache: r.cost_cache as number,
+    cost_file_processing: r.cost_file_processing as number,
+    byok_usage_inference: r.byok_usage_inference as number,
+    tokens_prompt: r.tokens_prompt as number,
+    tokens_completion: r.tokens_completion as number,
+    tokens_reasoning: r.tokens_reasoning as number,
+    tokens_cached: r.tokens_cached as number,
+    model_permaslug: r.model_permaslug as string,
+    provider_name: r.provider_name as string,
+    variant: r.variant as string,
+    cancelled: r.cancelled as boolean,
+    streamed: r.streamed as boolean,
+    user: r.user as string,
+    finish_reason_raw: r.finish_reason_raw as string,
+    finish_reason_normalized: r.finish_reason_normalized as string,
+    generation_time_ms: r.generation_time_ms as number,
+    time_to_first_token_ms: r.time_to_first_token_ms as number,
+    app_name: r.app_name as string,
+    api_key_name: r.api_key_name as string,
+    provider_source: (r.provider_source ?? "openrouter") as ProviderSource,
+    request_count: r.request_count ?? 1,
+  };
+}
+
+export interface CsvImportResult {
+  parsed: number;
+  saved: number;
+  failed: number;
+  error?: string;
+}
 
 export function useDashboardData(options: { demoMode?: boolean } = {}) {
   const { demoMode = false } = options;
@@ -10,235 +63,123 @@ export function useDashboardData(options: { demoMode?: boolean } = {}) {
   const [data, setData] = useState<ActivityRow[]>([]);
   const [fileName, setFileName] = useState<string>("Loading...");
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
-  const [syncing, setSyncing] = useState(false);
-  const [syncError, setSyncError] = useState<string | null>(null);
   const [dateFilter, setDateFilter] = useState<{ from: Date; to: Date } | null>(null);
   const [hasUserData, setHasUserData] = useState<boolean>(true);
   const [loading, setLoading] = useState<boolean>(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [truncated, setTruncated] = useState(false);
 
-  // Load data from DB, fall back to sample CSV
+  // Load ALL of the user's rows (paged; PostgREST returns at most 1000 rows per request).
   useEffect(() => {
+    let cancelled = false;
     async function loadFromDB() {
       // Demo mode: load only sample CSV, skip DB calls (works without auth)
       if (demoMode) {
-        const parsed = parseCSV(sampleCSV);
-        setData(parsed);
+        setData(parseCSV(sampleCSV));
         setFileName("demo data – openrouter sample");
         setHasUserData(true);
         setLoading(false);
         return;
       }
 
-      const { data: rows, error } = await supabase
-        .from("activity_rows")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (!error && rows && rows.length > 0) {
-        const mapped: ActivityRow[] = rows.map((r) => ({
-          generation_id: r.generation_id,
-          created_at: r.created_at,
-          cost_total: r.cost_total,
-          cost_web_search: r.cost_web_search,
-          cost_cache: r.cost_cache,
-          cost_file_processing: r.cost_file_processing,
-          byok_usage_inference: r.byok_usage_inference,
-          tokens_prompt: r.tokens_prompt,
-          tokens_completion: r.tokens_completion,
-          tokens_reasoning: r.tokens_reasoning,
-          tokens_cached: r.tokens_cached,
-          model_permaslug: r.model_permaslug,
-          provider_name: r.provider_name,
-          variant: r.variant,
-          cancelled: r.cancelled,
-          streamed: r.streamed,
-          user: r.user,
-          finish_reason_raw: r.finish_reason_raw,
-          finish_reason_normalized: r.finish_reason_normalized,
-          generation_time_ms: r.generation_time_ms,
-          time_to_first_token_ms: r.time_to_first_token_ms,
-          app_name: r.app_name,
-          api_key_name: r.api_key_name,
-          provider_source: ((r as any).provider_source ?? "openrouter") as "openrouter" | "anthropic" | "openai",
-          request_count: (r as any).request_count ?? 1,
-        })) as ActivityRow[];
-        setData(mapped);
-        setFileName(`Cloud DB (${mapped.length} rows)`);
-        setHasUserData(true);
-      } else {
-        // No user data — leave empty so onboarding can render
+      try {
+        const { rows, truncated } = await fetchAllPages<DbRow>(
+          (from, to) =>
+            supabase
+              .from("activity_rows")
+              .select("*")
+              .order("created_at", { ascending: false })
+              .order("id", { ascending: true })
+              .range(from, to) as unknown as PromiseLike<{ data: DbRow[] | null; error: { message: string } | null }>,
+          { maxRows: MAX_DASHBOARD_ROWS },
+        );
+        if (cancelled) return;
+        setTruncated(truncated);
+        if (rows.length > 0) {
+          const mapped = rows.map(mapDbRow);
+          setData(mapped);
+          setFileName(`Cloud DB (${mapped.length.toLocaleString()} rows${truncated ? ", truncated" : ""})`);
+          setHasUserData(true);
+        } else {
+          // No user data — leave empty so onboarding can render
+          setData([]);
+          setFileName("Žádná data – nahrajte první CSV");
+          setHasUserData(false);
+        }
+      } catch (e) {
+        if (cancelled) return;
+        const msg = e instanceof Error ? e.message : String(e);
+        setLoadError(msg);
         setData([]);
-        setFileName("Žádná data – nahrajte první CSV");
+        setFileName("Chyba načítání dat");
         setHasUserData(false);
+        toast.error(`Nepodařilo se načíst data: ${msg}`);
+      } finally {
+        if (!cancelled) setLoading(false);
       }
-      setLoading(false);
     }
     loadFromDB();
+    return () => {
+      cancelled = true;
+    };
   }, [demoMode]);
 
-  // Upload CSV → save to DB
-  const loadCSV = useCallback(async (text: string, name: string) => {
+  // Upload CSV → save to DB. Errors are surfaced (toast + return value), never swallowed.
+  const loadCSV = useCallback(async (text: string, name: string): Promise<CsvImportResult> => {
     const parsed = parseCSV(text);
     setData(parsed);
     setFileName(name);
     setSelectedModel(null);
-
-    // Upsert to DB in batches
-    const batchSize = 100;
-    for (let i = 0; i < parsed.length; i += batchSize) {
-      const batch = parsed.slice(i, i + batchSize).map((r) => ({
-        generation_id: r.generation_id,
-        created_at: r.created_at,
-        cost_total: r.cost_total,
-        cost_web_search: r.cost_web_search,
-        cost_cache: r.cost_cache,
-        cost_file_processing: r.cost_file_processing,
-        byok_usage_inference: r.byok_usage_inference,
-        tokens_prompt: r.tokens_prompt,
-        tokens_completion: r.tokens_completion,
-        tokens_reasoning: r.tokens_reasoning,
-        tokens_cached: r.tokens_cached,
-        model_permaslug: r.model_permaslug,
-        provider_name: r.provider_name,
-        variant: r.variant,
-        cancelled: r.cancelled,
-        streamed: r.streamed,
-        user: r.user,
-        finish_reason_raw: r.finish_reason_raw,
-        finish_reason_normalized: r.finish_reason_normalized,
-        generation_time_ms: r.generation_time_ms,
-        time_to_first_token_ms: r.time_to_first_token_ms,
-        app_name: r.app_name,
-        api_key_name: r.api_key_name,
-        user_id: session?.user?.id,
-        provider_source: r.provider_source ?? "openrouter",
-        request_count: r.request_count ?? 1,
-      }));
-      await supabase.from("activity_rows").upsert(batch, { onConflict: "generation_id" });
-    }
     setHasUserData(parsed.length > 0);
+
+    if (parsed.length === 0) {
+      toast.error("CSV neobsahuje žádné platné řádky (chybí generation_id / created_at).");
+      return { parsed: 0, saved: 0, failed: 0, error: "empty" };
+    }
+    const userId = session?.user?.id;
+    if (!userId) {
+      toast.error("Nejsi přihlášen – data nebyla uložena.");
+      return { parsed: parsed.length, saved: 0, failed: parsed.length, error: "not_authenticated" };
+    }
+
+    let saved = 0;
+    let failed = 0;
+    let firstError: string | undefined;
+    for (let i = 0; i < parsed.length; i += UPSERT_BATCH) {
+      const batch = parsed.slice(i, i + UPSERT_BATCH).map((r) => ({ ...r, user_id: userId }));
+      const { error } = await supabase
+        .from("activity_rows")
+        .upsert(batch, { onConflict: "user_id,generation_id" });
+      if (error) {
+        failed += batch.length;
+        firstError ??= error.message;
+      } else {
+        saved += batch.length;
+      }
+    }
+
+    if (failed > 0) {
+      toast.error(`Uložení ${failed.toLocaleString()} z ${parsed.length.toLocaleString()} řádků selhalo: ${firstError}`);
+    } else {
+      toast.success(`Uloženo ${saved.toLocaleString()} řádků.`);
+    }
+    return { parsed: parsed.length, saved, failed, error: firstError };
   }, [session]);
 
-  // Sync from OpenRouter API via edge function
-  const syncFromAPI = useCallback(async () => {
-    setSyncing(true);
-    setSyncError(null);
-    try {
-      const { data: result, error } = await supabase.functions.invoke("sync-openrouter");
-      if (error) throw error;
-      if (result?.error) throw new Error(result.error);
-
-      // Reload from DB after sync
-      const { data: rows } = await supabase
-        .from("activity_rows")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (rows && rows.length > 0) {
-        const mapped: ActivityRow[] = rows.map((r) => ({
-          generation_id: r.generation_id,
-          created_at: r.created_at,
-          cost_total: r.cost_total,
-          cost_web_search: r.cost_web_search,
-          cost_cache: r.cost_cache,
-          cost_file_processing: r.cost_file_processing,
-          byok_usage_inference: r.byok_usage_inference,
-          tokens_prompt: r.tokens_prompt,
-          tokens_completion: r.tokens_completion,
-          tokens_reasoning: r.tokens_reasoning,
-          tokens_cached: r.tokens_cached,
-          model_permaslug: r.model_permaslug,
-          provider_name: r.provider_name,
-          variant: r.variant,
-          cancelled: r.cancelled,
-          streamed: r.streamed,
-          user: r.user,
-          finish_reason_raw: r.finish_reason_raw,
-          finish_reason_normalized: r.finish_reason_normalized,
-          generation_time_ms: r.generation_time_ms,
-          time_to_first_token_ms: r.time_to_first_token_ms,
-          app_name: r.app_name,
-          api_key_name: r.api_key_name,
-          provider_source: ((r as any).provider_source ?? "openrouter") as "openrouter" | "anthropic" | "openai",
-          request_count: (r as any).request_count ?? 1,
-        }));
-        setData(mapped);
-        setFileName(`Cloud DB (${mapped.length} rows) — synced`);
-      }
-    } catch (err) {
-      setSyncError(err instanceof Error ? err.message : "Sync failed");
-    } finally {
-      setSyncing(false);
-    }
-  }, []);
-
   // Apply date filter first, then model filter
-  const dateFiltered = dateFilter
-    ? data.filter((r) => {
-        const d = r.created_at.substring(0, 10);
-        const from = dateFilter.from.toISOString().substring(0, 10);
-        const to = dateFilter.to.toISOString().substring(0, 10);
-        return d >= from && d <= to;
-      })
-    : data;
-
-  const filteredData = selectedModel
-    ? dateFiltered.filter((r) => r.model_permaslug === selectedModel)
-    : dateFiltered;
-
-  const models = [...new Set(dateFiltered.map((r) => r.model_permaslug))];
-  const providers = [...new Set(dateFiltered.map((r) => r.provider_name))];
-
-  const totalCost = dateFiltered.reduce((s, r) => s + r.cost_total, 0);
-  // Aggregated rows (Anthropic/OpenAI Admin API) carry request_count > 1; per-generation
-  // OpenRouter rows have request_count = 1, so summing it works for mixed datasets.
-  const totalRequests = dateFiltered.reduce((s, r) => s + (r.request_count ?? 1), 0);
-  const totalTokens = dateFiltered.reduce(
-    (s, r) => s + r.tokens_prompt + r.tokens_completion + r.tokens_reasoning,
-    0
+  const dateFiltered = useMemo(() => filterByDate(data, dateFilter), [data, dateFilter]);
+  const filteredData = useMemo(
+    () => (selectedModel ? dateFiltered.filter((r) => r.model_permaslug === selectedModel) : dateFiltered),
+    [dateFiltered, selectedModel],
   );
-  // Only OpenRouter rows have generation_time_ms — average over those, ignore aggregated
-  // Admin-API rows (which have generation_time_ms = 0).
-  const timed = dateFiltered.filter((r) => r.generation_time_ms > 0);
-  const avgGenTime =
-    timed.length > 0
-      ? timed.reduce((s, r) => s + r.generation_time_ms, 0) / timed.length
-      : 0;
 
-  const dateRange = data.length > 0
-    ? {
-        from: data.reduce((min, r) => (r.created_at < min ? r.created_at : min), data[0].created_at),
-        to: data.reduce((max, r) => (r.created_at > max ? r.created_at : max), data[0].created_at),
-      }
-    : null;
-
-  const costByModel = models.map((m) => ({
-    model: m.split("/").pop() || m,
-    fullModel: m,
-    cost: dateFiltered.filter((r) => r.model_permaslug === m).reduce((s, r) => s + r.cost_total, 0),
-  })).sort((a, b) => b.cost - a.cost);
-
-  const costByProvider = providers.map((p) => ({
-    provider: p,
-    cost: dateFiltered.filter((r) => r.provider_name === p).reduce((s, r) => s + r.cost_total, 0),
-    // Sum request_count so aggregated Anthropic/OpenAI Admin-API rows are counted correctly.
-    requests: dateFiltered.filter((r) => r.provider_name === p).reduce((s, r) => s + (r.request_count ?? 1), 0),
-  })).sort((a, b) => b.cost - a.cost);
-
-  const timeSeries = [...filteredData]
-    .sort((a, b) => a.created_at.localeCompare(b.created_at))
-    .map((r) => ({
-      time: r.created_at.substring(11, 16),
-      fullTime: r.created_at,
-      cost: r.cost_total,
-      tokens_prompt: r.tokens_prompt,
-      tokens_completion: r.tokens_completion,
-      tokens_reasoning: r.tokens_reasoning,
-      tokens_cached: r.tokens_cached,
-      generation_time_ms: r.generation_time_ms,
-      time_to_first_token_ms: r.time_to_first_token_ms,
-      model: r.model_permaslug.split("/").pop() || r.model_permaslug,
-    }));
+  const models = useMemo(() => [...new Set(dateFiltered.map((r) => r.model_permaslug))], [dateFiltered]);
+  const providers = useMemo(() => [...new Set(dateFiltered.map((r) => r.provider_name))], [dateFiltered]);
+  const { totalCost, totalRequests, totalTokens, avgGenTime } = useMemo(() => computeTotals(dateFiltered), [dateFiltered]);
+  const dateRange = useMemo(() => dateRangeOf(data), [data]);
+  const costByModel = useMemo(() => aggCostByModel(dateFiltered), [dateFiltered]);
+  const costByProvider = useMemo(() => aggCostByProvider(dateFiltered), [dateFiltered]);
+  const timeSeries = useMemo(() => aggTimeSeries(filteredData), [filteredData]);
 
   return {
     data,
@@ -249,9 +190,6 @@ export function useDashboardData(options: { demoMode?: boolean } = {}) {
     dateFilter,
     setDateFilter,
     loadCSV,
-    syncFromAPI,
-    syncing,
-    syncError,
     models,
     providers,
     totalCost,
@@ -264,5 +202,7 @@ export function useDashboardData(options: { demoMode?: boolean } = {}) {
     timeSeries,
     hasUserData,
     loading,
+    loadError,
+    truncated,
   };
 }

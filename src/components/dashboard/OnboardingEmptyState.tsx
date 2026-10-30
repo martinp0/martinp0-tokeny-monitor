@@ -5,7 +5,8 @@ import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 
 interface Props {
-  onUpload: (text: string, name: string) => Promise<void> | void;
+  /** Saves the CSV; reports success/failure itself (see useDashboardData.loadCSV). */
+  onUpload: (text: string, name: string) => Promise<unknown> | void;
 }
 
 export function OnboardingEmptyState({ onUpload }: Props) {
@@ -25,7 +26,6 @@ export function OnboardingEmptyState({ onUpload }: Props) {
       if (text) {
         try {
           await onUpload(text, file.name);
-          toast.success("Data úspěšně nahrána!");
         } catch (err) {
           toast.error("Nahrávání selhalo");
           console.error(err);
