@@ -75,14 +75,14 @@ git clone https://github.com/<your-user>/tokeny-monitor.git
 cd tokeny-monitor
 
 # Nainstaluj závislosti
-bun install   # nebo npm install
+bun install
 
 # Zkopíruj env šablonu
 cp .env.example .env
 # Vyplň VITE_SUPABASE_URL a VITE_SUPABASE_PUBLISHABLE_KEY
 
 # Spusť dev server
-bun dev       # nebo npm run dev
+bun dev
 ```
 
 Otevři [http://localhost:8080](http://localhost:8080).
@@ -228,9 +228,11 @@ bun run build
 Před PR prosím spusť:
 
 ```bash
-bun run build
 bun run lint
+bun run typecheck
 bun run test
+bun run build
+bun run check:functions   # vyžaduje Deno 2
 ```
 
 ---
