@@ -46,37 +46,31 @@ const FEATURES = [
     icon: DollarSign,
     title: "Náklady v CZK i USD",
     desc: "Přepínej měnu jedním klikem. Aktuální kurz ČNB se stahuje automaticky.",
-    color: "from-[hsl(270,95%,65%)] to-[hsl(320,90%,65%)]",
   },
   {
     icon: BarChart3,
     title: "Detailní grafy",
-    desc: "Spotřeba tokenů, výkon modelů, latence, providery — vše na jednom místě.",
-    color: "from-[hsl(175,85%,55%)] to-[hsl(200,90%,60%)]",
+    desc: "Spotřeba tokenů, výkon modelů, latence, providery – vše na jednom místě.",
   },
   {
     icon: Upload,
     title: "Import z CSV",
     desc: "Stáhni si activity export z OpenRouter a nahraj ho jedním tažením myši.",
-    color: "from-[hsl(45,100%,60%)] to-[hsl(320,90%,65%)]",
   },
   {
     icon: Zap,
     title: "Real-life srovnání",
     desc: "Kolik espress, piv nebo pizz by se za tvoje API náklady dalo koupit?",
-    color: "from-[hsl(140,80%,55%)] to-[hsl(175,85%,55%)]",
   },
   {
     icon: Shield,
     title: "Bezpečné a privátní",
     desc: "Tvoje data zůstávají v šifrovaném cloudu, viditelná jen tobě.",
-    color: "from-[hsl(270,95%,65%)] to-[hsl(200,90%,60%)]",
   },
   {
     icon: Smartphone,
     title: "Funguje všude",
     desc: "Web, mobil, tablet i jako nativní app pro iOS a Android.",
-    color: "from-[hsl(320,90%,65%)] to-[hsl(45,100%,60%)]",
   },
 ];
 
@@ -184,12 +178,12 @@ export default function Landing() {
       <header className="sticky top-0 z-50 border-b border-white/[0.06] glass">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-2 min-w-0">
           <Link to="/" className="flex items-center gap-2 sm:gap-3 min-w-0">
-            <div className="h-8 w-8 shrink-0 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-              <Activity className="h-4 w-4 text-white" />
+            <div className="h-8 w-8 shrink-0 rounded-lg bg-primary flex items-center justify-center">
+              <Activity className="h-4 w-4 text-primary-foreground" />
             </div>
-            <span className="text-sm sm:text-lg font-bold gradient-text tracking-tight truncate">OpenRouter Monitor</span>
+            <span className="text-sm sm:text-lg font-semibold tracking-tight truncate">OpenRouter Monitor</span>
           </Link>
-          <nav className="hidden md:flex items-center gap-8 text-sm font-mono text-muted-foreground">
+          <nav className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
             <a href="#features" className="hover:text-foreground transition-colors">{t("nav.features")}</a>
             <a href="#demo" className="hover:text-foreground transition-colors">{t("nav.demo")}</a>
             <a href="#how" className="hover:text-foreground transition-colors">{t("nav.howItWorks")}</a>
@@ -211,15 +205,15 @@ export default function Landing() {
       <main>
       {/* Hero */}
       <section className="relative px-4 sm:px-6 pt-20 pb-16 max-w-7xl mx-auto text-center">
-        <div className="inline-flex max-w-full items-center gap-2 px-3 py-1 rounded-full glass border-white/[0.08] text-xs font-mono text-muted-foreground mb-8 animate-fade-in">
+        <div className="inline-flex max-w-full items-center gap-2 px-3 py-1 rounded-full glass border-white/[0.08] text-xs text-muted-foreground mb-8 animate-fade-in">
           <Sparkles className="h-3 w-3 text-accent" />
           Přehled nákladů AI tokenů v reálném čase
         </div>
-        <h1 className="text-5xl md:text-7xl font-bold tracking-tight leading-[1.05] mb-6">
+        <h1 className="text-5xl md:text-7xl font-semibold tracking-tight leading-[1.05] mb-6">
           Zjisti, kolik tě <br className="hidden md:block" />
-          <span className="gradient-text">opravdu stojí AI</span>
+          opravdu stojí <span className="text-primary">AI</span>
         </h1>
-        <p className="max-w-2xl mx-auto text-lg md:text-xl text-muted-foreground mb-10 font-mono">
+        <p className="max-w-2xl mx-auto text-lg md:text-xl text-muted-foreground mb-10">
           Krásný dashboard pro tvoji OpenRouter aktivitu. Sleduj spotřebu, optimalizuj
           modely a převáděj náklady do <span className="text-accent">CZK i USD</span>.
         </p>
@@ -227,20 +221,20 @@ export default function Landing() {
           <Link to={ctaHref}>
             <Button
               size="lg"
-              className="gap-2 font-mono bg-gradient-to-r from-primary to-[hsl(320,90%,65%)] hover:opacity-90 transition-opacity border-0 glow-md"
+              className="gap-2"
             >
               {ctaLabel}
               <ArrowRight className="h-4 w-4" />
             </Button>
           </Link>
           <a href="#demo">
-            <Button size="lg" variant="outline" className="gap-2 font-mono glass glass-hover border-white/[0.08]">
+            <Button size="lg" variant="outline" className="gap-2">
               <LineChart className="h-4 w-4" />
               Vyzkoušet demo
             </Button>
           </a>
         </div>
-        <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs font-mono text-muted-foreground">
+        <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
           <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-accent" />Zdarma</span>
           <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-accent" />Bez instalace</span>
           <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-accent" />CZ rozhraní</span>
@@ -250,24 +244,23 @@ export default function Landing() {
       {/* Features */}
       <section id="features" className="px-4 sm:px-6 py-20 max-w-7xl mx-auto">
         <div className="text-center mb-14">
-          <h2 className="text-3xl md:text-5xl font-bold mb-4">
-            Vše, co potřebuješ pro <span className="gradient-text">kontrolu AI nákladů</span>
+          <h2 className="text-3xl md:text-5xl font-semibold mb-4">
+            Vše, co potřebuješ pro kontrolu AI nákladů
           </h2>
-          <p className="text-muted-foreground font-mono max-w-2xl mx-auto">
+          <p className="text-muted-foreground max-w-2xl mx-auto">
             Žádné tabulky v Excelu. Žádné dohady. Jen čisté grafy a přehledná čísla.
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {FEATURES.map(({ icon: Icon, title, desc, color }, i) => (
+          {FEATURES.map(({ icon: Icon, title, desc }, i) => (
             <Card
               key={title}
-              className="glass glass-hover relative overflow-hidden group animate-fade-in opacity-0"
+              className="glass relative overflow-hidden group animate-fade-in opacity-0"
               style={{ animationDelay: `${i * 80}ms`, animationFillMode: "forwards" }}
             >
-              <div className={`absolute inset-0 bg-gradient-to-br ${color} opacity-0 group-hover:opacity-[0.08] transition-opacity duration-500`} />
               <CardContent className="p-6 relative">
-                <div className={`h-10 w-10 rounded-lg bg-gradient-to-br ${color} flex items-center justify-center mb-4`}>
-                  <Icon className="h-5 w-5 text-white" />
+                <div className="h-10 w-10 rounded-lg bg-primary/15 text-primary flex items-center justify-center mb-4">
+                  <Icon className="h-5 w-5" />
                 </div>
                 <h3 className="text-lg font-bold mb-2">{title}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
@@ -280,21 +273,21 @@ export default function Landing() {
       {/* Live Demo */}
       <section id="demo" className="px-4 sm:px-6 py-20 max-w-[1600px] mx-auto">
         <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/15 text-accent text-xs font-mono mb-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/15 text-accent text-xs mb-4">
             <Activity className="h-3 w-3" />
             Live demo s ukázkovými daty
           </div>
           <h2 className="text-3xl md:text-5xl font-bold mb-4">
-            Takhle to <span className="gradient-text">vypadá uvnitř</span>
+            Takhle to vypadá uvnitř
           </h2>
-          <p className="text-muted-foreground font-mono max-w-2xl mx-auto mb-6">
+          <p className="text-muted-foreground max-w-2xl mx-auto mb-6">
             Žádný login, žádná registrace. Hraj si s grafy hned teď.
           </p>
           <Button
             variant="outline"
             size="sm"
             onClick={toggleCurrency}
-            className="gap-1.5 border-border hover:bg-secondary hover:text-foreground font-mono text-xs"
+            className="gap-1.5 border-border hover:bg-secondary hover:text-foreground text-xs"
           >
             Přepnout do {currency === "CZK" ? "USD ($)" : "CZK (Kč)"}
           </Button>
@@ -303,13 +296,13 @@ export default function Landing() {
         <LandingDemoGate />
 
         <div className="mt-10 text-center">
-          <p className="text-sm text-muted-foreground font-mono mb-4">
+          <p className="text-sm text-muted-foreground mb-4">
             Líbí se ti to? Nahraj svoje vlastní data a sleduj <span className="text-accent">opravdové náklady</span>.
           </p>
           <Link to={ctaHref}>
             <Button
               size="lg"
-              className="gap-2 font-mono bg-gradient-to-r from-primary to-[hsl(320,90%,65%)] hover:opacity-90 transition-opacity border-0 glow-md"
+              className="gap-2"
             >
               {ctaLabel}
               <ArrowRight className="h-4 w-4" />
@@ -321,7 +314,7 @@ export default function Landing() {
       {/* How it works */}
       <section id="how" className="px-4 sm:px-6 py-20 max-w-5xl mx-auto">
         <h2 className="text-3xl md:text-5xl font-bold mb-12 text-center">
-          3 kroky k <span className="gradient-text">dokonalému přehledu</span>
+          3 kroky k dokonalému přehledu
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
@@ -331,7 +324,7 @@ export default function Landing() {
           ].map(({ n, t, d }) => (
             <Card key={n} className="glass border-white/[0.08]">
               <CardContent className="p-6">
-                <div className="text-5xl font-mono font-bold gradient-text mb-3">{n}</div>
+                <div className="text-5xl font-mono font-semibold text-primary mb-3">{n}</div>
                 <h3 className="text-lg font-bold mb-2">{t}</h3>
                 <p className="text-sm text-muted-foreground">{d}</p>
               </CardContent>
@@ -343,14 +336,14 @@ export default function Landing() {
       {/* FAQ */}
       <section id="faq" className="px-4 sm:px-6 py-20 max-w-4xl mx-auto">
         <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/15 text-primary text-xs font-mono mb-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/15 text-primary text-xs mb-4">
             <Sparkles className="h-3 w-3" />
             Nejčastější dotazy
           </div>
           <h2 className="text-3xl md:text-5xl font-bold mb-4">
-            Co lidi <span className="gradient-text">nejvíc zajímá</span>
+            Co lidi nejvíc zajímá
           </h2>
-          <p className="text-muted-foreground font-mono">
+          <p className="text-muted-foreground">
             Krátké odpovědi na otázky, které dostávám pořád.
           </p>
         </div>
@@ -359,7 +352,7 @@ export default function Landing() {
             <AccordionItem
               key={i}
               value={`faq-${i}`}
-              className="glass border-white/[0.08] rounded-xl px-5 data-[state=open]:glow-sm transition-shadow"
+              className="border-border rounded-xl px-5"
             >
               <AccordionTrigger className="text-left font-bold hover:no-underline py-5 min-w-0 gap-3">
                 <span className="min-w-0 flex-1">{item.q}</span>
@@ -383,11 +376,11 @@ export default function Landing() {
           <Card className="glass glass-hover border-white/[0.08] overflow-hidden">
             <CardContent className="p-8 md:p-10 flex flex-col md:flex-row items-start md:items-center gap-6 md:gap-10">
               <div className="flex items-center gap-4">
-                <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-primary via-[hsl(320,90%,65%)] to-accent flex items-center justify-center text-xl font-bold text-white shrink-0 glow-sm">
+                <div className="h-14 w-14 rounded-2xl bg-primary flex items-center justify-center text-xl font-semibold text-primary-foreground shrink-0">
                   MP
                 </div>
                 <div>
-                  <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-muted-foreground mb-1">
+                  <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1">
                     Indie maker
                   </div>
                   <div className="text-lg font-bold">Martin Pohl</div>
@@ -400,7 +393,7 @@ export default function Landing() {
                   a indie web projekty. Mrkni na jeho práci a další experimenty.
                 </p>
               </div>
-              <div className="flex items-center gap-2 text-sm font-mono text-accent group-hover:gap-3 transition-all shrink-0">
+              <div className="flex items-center gap-2 text-sm text-accent group-hover:gap-3 transition-all shrink-0">
                 martin.pohl.uk
                 <ExternalLink className="h-4 w-4" />
               </div>
@@ -412,13 +405,13 @@ export default function Landing() {
       {/* Open Source */}
       <section className="px-4 sm:px-6 py-12 max-w-3xl mx-auto text-center">
         <div className="glass rounded-2xl border-white/[0.08] p-8 md:p-10 flex flex-col items-center">
-          <div className="h-12 w-12 rounded-full bg-gradient-to-br from-[hsl(0,0%,20%)] to-[hsl(0,0%,40%)] flex items-center justify-center mb-5">
+          <div className="h-12 w-12 rounded-full bg-secondary flex items-center justify-center mb-5">
             <Github className="h-6 w-6 text-white" />
           </div>
           <h3 className="text-xl md:text-2xl font-bold mb-3">
-            100 % <span className="gradient-text">open-source</span>
+            100 % open-source
           </h3>
-          <p className="text-sm text-muted-foreground font-mono max-w-lg mx-auto mb-6 leading-relaxed">
+          <p className="text-sm text-muted-foreground max-w-lg mx-auto mb-6 leading-relaxed">
             Celý kód je veřejný na GitHubu. Forkni si repo, rozjeď lokálně přes Docker
             a uprav si dashboard podle sebe. Pull requesty vítány!
           </p>
@@ -429,7 +422,7 @@ export default function Landing() {
           >
             <Button
               size="lg"
-              className="gap-2 font-mono glass glass-hover border-white/[0.08]"
+              className="gap-2"
               variant="outline"
             >
               <Github className="h-4 w-4" />
@@ -442,20 +435,19 @@ export default function Landing() {
 
       {/* Final CTA */}
       <section className="px-4 sm:px-6 py-24 max-w-4xl mx-auto text-center">
-        <div className="rounded-3xl glass border-white/[0.08] p-6 sm:p-10 md:p-12 glow-md relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10 pointer-events-none" />
-          <Globe className="h-12 w-12 text-accent mx-auto mb-6 relative" />
+        <div className="rounded-3xl border border-border bg-card p-6 sm:p-10 md:p-12 relative overflow-hidden">
+          <Globe className="h-12 w-12 text-primary mx-auto mb-6 relative" />
           <h2 className="text-3xl md:text-5xl font-bold mb-4 relative">
-            Připraven/a převzít <span className="gradient-text">kontrolu nad AI náklady?</span>
+            Připraven/a převzít kontrolu nad AI náklady?
           </h2>
-          <p className="text-muted-foreground font-mono mb-8 relative">
+          <p className="text-muted-foreground mb-8 relative">
             Začni během minuty. Žádná kreditka.
           </p>
           <div className="relative">
             <Link to={ctaHref}>
               <Button
                 size="lg"
-                className="gap-2 font-mono bg-gradient-to-r from-primary to-[hsl(320,90%,65%)] hover:opacity-90 transition-opacity border-0"
+                className="gap-2"
               >
                 {ctaLabel}
                 <ArrowRight className="h-4 w-4" />
@@ -468,7 +460,7 @@ export default function Landing() {
 
       {/* Footer */}
       <footer className="border-t border-white/[0.06] px-4 sm:px-6 py-8">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-xs font-mono text-muted-foreground min-w-0">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-muted-foreground min-w-0">
           <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 max-w-full text-center">
             <Activity className="h-3.5 w-3.5" />
             <span>
