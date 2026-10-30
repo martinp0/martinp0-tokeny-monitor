@@ -14,6 +14,7 @@ struct TokenyMenuBarApp: App {
         let model = AppModel.shared
         Task { await model.auth.observe() }
         Task { await model.autoRefresh() }
+        Task { await model.observeStorefront() }
     }
 
     var body: some Scene {
@@ -147,8 +148,8 @@ struct MenuPanel: View {
                 }
             }
         }
-        if !s.isPro {
-            ProUpsellCard(accountURL: model.config.accountURL)
+        if !s.isPro && model.allowsPurchaseLinks {
+            ProUpsellCard(accountURL: model.accountURL)
         }
         if let cached = model.cached {
             UpdatedLabel(cached: cached)
@@ -219,7 +220,7 @@ struct MacSettingsView: View {
                     if let summary = model.summary {
                         LabeledContent("Plan", value: summary.isPro ? "Pro" : String(localized: "Free"))
                     }
-                    Link("Manage account on the web", destination: model.config.accountURL)
+                    Link("Manage account on the web", destination: model.accountURL)
                     HStack {
                         Button("Sign out") { Task { await model.signOut() } }
                         Button("Delete account…", role: .destructive) { confirmingDelete = true }

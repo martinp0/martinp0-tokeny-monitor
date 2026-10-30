@@ -19,7 +19,7 @@ struct SettingsView: View {
                     if let summary = model.summary {
                         LabeledContent("Plan", value: summary.isPro ? "Pro" : String(localized: "Free"))
                     }
-                    Link(destination: model.config.accountURL) {
+                    Link(destination: model.accountURL) {
                         Label("Manage account on the web", systemImage: "safari")
                     }
                 }

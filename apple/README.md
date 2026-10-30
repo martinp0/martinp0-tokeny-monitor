@@ -86,17 +86,11 @@ Xcode Cloud and TestFlight: see [docs/xcode-cloud.md](../docs/xcode-cloud.md).
 
 ## App Review notes
 
-- **4.2 Minimum functionality:** fully native (no web view), with widgets, complications, a menu bar
-  app and App Intents. The old Capacitor wrapper of the web app is gone.
-- **5.1.1(v) Account deletion:** account creation happens in the app, so Settings has *Delete
-  account…* (calls the `delete-account` edge function). It does not cancel a Stripe subscription
-  yet; the dialog tells the user to cancel on the web first.
-- **3.1.1 / 3.1.3 Payments:** no in-app purchase. Free users see what Pro adds and a *Manage plan on
-  the web* button. Linking out is allowed on the US storefront since 2025; elsewhere (including the
-  EU, which uses the StoreKit External Purchase Link entitlement) it is not. Before submitting,
-  either release in the US only, set `ProUpsellPolicy.showsWebLink = false` (the card then just
-  describes Pro), or add StoreKit subscriptions.
-- **Privacy:** `PrivacyInfo.xcprivacy` declares e-mail and user ID (linked, app functionality, no
-  tracking) and the UserDefaults reason codes. App Store Connect also needs a privacy policy URL; the
-  app links to `https://tokeny.martinpohl.cz/privacy` (`src/pages/Privacy.tsx`, cs + en); use that URL.
-- **Review account:** give App Review a demo login with some data (a Pro account shows every screen).
+Full notes, demo account script and privacy label answers: [docs/app-review.md](../docs/app-review.md).
+Short version:
+- **4.2:** fully native (no web view): widgets, complications, menu bar, App Intents.
+- **5.1.1(v):** Settings → *Delete account…* (`delete-account`, cancels Stripe too after PR #20).
+- **3.1.1 / 3.1.3:** no IAP. A Pro upsell and web link appear **only on the US storefront**
+  (`PurchaseLinkPolicy`, StoreKit `Storefront`); elsewhere there's no upsell and the account link
+  goes to `/profile`.
+- **Privacy:** `PrivacyInfo.xcprivacy` = e-mail + user ID, app functionality, no tracking.

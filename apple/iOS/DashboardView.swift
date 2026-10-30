@@ -130,9 +130,9 @@ struct DashboardView: View {
                 }
             }
 
-            if !s.isPro {
+            if !s.isPro && model.allowsPurchaseLinks {
                 Section {
-                    ProUpsellCard(accountURL: model.config.accountURL)
+                    ProUpsellCard(accountURL: model.accountURL)
                 }
             }
 

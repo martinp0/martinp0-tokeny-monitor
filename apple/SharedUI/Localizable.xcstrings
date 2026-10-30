@@ -417,16 +417,6 @@
         }
       }
     },
-    "Manage plan on the web": {
-      "localizations": {
-        "cs": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Spravovat tarif na webu"
-          }
-        }
-      }
-    },
     "Month %@": {
       "localizations": {
         "cs": {
@@ -919,6 +909,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Aktualizováno %@"
+          }
+        }
+      }
+    },
+    "Upgrade on the web": {
+      "localizations": {
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Přejít na Pro na webu"
           }
         }
       }

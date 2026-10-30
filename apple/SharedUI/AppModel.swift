@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import StoreKit
 import TokenyAuth
 import TokenyCore
 
@@ -22,6 +23,9 @@ final class AppModel {
     private(set) var cached: CachedSummary?
     private(set) var isRefreshing = false
     private(set) var lastError: UsageAPIError?
+
+    /// True only on a storefront where linking to web purchase is allowed (US). Starts false.
+    private(set) var allowsPurchaseLinks = false
 
     /// Called after every successful refresh or sign-out (the iPhone forwards it to the Watch).
     @ObservationIgnored var onChange: (@MainActor () -> Void)?
@@ -58,6 +62,17 @@ final class AppModel {
 
     var summary: UsageSummary? { cached?.summary }
     var config: AppConfig { api.config }
+
+    /// "Manage account on the web": settings (with checkout) in the US, profile elsewhere.
+    var accountURL: URL { PurchaseLinkPolicy.accountURL(for: config, allowsPurchaseLinks: allowsPurchaseLinks) }
+
+    /// Reads the App Store storefront and follows changes. Run once from the app's `.task`.
+    func observeStorefront() async {
+        allowsPurchaseLinks = PurchaseLinkPolicy.allowsPurchaseLinks(storefrontCountryCode: await Storefront.current?.countryCode)
+        for await storefront in Storefront.updates {
+            allowsPurchaseLinks = PurchaseLinkPolicy.allowsPurchaseLinks(storefrontCountryCode: storefront.countryCode)
+        }
+    }
 
     /// Fetches a fresh summary. Errors land in ``lastError``; the cached summary stays on screen.
     func refresh() async {

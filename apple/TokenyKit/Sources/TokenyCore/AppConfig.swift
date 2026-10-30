@@ -30,6 +30,8 @@ public struct AppConfig: Sendable, Equatable {
 
     /// Web account page: plan, billing, provider keys. The apps never sell anything themselves.
     public var accountURL: URL { webURL.appending(path: "settings") }
+    /// Account page without anything to buy (see ``PurchaseLinkPolicy``).
+    public var profileURL: URL { webURL.appending(path: "profile") }
     public var dashboardURL: URL { webURL.appending(path: "dashboard") }
     /// Where Supabase sends e-mail confirmation / password reset links.
     public var authCallbackURL: URL { webURL.appending(path: "auth/callback") }
