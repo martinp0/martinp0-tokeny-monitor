@@ -315,6 +315,7 @@ export default function Landing() {
               <Github className="h-4 w-4" aria-hidden /> GitHub
             </FooterLink>
             <FooterLink href="https://martin.pohl.uk" external>martin.pohl.uk</FooterLink>
+            <FooterLink to="/privacy">{t("landing.footer.privacy")}</FooterLink>
             <FooterLink href="https://buymeacoffee.com/martinpohlp" external>
               <Coffee className="h-4 w-4" aria-hidden /> {t("landing.footer.coffee")}
             </FooterLink>

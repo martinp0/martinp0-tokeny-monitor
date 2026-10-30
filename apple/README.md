@@ -98,5 +98,5 @@ Xcode Cloud and TestFlight: see [docs/xcode-cloud.md](../docs/xcode-cloud.md).
   describes Pro), or add StoreKit subscriptions.
 - **Privacy:** `PrivacyInfo.xcprivacy` declares e-mail and user ID (linked, app functionality, no
   tracking) and the UserDefaults reason codes. App Store Connect also needs a privacy policy URL; the
-  app links to `https://tokeny.martinpohl.cz/privacy`, which does not exist yet.
+  app links to `https://tokeny.martinpohl.cz/privacy` (`src/pages/Privacy.tsx`, cs + en); use that URL.
 - **Review account:** give App Review a demo login with some data (a Pro account shows every screen).

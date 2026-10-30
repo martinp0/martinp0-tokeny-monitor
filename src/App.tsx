@@ -29,6 +29,7 @@ const BlogModelComparison = lazy(() => import("./pages/BlogModelComparison.tsx")
 const BlogMonitoringAiCosts = lazy(() => import("./pages/BlogMonitoringAiCosts.tsx"));
 const BlogMultiProvider = lazy(() => import("./pages/BlogMultiProvider.tsx"));
 const BlogGrokTokens = lazy(() => import("./pages/BlogGrokTokens.tsx"));
+const Privacy = lazy(() => import("./pages/Privacy.tsx"));
 
 const Toaster = lazy(() => import("@/components/ui/toaster").then((m) => ({ default: m.Toaster })));
 const Sonner = lazy(() => import("@/components/ui/sonner").then((m) => ({ default: m.Toaster })));
@@ -117,6 +118,7 @@ export function AppRoutes() {
       <Route path="/blog/monitoring-ai-costs" element={<BlogMonitoringAiCosts />} />
       <Route path="/blog/multi-provider-monitoring" element={<BlogMultiProvider />} />
       <Route path="/blog/grok-token-optimization" element={<BlogGrokTokens />} />
+      <Route path="/privacy" element={<Privacy />} />
       <Route path="/shared/:token" element={<SharedDashboard />} />
       <Route path="*" element={<NotFound />} />
     </Routes>

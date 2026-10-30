@@ -44,6 +44,7 @@ Deno.serve(async (req) => {
     await supabaseAdmin.from("activity_rows").delete().eq("user_id", user.id);
     await supabaseAdmin.from("budget_alerts").delete().eq("user_id", user.id);
     await supabaseAdmin.from("mcp_tokens").delete().eq("user_id", user.id);
+    await supabaseAdmin.from("shared_dashboards").delete().eq("user_id", user.id);
     await supabaseAdmin.from("profiles").delete().eq("user_id", user.id);
 
     // Delete auth user
