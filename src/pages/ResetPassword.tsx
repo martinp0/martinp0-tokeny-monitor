@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Activity, KeyRound } from "lucide-react";
+import { Activity } from "lucide-react";
 import { toast } from "sonner";
 
 export default function ResetPassword() {
@@ -44,7 +44,7 @@ export default function ResetPassword() {
       toast.success("Heslo bylo úspěšně změněno");
       navigate("/");
     } catch (error: any) {
-      toast.error(error.message || "Chyba při změně hesla");
+      toast.error("Heslo se nepodařilo změnit. Zkuste to znovu.");
     } finally {
       setLoading(false);
     }
@@ -52,7 +52,7 @@ export default function ResetPassword() {
 
   const head = (
     <Helmet>
-      <title>Reset hesla – OpenRouter Monitor</title>
+      <title>Obnovení hesla – OpenRouter Monitor</title>
       <meta name="description" content="Nastavte si nové heslo k vašemu účtu OpenRouter Monitor." />
       <link rel="canonical" href="https://tokeny.pohl.uk/reset-password" />
       <meta name="robots" content="noindex,nofollow" />
@@ -61,15 +61,15 @@ export default function ResetPassword() {
 
   if (!ready) {
     return (
-      <main className="min-h-screen bg-background flex items-center justify-center p-4">
+      <main className="min-h-screen bg-background flex items-center justify-center px-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))]">
         {head}
-        <Card className="w-full max-w-md bg-card border-border/50">
+        <Card className="w-full max-w-md bg-card border-border">
           <CardContent className="p-8 text-center">
-            <h1 className="text-lg font-semibold text-foreground mb-2">Reset hesla</h1>
-            <p className="text-muted-foreground font-mono text-sm">
-              Neplatný nebo expirovaný odkaz na reset hesla.
+            <h1 className="text-lg font-semibold text-foreground mb-2">Obnovení hesla</h1>
+            <p className="text-muted-foreground text-sm">
+              Odkaz pro obnovení hesla je neplatný nebo vypršel.
             </p>
-            <Button onClick={() => navigate("/auth")} variant="outline" className="mt-4 font-mono">
+            <Button onClick={() => navigate("/auth")} variant="outline" className="mt-4 min-h-11">
               Zpět na přihlášení
             </Button>
           </CardContent>
@@ -79,48 +79,51 @@ export default function ResetPassword() {
   }
 
   return (
-    <main className="min-h-screen bg-background flex items-center justify-center p-4">
+    <main className="min-h-screen bg-background flex items-center justify-center px-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))]">
       {head}
-      <Card className="w-full max-w-md bg-card border-border/50">
+      <Card className="w-full max-w-md bg-card border-border">
         <CardHeader className="text-center">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <Activity className="h-8 w-8 text-primary" />
-            <span className="text-xl font-bold text-foreground">OpenRouter Monitor</span>
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center">
+              <Activity className="h-5 w-5 text-primary-foreground" />
+            </div>
+            <span className="text-xl font-semibold text-foreground">OpenRouter Monitor</span>
           </div>
           <h1 className="text-lg font-semibold text-foreground">Nové heslo</h1>
           <CardTitle className="sr-only">Nové heslo</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               <Label htmlFor="reset-password" className="sr-only">Nové heslo</Label>
               <Input
                 id="reset-password"
                 type="password"
+                autoComplete="new-password"
                 placeholder="Nové heslo"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={6}
-                className="bg-secondary border-border font-mono"
+                className="h-11 bg-background"
               />
             </div>
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               <Label htmlFor="reset-password-confirm" className="sr-only">Potvrdit heslo</Label>
               <Input
                 id="reset-password-confirm"
                 type="password"
+                autoComplete="new-password"
                 placeholder="Potvrdit heslo"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
                 minLength={6}
-                className="bg-secondary border-border font-mono"
+                className="h-11 bg-background"
               />
             </div>
-            <Button type="submit" disabled={loading} className="w-full gap-2 font-mono">
-              <KeyRound className="h-4 w-4" />
-              {loading ? "Načítání..." : "Nastavit nové heslo"}
+            <Button type="submit" disabled={loading} className="w-full min-h-11">
+              {loading ? "Odesílání…" : "Nastavit nové heslo"}
             </Button>
           </form>
         </CardContent>
