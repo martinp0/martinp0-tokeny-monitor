@@ -84,4 +84,20 @@ struct UsageAPITests {
         #expect(config.accountURL.absoluteString == "https://tokeny.example/settings")
         #expect(AppConfig.production.webURL.host == "tokeny.martinpohl.cz")
     }
+
+    @Test func configFromInfoPlist() {
+        let moved = AppConfig.fromInfo([
+            "TokenySupabaseHost": "newref.supabase.co",
+            "TokenySupabaseAnonKey": "new-anon",
+        ])
+        #expect(moved.supabaseURL.absoluteString == "https://newref.supabase.co")
+        #expect(moved.functionsURL.absoluteString == "https://newref.supabase.co/functions/v1")
+        #expect(moved.anonKey == "new-anon")
+        // A pasted full URL is tolerated.
+        #expect(AppConfig.fromInfo(["TokenySupabaseHost": "https://x.supabase.co/"]).supabaseURL.absoluteString == "https://x.supabase.co")
+        // Missing or unexpanded build settings fall back to the built-in backend.
+        let fallback = AppConfig.fromInfo(["TokenySupabaseHost": "$(TOKENY_SUPABASE_HOST)", "TokenySupabaseAnonKey": ""])
+        #expect(fallback.supabaseURL.host == AppConfig.fallbackSupabaseHost)
+        #expect(fallback.anonKey == AppConfig.fallbackAnonKey)
+    }
 }

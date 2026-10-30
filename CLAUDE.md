@@ -23,7 +23,17 @@ bun run check:functions         # `deno check` every edge function (needs Deno 2
 docker compose up --build       # multi-stage nginx image on :8080
 ```
 
-CI (`.github/workflows/ci.yml`, template in `ci/github-actions-ci.yml` until installed) runs lint, typecheck, test, build and the Deno check on every PR.
+CI (`.github/workflows/ci.yml`, template in `ci/github-actions-ci.yml` until installed) runs lint, typecheck, test, build and the Deno check on every PR. Backend deploys (`supabase db push` + `functions deploy`) go through the manual workflow template `ci/supabase-deploy.yml` (secrets `SUPABASE_ACCESS_TOKEN`, `SUPABASE_PROJECT_REF`, `SUPABASE_DB_PASSWORD`).
+
+SQL tests (need a local Postgres with supabase_vault, pg_cron, pg_net, pgmq): `PGURL=postgres://… supabase/tests/run-vault-test.sh` (Vault keys + cron jobs) and `supabase/tests/run-restore-test.sh` (rehearses the Lovable export → restore → `db push`).
+
+## Backend project (one ref, many files)
+
+The Supabase project ref appears in `.env`, `supabase/config.toml`, `vercel.json` (rewrites), `apple/Config/Backend.xcconfig` and the fallbacks in `AppConfig.swift`. Change it only with `node scripts/set-backend.mjs <ref> <anon-key>`; `src/test/backend-config.test.ts` fails if they disagree or if the ref is hardcoded anywhere else. Never put a service-role / `sb_secret_` key in any of these.
+
+- Public URLs that users save go through the site, not the Supabase host: `https://tokeny.martinpohl.cz/api/mcp` and `/api/og-dashboard` (Vercel rewrites, built by `src/lib/public-urls.ts`).
+- Cron jobs read the project URL and their credentials from Vault (`project_url`, `auto_sync_secret`, `email_queue_service_role_key`); without them they no-op. See `20261030150000_cron_jobs_from_vault.sql`.
+- The move off Lovable Cloud (export, restore, secrets, auth, Stripe, cutover, rollback) is in `docs/migrate-off-lovable.md`.
 
 ## Environment Variables
 

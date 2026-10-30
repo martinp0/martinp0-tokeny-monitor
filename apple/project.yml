@@ -17,6 +17,11 @@ packages:
   TokenyKit:
     path: TokenyKit
 
+# Backend endpoint (Supabase host + publishable key) for every target; see Config/Backend.xcconfig.
+configFiles:
+  Debug: Config/Backend.xcconfig
+  Release: Config/Backend.xcconfig
+
 settings:
   base:
     SWIFT_VERSION: "6.0"
@@ -61,6 +66,8 @@ targets:
       properties:
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        TokenySupabaseHost: $(TOKENY_SUPABASE_HOST)
+        TokenySupabaseAnonKey: $(TOKENY_SUPABASE_ANON_KEY)
         TokenyKeychainGroup: $(AppIdentifierPrefix)cz.martinpohl.tokeny.shared
         BGTaskSchedulerPermittedIdentifiers: [cz.martinpohl.tokeny.refresh]
         UIBackgroundModes: [fetch]
@@ -107,6 +114,8 @@ targets:
       properties:
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        TokenySupabaseHost: $(TOKENY_SUPABASE_HOST)
+        TokenySupabaseAnonKey: $(TOKENY_SUPABASE_ANON_KEY)
         TokenyKeychainGroup: $(AppIdentifierPrefix)cz.martinpohl.tokeny.shared
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
@@ -144,6 +153,8 @@ targets:
       properties:
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        TokenySupabaseHost: $(TOKENY_SUPABASE_HOST)
+        TokenySupabaseAnonKey: $(TOKENY_SUPABASE_ANON_KEY)
         ITSAppUsesNonExemptEncryption: false
     settings:
       base:
@@ -182,6 +193,8 @@ targets:
       properties:
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        TokenySupabaseHost: $(TOKENY_SUPABASE_HOST)
+        TokenySupabaseAnonKey: $(TOKENY_SUPABASE_ANON_KEY)
         WKApplication: true
     settings:
       base:
@@ -214,6 +227,8 @@ targets:
       properties:
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        TokenySupabaseHost: $(TOKENY_SUPABASE_HOST)
+        TokenySupabaseAnonKey: $(TOKENY_SUPABASE_ANON_KEY)
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
     settings:

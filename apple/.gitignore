@@ -11,3 +11,4 @@ macOS/Info.plist
 macOS/*.entitlements
 watchOS/*.entitlements
 Generated/
+Config/Backend.local.xcconfig

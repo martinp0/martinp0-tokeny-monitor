@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Applies all migrations to a throwaway Postgres with the supabase_vault extension and checks the
-# Vault key migration, including the backfill of plaintext keys.
+# Vault key migration (including the backfill of plaintext keys) and the Vault-driven cron jobs.
+# pg_cron, pg_net and pgmq may be minimal stubs; the tests only need their SQL surface.
 #
 # Needs: Postgres 15+ with supabase_vault installed and preloaded (shared_preload_libraries,
 # vault.getkey_script). Usage: PGURL=postgres://postgres@localhost:54329 ./supabase/tests/run-vault-test.sh
@@ -29,3 +30,6 @@ SQL
   psql -q -v ON_ERROR_STOP=1 "$URL" -f "$f" >/dev/null
 done
 psql -q -v ON_ERROR_STOP=1 "$URL" -f supabase/tests/provider_keys_vault.test.sql
+# Real pgmq keeps each queue in pgmq.q_<name>; create them if the local pgmq is a stub.
+psql -q -v ON_ERROR_STOP=1 "$URL" -c "CREATE TABLE IF NOT EXISTS pgmq.q_auth_emails (msg_id bigserial PRIMARY KEY, message jsonb)" -c "CREATE TABLE IF NOT EXISTS pgmq.q_transactional_emails (msg_id bigserial PRIMARY KEY, message jsonb)"
+psql -q -v ON_ERROR_STOP=1 "$URL" -f supabase/tests/cron_jobs.test.sql
