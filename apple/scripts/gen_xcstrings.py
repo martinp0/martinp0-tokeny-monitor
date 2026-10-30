@@ -85,7 +85,7 @@ CS = {
     "This month": "Tento měsíc",
     "This month's AI spend and your budget.": "Útrata za AI tento měsíc a rozpočet.",
     "This needs Tokeny Pro.": "Tohle je součást Tokeny Pro.",
-    "This permanently deletes your account, provider keys and usage history. If you have Pro, cancel the subscription on the web first.": "Natrvalo smaže účet, klíče k poskytovatelům i historii. Pokud máš Pro, nejdřív zruš předplatné na webu.",
+    "This permanently deletes your account, provider keys and usage history. Any Pro subscription is canceled immediately, with no refund for the rest of the period.": "Natrvalo smaže účet, klíče k poskytovatelům i historii. Případné předplatné Pro se okamžitě ukončí, bez vrácení peněz za zbytek období.",
     "Today": "Dnes",
     "Today %@": "Dnes %@",
     "Today %@, this month %@.": "Dnes %1$@, tento měsíc %2$@.",

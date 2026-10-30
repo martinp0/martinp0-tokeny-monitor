@@ -787,12 +787,12 @@
         }
       }
     },
-    "This permanently deletes your account, provider keys and usage history. If you have Pro, cancel the subscription on the web first.": {
+    "This permanently deletes your account, provider keys and usage history. Any Pro subscription is canceled immediately, with no refund for the rest of the period.": {
       "localizations": {
         "cs": {
           "stringUnit": {
             "state": "translated",
-            "value": "Natrvalo smaže účet, klíče k poskytovatelům i historii. Pokud máš Pro, nejdřív zruš předplatné na webu."
+            "value": "Natrvalo smaže účet, klíče k poskytovatelům i historii. Případné předplatné Pro se okamžitě ukončí, bez vrácení peněz za zbytek období."
           }
         }
       }
