@@ -13,6 +13,8 @@ import {
   timeSeries as aggTimeSeries,
 } from "@/lib/aggregations";
 import sampleCSV from "@/data/sample.csv?raw";
+import { useSubscription } from "@/hooks/useSubscription";
+import { FREE_LIMITS, splitRowsForPlan } from "@/lib/plan";
 
 /** Upper bound of rows loaded into the browser. Beyond this the dashboard says it is truncated. */
 const MAX_DASHBOARD_ROWS = 100_000;
@@ -60,6 +62,7 @@ export interface CsvImportResult {
 export function useDashboardData(options: { demoMode?: boolean } = {}) {
   const { demoMode = false } = options;
   const { session } = useAuth();
+  const { isPro, loading: planLoading } = useSubscription();
   const [data, setData] = useState<ActivityRow[]>([]);
   const [fileName, setFileName] = useState<string>("Loading...");
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
@@ -126,8 +129,14 @@ export function useDashboardData(options: { demoMode?: boolean } = {}) {
 
   // Upload CSV → save to DB. Errors are surfaced (toast + return value), never swallowed.
   const loadCSV = useCallback(async (text: string, name: string): Promise<CsvImportResult> => {
+    if (session?.user?.id && planLoading) {
+      toast.info("Načítám tvůj tarif – zkus import za okamžik znovu.");
+      return { parsed: 0, saved: 0, failed: 0, error: "plan_loading" };
+    }
     const parsed = parseCSV(text);
-    setData(parsed);
+    // Signed-in free users see (and store) the free window only, same as after a reload.
+    const { keep: toSave, skipped } = session?.user?.id ? splitRowsForPlan(parsed, isPro) : { keep: parsed, skipped: 0 };
+    setData(toSave);
     setFileName(name);
     setSelectedModel(null);
     setHasUserData(parsed.length > 0);
@@ -142,11 +151,18 @@ export function useDashboardData(options: { demoMode?: boolean } = {}) {
       return { parsed: parsed.length, saved: 0, failed: parsed.length, error: "not_authenticated" };
     }
 
+    // Free plan keeps the last 30 days (RLS rejects older rows for free users anyway).
+    if (skipped > 0) {
+      toast.info(
+        `${skipped.toLocaleString()} řádků starších než ${FREE_LIMITS.historyDays} dní se ve Free neukládá. S Pro importuješ celou historii.`,
+      );
+    }
+
     let saved = 0;
     let failed = 0;
     let firstError: string | undefined;
-    for (let i = 0; i < parsed.length; i += UPSERT_BATCH) {
-      const batch = parsed.slice(i, i + UPSERT_BATCH).map((r) => ({ ...r, user_id: userId }));
+    for (let i = 0; i < toSave.length; i += UPSERT_BATCH) {
+      const batch = toSave.slice(i, i + UPSERT_BATCH).map((r) => ({ ...r, user_id: userId }));
       const { error } = await supabase
         .from("activity_rows")
         .upsert(batch, { onConflict: "user_id,generation_id" });
@@ -159,12 +175,12 @@ export function useDashboardData(options: { demoMode?: boolean } = {}) {
     }
 
     if (failed > 0) {
-      toast.error(`Uložení ${failed.toLocaleString()} z ${parsed.length.toLocaleString()} řádků selhalo: ${firstError}`);
-    } else {
+      toast.error(`Uložení ${failed.toLocaleString()} z ${toSave.length.toLocaleString()} řádků selhalo: ${firstError}`);
+    } else if (toSave.length > 0) {
       toast.success(`Uloženo ${saved.toLocaleString()} řádků.`);
     }
     return { parsed: parsed.length, saved, failed, error: firstError };
-  }, [session]);
+  }, [session, isPro, planLoading]);
 
   // Apply date filter first, then model filter
   const dateFiltered = useMemo(() => filterByDate(data, dateFilter), [data, dateFilter]);

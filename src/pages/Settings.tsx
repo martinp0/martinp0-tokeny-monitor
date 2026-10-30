@@ -16,6 +16,8 @@ import { ProBadge } from "@/components/ProBadge";
 import { PRICING, formatCzk } from "@/config/pricing";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { UpgradeModal } from "@/components/UpgradeModal";
+import { ProGate } from "@/components/ProGate";
+import type { BillingInterval } from "@/config/pricing";
 
 interface BudgetAlert {
   id: string;
@@ -34,9 +36,22 @@ interface McpToken {
 
 const Settings = () => {
   const { session } = useAuth();
-  const [searchParams] = useSearchParams();
-  const { isPro, loading: subLoading, currentPeriodEnd, cancelAtPeriodEnd, startCheckout, refresh: refreshSub } = useSubscription();
-  const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const {
+    isPro,
+    loading: subLoading,
+    status: subStatus,
+    interval: subInterval,
+    currentPeriodEnd,
+    cancelAtPeriodEnd,
+    hasCustomer,
+    openPortal,
+    refresh: refreshSub,
+  } = useSubscription();
+  const upgradeParam = searchParams.get("upgrade");
+  const [upgradeModalOpen, setUpgradeModalOpen] = useState(!!upgradeParam);
+  const [upgradeInterval] = useState<BillingInterval>(upgradeParam === "monthly" || upgradeParam === "month" ? "month" : "year");
+  const [portalLoading, setPortalLoading] = useState(false);
   const [alert, setAlert] = useState<BudgetAlert | null>(null);
   const [tokens, setTokens] = useState<McpToken[]>([]);
   const [newToken, setNewToken] = useState<string | null>(null);
@@ -54,14 +69,30 @@ const Settings = () => {
   // Handle Stripe redirect
   useEffect(() => {
     const result = searchParams.get("checkout");
+    const timers: number[] = [];
     if (result === "success") {
-      toast.success("Platba proběhla úspěšně! Pro tier aktivován.");
+      toast.success("Děkuju! Tokeny Pro se aktivuje během pár vteřin.");
+      // The webhook may land a moment after the redirect — re-check a few times.
       refreshSub();
+      for (const ms of [2500, 6000, 12000]) timers.push(window.setTimeout(refreshSub, ms));
     } else if (result === "canceled") {
       toast.info("Platba zrušena.");
     }
+    if (result || searchParams.get("upgrade")) {
+      const next = new URLSearchParams(searchParams);
+      next.delete("checkout");
+      next.delete("upgrade");
+      setSearchParams(next, { replace: true });
+    }
+    return () => timers.forEach((t) => window.clearTimeout(t));
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  async function handlePortal() {
+    setPortalLoading(true);
+    await openPortal();
+    setPortalLoading(false);
+  }
 
   async function load() {
     const { data: a } = await supabase.from("budget_alerts").select("*").maybeSingle();
@@ -163,42 +194,57 @@ const Settings = () => {
               <div className="space-y-3">
                 <p className="text-sm text-muted-foreground">
                   Tvůj plán: <span className="font-semibold text-foreground">Pro</span>
+                  {subInterval && (
+                    <span className="ml-1">({subInterval === "year" ? "ročně" : "měsíčně"})</span>
+                  )}
                   {cancelAtPeriodEnd && (
                     <span className="ml-2 text-xs text-warning tabular-nums">(nekončí obnovením)</span>
                   )}
                 </p>
-                {currentPeriodEnd && (
-                  <p className="tabular-nums text-xs text-muted-foreground">
-                    Obnovení: {new Date(currentPeriodEnd).toLocaleDateString("cs-CZ")}
+                {subStatus === "past_due" && (
+                  <p className="text-xs text-warning" role="status">
+                    Poslední platba se nezdařila. Aktualizuj prosím platební kartu, ať o Pro nepřijdeš.
                   </p>
                 )}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="gap-1.5"
-                  onClick={startCheckout}
-                >
-                  <ExternalLink className="h-3.5 w-3.5" /> Správa předplatného
+                {currentPeriodEnd && (
+                  <p className="tabular-nums text-xs text-muted-foreground">
+                    {subStatus === "trialing"
+                      ? "Zkušební období do: "
+                      : cancelAtPeriodEnd
+                        ? "Pro platí do: "
+                        : "Obnovení: "}
+                    {new Date(currentPeriodEnd).toLocaleDateString("cs-CZ")}
+                  </p>
+                )}
+                <Button variant="outline" size="sm" className="gap-1.5" onClick={handlePortal} disabled={portalLoading}>
+                  <ExternalLink className="h-3.5 w-3.5" /> {portalLoading ? "Otevírám…" : "Spravovat předplatné"}
                 </Button>
+                <p className="text-xs text-muted-foreground">
+                  Změna měsíčně/ročně, platební karta, faktury a zrušení – přes zabezpečený portál Stripe.
+                </p>
               </div>
             ) : (
               <div className="space-y-3">
                 <p className="text-sm text-muted-foreground">
                   Tvůj plán: <span className="font-semibold text-foreground">Free</span>
+                  <span className="ml-1">· 1 poskytovatel, posledních 30 dní, import CSV</span>
                 </p>
-                <Button
-                  size="sm"
-                  className="gap-1.5"
-                  onClick={() => setUpgradeModalOpen(true)}
-                >
-                  <Zap className="h-3.5 w-3.5" /> Pro – {formatCzk(PRICING.pro.monthly)} / měsíc
-                </Button>
+                <div className="flex flex-wrap gap-2">
+                  <Button size="sm" className="gap-1.5" onClick={() => setUpgradeModalOpen(true)}>
+                    <Zap className="h-3.5 w-3.5" /> Pro – od {formatCzk(PRICING.pro.monthly)} / měsíc
+                  </Button>
+                  {hasCustomer && (
+                    <Button variant="outline" size="sm" className="gap-1.5" onClick={handlePortal} disabled={portalLoading}>
+                      <ExternalLink className="h-3.5 w-3.5" /> Faktury a platby
+                    </Button>
+                  )}
+                </div>
               </div>
             )}
           </CardContent>
         </Card>
 
-        <UpgradeModal open={upgradeModalOpen} onOpenChange={setUpgradeModalOpen} />
+        <UpgradeModal open={upgradeModalOpen} onOpenChange={setUpgradeModalOpen} defaultInterval={upgradeInterval} />
 
         <ProviderConnections />
 
@@ -209,6 +255,8 @@ const Settings = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            <ProGate feature="budget_alerts">
+            <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <Label htmlFor={budgetId} className="text-xs">Měsíční budget (USD)</Label>
@@ -230,6 +278,8 @@ const Settings = () => {
               </div>
               <Button onClick={saveAlert}>Uložit</Button>
             </div>
+            </div>
+            </ProGate>
           </CardContent>
         </Card>
 
@@ -240,6 +290,8 @@ const Settings = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            <ProGate feature="mcp">
+            <div className="space-y-4">
             <div className="rounded-lg bg-secondary/40 p-3 space-y-2">
               <div className="text-xs text-muted-foreground tabular-nums uppercase flex items-center gap-1">
                 <Terminal className="h-3 w-3" /> MCP endpoint
@@ -302,6 +354,8 @@ const Settings = () => {
 }`}
               </pre>
             </details>
+            </div>
+            </ProGate>
           </CardContent>
         </Card>
       </main>

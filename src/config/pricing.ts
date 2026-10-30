@@ -1,11 +1,20 @@
 /**
- * Single source of truth for plans and prices.
+ * Single source of truth for plans and prices (UI side).
  * Landing, Settings, UpgradeModal and ProGate all read from here.
  *
- * NOTE: prices are placeholders until the matching CZK prices exist in Stripe
- * (STRIPE_PRICE_ID). Flip `PRO_CHECKOUT_ENABLED` once checkout is live.
+ * Stripe (live, account martinpohl.cz): product "Tokeny Pro" (prod_VXDr0XHK7gteJO)
+ *   monthly 99 Kč  → price_1UW9Py6jFD9ux2ZIFyLZKM6k (lookup_key tokeny_pro_monthly)
+ *   yearly 990 Kč  → price_1UW9Pz6jFD9ux2ZIzt5tYuVw (lookup_key tokeny_pro_yearly)
+ * The edge functions read the price ids from STRIPE_PRICE_MONTHLY / STRIPE_PRICE_YEARLY; the
+ * amounts here are display-only and must match Stripe. Limits are enforced server-side
+ * (supabase/functions/_shared/plan.ts + RLS) — the UI only mirrors them.
  */
-export const PRO_CHECKOUT_ENABLED = false;
+import { FREE_LIMITS } from "@/lib/plan";
+
+export const PRO_CHECKOUT_ENABLED = true;
+
+/** Free trial for first-time subscribers (must match STRIPE_TRIAL_DAYS; 0 hides the copy). */
+export const PRO_TRIAL_DAYS = 14;
 
 export const PRICING = {
   currency: "CZK",
@@ -15,12 +24,26 @@ export const PRICING = {
   },
 } as const;
 
+export { FREE_LIMITS };
+
 export type PlanId = "free" | "pro";
+export type BillingInterval = "month" | "year";
 
 /** i18n keys under `pricing.features.*` */
 export const PLAN_FEATURES: Record<PlanId, string[]> = {
-  free: ["dashboard", "csvImport", "currency", "calculator", "oneAlert", "mcp"],
-  pro: ["everythingFree", "autoSync", "unlimitedAlerts", "forecast", "aiAgent", "exports", "sharing", "support"],
+  free: ["dashboard", "oneProvider", "history30", "csvImport", "currency", "calculator"],
+  pro: [
+    "everythingFree",
+    "unlimitedProviders",
+    "fullHistory",
+    "autoSync",
+    "budgetAlerts",
+    "forecast",
+    "aiAgent",
+    "exports",
+    "sharing",
+    "mcp",
+  ],
 };
 
 export function formatCzk(amount: number, locale = "cs-CZ") {

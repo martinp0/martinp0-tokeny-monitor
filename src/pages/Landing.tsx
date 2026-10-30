@@ -258,7 +258,7 @@ export default function Landing() {
           </ol>
         </section>
 
-        <PricingSection ctaHref={ctaHref} />
+        <PricingSection ctaHref={ctaHref} signedIn={hasSession} />
 
         {/* FAQ */}
         <section id="faq" className="scroll-mt-20 px-4 sm:px-6 py-20 md:py-28 max-w-3xl mx-auto">

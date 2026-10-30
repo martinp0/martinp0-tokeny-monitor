@@ -10,6 +10,9 @@ import {
 } from "@/components/ui/dialog";
 import { Plug, Plus, RefreshCw, Trash2, AlertCircle, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
+import { useSubscription } from "@/hooks/useSubscription";
+import { UpgradeModal } from "@/components/UpgradeModal";
+import { FREE_LIMITS, proRequiredFeature } from "@/lib/plan";
 
 // Only providers with a working server-side sync (see supabase/functions/_shared/sync-core.ts).
 type ProviderId = "openrouter" | "anthropic" | "openai";
@@ -75,6 +78,11 @@ export function ProviderConnections() {
   const [apiKey, setApiKey] = useState("");
   const [orgId, setOrgId] = useState("");
   const [saving, setSaving] = useState(false);
+  const { isPro, loading: planLoading } = useSubscription();
+  const [upgradeFeature, setUpgradeFeature] = useState<string | null>(null);
+  // Free plan: 1 provider. Mirrors the server check in save-provider-credential / user-sync.
+  const atFreeLimit = !planLoading && !isPro && credentials.length >= FREE_LIMITS.providers;
+  const syncableIds = new Set(isPro ? credentials.map((c) => c.id) : credentials.slice(0, FREE_LIMITS.providers).map((c) => c.id));
 
   async function load() {
     setLoading(true);
@@ -110,6 +118,12 @@ export function ProviderConnections() {
     });
     setSaving(false);
     if (error) {
+      const proFeature = await proRequiredFeature(error);
+      if (proFeature) {
+        setDialogOpen(false);
+        setUpgradeFeature(proFeature);
+        return;
+      }
       toast.error(await invokeErrorMessage(error));
       return;
     }
@@ -143,6 +157,11 @@ export function ProviderConnections() {
     });
     setSyncingId(null);
     if (error) {
+      const proFeature = await proRequiredFeature(error);
+      if (proFeature) {
+        setUpgradeFeature(proFeature);
+        return;
+      }
       toast.error(`${PROVIDER_META[c.provider].label}: ${await invokeErrorMessage(error)}`);
       await load();
       return;
@@ -162,7 +181,19 @@ export function ProviderConnections() {
         <CardTitle className="flex items-center gap-2 text-base">
           <Plug className="h-4 w-4 text-primary" /> API integrace
         </CardTitle>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <UpgradeModal
+          open={!!upgradeFeature}
+          onOpenChange={(o) => !o && setUpgradeFeature(null)}
+          feature={upgradeFeature ?? undefined}
+        />
+        <Dialog
+          open={dialogOpen}
+          onOpenChange={(o) => {
+            // Free plan already has its one provider → offer Pro instead of a form that would 403.
+            if (o && atFreeLimit) setUpgradeFeature("multi_provider");
+            else setDialogOpen(o);
+          }}
+        >
           <DialogTrigger asChild>
             <Button size="sm" className="gap-1.5">
               <Plus className="h-4 w-4" /> Přidat klíč
@@ -255,6 +286,14 @@ export function ProviderConnections() {
             Zatím žádné napojení. Přidej první API klíč pro automatický import.
           </div>
         )}
+        {!planLoading && !isPro && credentials.length > 0 && (
+          <p className="text-xs text-muted-foreground">
+            Free: 1 poskytovatel, ruční sync, posledních 30 dní.{" "}
+            <button type="button" className="text-primary underline-offset-2 hover:underline" onClick={() => setUpgradeFeature("auto_sync")}>
+              Pro synchronizuje automaticky každou hodinu.
+            </button>
+          </p>
+        )}
         {credentials.map((c) => (
           <div key={c.id} className="flex items-center justify-between rounded-lg bg-secondary/30 px-3 py-2.5">
             <div className="min-w-0">
@@ -289,11 +328,12 @@ export function ProviderConnections() {
                 variant="ghost"
                 size="sm"
                 className="gap-1.5"
-                onClick={() => handleSync(c)}
+                onClick={() => (syncableIds.has(c.id) ? handleSync(c) : setUpgradeFeature("multi_provider"))}
                 disabled={syncingId === c.id}
+                title={syncableIds.has(c.id) ? undefined : "Další poskytovatelé se synchronizují jen v Pro"}
               >
                 <RefreshCw className={`h-3.5 w-3.5 ${syncingId === c.id ? "animate-spin" : ""}`} />
-                Sync
+                {syncableIds.has(c.id) ? "Sync" : "Pro"}
               </Button>
               <Button
                 variant="ghost"

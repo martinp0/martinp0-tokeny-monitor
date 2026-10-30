@@ -1,4 +1,4 @@
-import { lazy, Suspense, useRef, useCallback } from "react";
+import { lazy, Suspense, useRef, useCallback, useState } from "react";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useDashboardData } from "@/hooks/useDashboardData";
@@ -33,6 +33,10 @@ import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { useSubscription } from "@/hooks/useSubscription";
+import { UpgradeModal } from "@/components/UpgradeModal";
+import { ProGate } from "@/components/ProGate";
+import { FREE_LIMITS, type ProFeature } from "@/lib/plan";
 
 const Index = () => {
   const dashboardRef = useRef<HTMLDivElement>(null);
@@ -43,7 +47,15 @@ const Index = () => {
     costByModel, costByProvider, timeSeries,
     hasUserData, loading,
   } = useDashboardData();
-  const { exportPNG, exportPDF } = useExport(dashboardRef);
+  const { exportPNG: rawExportPNG, exportPDF: rawExportPDF } = useExport(dashboardRef);
+  const { isPro, loading: planLoading } = useSubscription();
+  const [upgradeFeature, setUpgradeFeature] = useState<ProFeature | null>(null);
+  // Exports are rendered in the browser, so this UI gate is the only check (documented in the PR).
+  const exportPNG = useCallback(() => (isPro ? rawExportPNG() : setUpgradeFeature("exports")), [isPro, rawExportPNG]);
+  const exportPDF = useCallback(
+    (...args: Parameters<typeof rawExportPDF>) => (isPro ? rawExportPDF(...args) : setUpgradeFeature("exports")),
+    [isPro, rawExportPDF],
+  );
   const { currency, toggle: toggleCurrency, setCurrency, exchangeRate, rateDate } = useCurrency();
   const { signOut } = useAuth();
 
@@ -138,7 +150,7 @@ const Index = () => {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            <ShareDashboardButton />
+            <ProGate feature="sharing" compact><ShareDashboardButton /></ProGate>
             <ChangelogModal />
             <LanguageSwitcher />
             <ThemeToggle />
@@ -211,7 +223,7 @@ const Index = () => {
                   </div>
                   <div className="space-y-2">
                     <p className="text-xs uppercase tracking-wider text-muted-foreground">Ostatní</p>
-                    <ShareDashboardButton />
+                    <ProGate feature="sharing" compact><ShareDashboardButton /></ProGate>
                     <div className="flex items-center gap-2">
                       <ChangelogModal />
                       <LanguageSwitcher />
@@ -244,6 +256,16 @@ const Index = () => {
           <OnboardingEmptyState onUpload={loadCSV} />
         ) : (
           <>
+            {!planLoading && !isPro && (
+              <div className="surface rounded-2xl px-4 py-3 flex flex-wrap items-center justify-between gap-2 text-sm" role="note">
+                <span className="text-muted-foreground">
+                  Free tarif zobrazuje posledních {FREE_LIMITS.historyDays} dní. Starší data máš uložená – odemkne je Pro.
+                </span>
+                <Button size="sm" variant="outline" onClick={() => setUpgradeFeature("full_history")}>
+                  Přejít na Pro
+                </Button>
+              </div>
+            )}
             <KpiCards totalCost={totalCost} totalRequests={totalRequests} totalTokens={totalTokens} avgGenTime={avgGenTime} />
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -258,7 +280,7 @@ const Index = () => {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <CostForecast data={data} />
+              <ProGate feature="forecast"><CostForecast data={data} /></ProGate>
               <AnomalyPanel data={data} />
             </div>
 
@@ -271,9 +293,18 @@ const Index = () => {
         )}
       </main>
 
-      <Suspense fallback={null}>
-        <AiAgentChat onAction={handleAgentAction} />
-      </Suspense>
+      <UpgradeModal
+        open={!!upgradeFeature}
+        onOpenChange={(o) => !o && setUpgradeFeature(null)}
+        feature={upgradeFeature ?? undefined}
+      />
+
+      {/* AI agent is Pro-only (chat-agent returns 403 otherwise). */}
+      <ProGate feature="ai_agent" hideWhenLocked>
+        <Suspense fallback={null}>
+          <AiAgentChat onAction={handleAgentAction} />
+        </Suspense>
+      </ProGate>
     </div>
   );
 };

@@ -4,11 +4,11 @@ import { useTranslation } from "react-i18next";
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { PLAN_FEATURES, PRICING, PRO_CHECKOUT_ENABLED, formatCzk } from "@/config/pricing";
+import { PLAN_FEATURES, PRICING, PRO_CHECKOUT_ENABLED, PRO_TRIAL_DAYS, formatCzk } from "@/config/pricing";
 
 type Billing = "monthly" | "yearly";
 
-export function PricingSection({ ctaHref }: { ctaHref: string }) {
+export function PricingSection({ ctaHref, signedIn = false }: { ctaHref: string; signedIn?: boolean }) {
   const { t, i18n } = useTranslation();
   const [billing, setBilling] = useState<Billing>("monthly");
   const locale = i18n.language?.startsWith("en") ? "en-GB" : "cs-CZ";
@@ -73,14 +73,20 @@ export function PricingSection({ ctaHref }: { ctaHref: string }) {
             {proPrice}
           </p>
           <FeatureList keys={PLAN_FEATURES.pro} />
+          {/* Signed-in visitors go straight to the plan picker in Settings (keeps the landing
+              bundle free of the Supabase client). */}
           <Button asChild size="lg" className="mt-8 w-full">
-            <Link to={ctaHref}>{PRO_CHECKOUT_ENABLED ? t("pricing.upgrade") : t("pricing.notify")}</Link>
+            <Link to={PRO_CHECKOUT_ENABLED && signedIn ? `/settings?upgrade=${billing}` : ctaHref}>
+              {!PRO_CHECKOUT_ENABLED
+                ? t("pricing.notify")
+                : PRO_TRIAL_DAYS > 0
+                  ? t("pricing.trialShort", { days: PRO_TRIAL_DAYS })
+                  : t("pricing.upgrade")}
+            </Link>
           </Button>
         </div>
       </div>
-      {!PRO_CHECKOUT_ENABLED && (
-        <p className="text-center text-sm text-muted-foreground mt-6">{t("pricing.vatNote")}</p>
-      )}
+      <p className="text-center text-sm text-muted-foreground mt-6">{t("pricing.vatNote")}</p>
     </section>
   );
 }
