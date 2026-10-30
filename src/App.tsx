@@ -8,6 +8,7 @@ import { HelmetProvider } from "react-helmet-async";
 import Landing from "./pages/Landing.tsx";
 
 const Auth = lazy(() => import("./pages/Auth.tsx"));
+const AuthCallback = lazy(() => import("./pages/AuthCallback.tsx"));
 const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword.tsx"));
 const Fun = lazy(() => import("./pages/Fun.tsx"));
@@ -97,6 +98,7 @@ export function AppRoutes() {
     <Routes>
       <Route path="/" element={<Landing />} />
       <Route path="/auth" element={<AuthRoute><Auth /></AuthRoute>} />
+      <Route path="/auth/callback" element={<AuthCallback />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/fun" element={<Fun />} />
       <Route path="/dashboard" element={<ProtectedRoute><Index /></ProtectedRoute>} />

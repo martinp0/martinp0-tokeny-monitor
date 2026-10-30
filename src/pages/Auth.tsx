@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
+import { authCallbackUrl } from "@/lib/auth-redirect";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -33,7 +33,7 @@ export default function Auth() {
           password,
           options: {
             data: { display_name: displayName || email },
-            emailRedirectTo: window.location.origin,
+            emailRedirectTo: authCallbackUrl(window.location.origin),
           },
         });
         if (error) throw error;
@@ -149,8 +149,9 @@ export default function Auth() {
                   variant="outline"
                   className="w-full gap-2 font-mono glass glass-hover border-white/[0.08]"
                   onClick={async () => {
-                    const { error } = await lovable.auth.signInWithOAuth("google", {
-                      redirect_uri: window.location.origin,
+                    const { error } = await supabase.auth.signInWithOAuth({
+                      provider: "google",
+                      options: { redirectTo: authCallbackUrl(window.location.origin) },
                     });
                     if (error) toast.error(error.message || "Chyba při přihlášení přes Google");
                   }}
@@ -168,8 +169,9 @@ export default function Auth() {
                   variant="outline"
                   className="w-full gap-2 font-mono glass glass-hover border-white/[0.08]"
                   onClick={async () => {
-                    const { error } = await lovable.auth.signInWithOAuth("apple", {
-                      redirect_uri: window.location.origin,
+                    const { error } = await supabase.auth.signInWithOAuth({
+                      provider: "apple",
+                      options: { redirectTo: authCallbackUrl(window.location.origin) },
                     });
                     if (error) toast.error(error.message || "Chyba při přihlášení přes Apple");
                   }}
