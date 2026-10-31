@@ -34,7 +34,7 @@ export default function BlogPostLayout({ title, description, slug, date, tag, ke
           "@type": "Article",
           headline: title,
           description,
-          author: { "@type": "Person", name: "Martin Pohl", url: "https://martin.pohl.uk" },
+          author: { "@type": "Person", name: "Martin Pohl", url: "https://martinpohl.cz" },
           publisher: {
             "@type": "Organization",
             name: "Tokeny Monitor",

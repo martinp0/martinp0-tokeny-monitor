@@ -375,10 +375,10 @@ export default function Landing() {
         </Accordion>
       </section>
 
-      {/* Maker — nenápadné propojení s martin.pohl.uk */}
+      {/* Maker — nenápadné propojení s martinpohl.cz */}
       <section id="maker" className="px-4 sm:px-6 py-16 max-w-5xl mx-auto">
         <a
-          href="https://martin.pohl.uk?utm_source=tokeny.pohl.uk&utm_medium=landing&utm_campaign=maker_card"
+          href="https://martinpohl.cz/?utm_source=tokeny.martinpohl.cz&utm_medium=landing&utm_campaign=maker_card"
           target="_blank"
           rel="noopener author"
           className="block group"
@@ -405,7 +405,7 @@ export default function Landing() {
                 </p>
               </div>
               <div className="flex items-center gap-2 text-sm text-accent group-hover:gap-3 transition-all shrink-0">
-                martin.pohl.uk
+                martinpohl.cz
                 <ExternalLink className="h-4 w-4" />
               </div>
             </CardContent>
@@ -476,7 +476,7 @@ export default function Landing() {
             <span>
               OpenRouter Monitor · {new Date().getFullYear()} ·{" "}
               <a
-                href="https://martin.pohl.uk?utm_source=tokeny.pohl.uk&utm_medium=footer"
+                href="https://martinpohl.cz/?utm_source=tokeny.martinpohl.cz&utm_medium=footer"
                 target="_blank"
                 rel="noopener author"
                 className={`${hit} text-foreground`}
@@ -495,12 +495,12 @@ export default function Landing() {
               {csCopy("Kup mi kafe")}
             </a>
             <a
-              href="https://martin.pohl.uk?utm_source=tokeny.pohl.uk&utm_medium=footer_nav"
+              href="https://martinpohl.cz/?utm_source=tokeny.martinpohl.cz&utm_medium=footer_nav"
               target="_blank"
               rel="noopener author"
               className={hit}
             >
-              martin.pohl.uk
+              martinpohl.cz
             </a>
             <Link to="/auth" className={hit}>{csCopy("Přihlášení")}</Link>
             <a
