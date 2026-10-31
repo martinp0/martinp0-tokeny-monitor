@@ -16,6 +16,7 @@ struct TokenyApp: App {
             RootView()
                 .environment(model)
                 .task { await model.auth.observe() }
+                .task { await model.observeStorefront() }
                 .task {
                     watch.activate(model: model)
                     model.onChange = { [watch, model] in watch.push(from: model) }

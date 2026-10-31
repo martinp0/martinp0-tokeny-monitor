@@ -49,7 +49,7 @@ CS = {
     "Last month": "Minulý měsíc",
     "Main currency": "Hlavní měna",
     "Manage account on the web": "Spravovat účet na webu",
-    "Manage plan on the web": "Spravovat tarif na webu",
+    "Upgrade on the web": "Přejít na Pro na webu",
     "Month %@": "Měsíc %@",
     "No data yet": "Zatím žádná data",
     "Not signed in. Sign in from the menu bar.": "Nejsi přihlášený. Přihlas se v menu baru.",
