@@ -6,6 +6,13 @@ import { ArrowRight, BookOpen, Calendar } from "lucide-react";
 
 const POSTS = [
   {
+    slug: "kolik-stoji-ai-agenti",
+    title: "Kolik doopravdy stojí AI agenti: měsíc dat, 7,3 miliardy tokenů a 859 dolarů",
+    excerpt: "Říjen 2026 z Grok Botu a Cursoru: 85 179 volání, 95 % tokenů z mezipaměti a útrata, která přichází ve skocích.",
+    date: "2026-10-30",
+    tag: "Reálná data",
+  },
+  {
     slug: "grok-token-optimization",
     title: "Jak optimalizovat tokeny u Grok API (xAI): 7 praktických tipů",
     excerpt: "Kratší výstupy, správa historie, prompt caching, výběr modelu a měření. Jak snížit účet za Grok.",
@@ -62,10 +69,10 @@ export default function Blog() {
       <Helmet>
         <title>Blog — AI cost saving, prompt engineering & token optimization | Tokeny Monitor</title>
         <meta name="description" content="Praktické články o snižování nákladů na LLM, optimalizaci promptů a práci s token window. Návody, příklady, čísla." />
-        <link rel="canonical" href="https://tokeny.pohl.uk/blog" />
+        <link rel="canonical" href="https://tokeny.martinpohl.cz/blog" />
         <meta property="og:title" content="Tokeny Monitor Blog — AI cost & prompt optimization" />
         <meta property="og:description" content="Návody a tipy jak ušetřit na AI API a psát lepší prompty." />
-        <meta property="og:url" content="https://tokeny.pohl.uk/blog" />
+        <meta property="og:url" content="https://tokeny.martinpohl.cz/blog" />
         <meta property="og:type" content="website" />
       </Helmet>
 

@@ -20,10 +20,10 @@ export default function ClaudeApiCost() {
           content="Claude API cost breakdown for Haiku, Sonnet and Opus. Per-token pricing, real-world monthly examples and how to track actual spend in USD or CZK."
         />
         <meta name="keywords" content="claude api cost, claude api pricing, anthropic api cost, claude sonnet pricing, claude opus cost, claude haiku price" />
-        <link rel="canonical" href="https://tokeny.pohl.uk/claude-api-cost" />
+        <link rel="canonical" href="https://tokeny.martinpohl.cz/claude-api-cost" />
         <meta property="og:title" content="Claude API Cost 2026 — Full Pricing Breakdown" />
         <meta property="og:description" content="How much does the Claude API really cost? Haiku, Sonnet, Opus pricing with monthly examples." />
-        <meta property="og:url" content="https://tokeny.pohl.uk/claude-api-cost" />
+        <meta property="og:url" content="https://tokeny.martinpohl.cz/claude-api-cost" />
         <meta property="og:type" content="article" />
         <script type="application/ld+json">{JSON.stringify({
           "@context": "https://schema.org",
@@ -32,7 +32,7 @@ export default function ClaudeApiCost() {
           description: "Per-token pricing for Claude Haiku, Sonnet and Opus with monthly cost examples.",
           author: { "@type": "Person", name: "Martin Pohl", url: "https://martinpohl.cz" },
           datePublished: "2026-05-18",
-          url: "https://tokeny.pohl.uk/claude-api-cost",
+          url: "https://tokeny.martinpohl.cz/claude-api-cost",
         })}</script>
         <script type="application/ld+json">{JSON.stringify({
           "@context": "https://schema.org",

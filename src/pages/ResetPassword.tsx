@@ -54,7 +54,7 @@ export default function ResetPassword() {
     <Helmet>
       <title>Obnovení hesla – OpenRouter Monitor</title>
       <meta name="description" content="Nastavte si nové heslo k vašemu účtu OpenRouter Monitor." />
-      <link rel="canonical" href="https://tokeny.pohl.uk/reset-password" />
+      <link rel="canonical" href="https://tokeny.martinpohl.cz/reset-password" />
       <meta name="robots" content="noindex,nofollow" />
     </Helmet>
   );

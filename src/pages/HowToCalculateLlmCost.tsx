@@ -14,10 +14,10 @@ export default function HowToCalculateLlmCost() {
           content="Step-by-step guide to calculate LLM cost: how tokens are priced, formula, real examples for GPT, Claude and Gemini. Free calculator included."
         />
         <meta name="keywords" content="llm cost calculator, how to calculate llm cost, token cost formula, ai api cost calculation, llm pricing explained" />
-        <link rel="canonical" href="https://tokeny.pohl.uk/how-to-calculate-llm-cost" />
+        <link rel="canonical" href="https://tokeny.martinpohl.cz/how-to-calculate-llm-cost" />
         <meta property="og:title" content="How to Calculate LLM Cost — Step-by-Step" />
         <meta property="og:description" content="Token pricing, formula and real examples. With a free LLM cost calculator." />
-        <meta property="og:url" content="https://tokeny.pohl.uk/how-to-calculate-llm-cost" />
+        <meta property="og:url" content="https://tokeny.martinpohl.cz/how-to-calculate-llm-cost" />
         <meta property="og:type" content="article" />
         <script type="application/ld+json">{JSON.stringify({
           "@context": "https://schema.org",

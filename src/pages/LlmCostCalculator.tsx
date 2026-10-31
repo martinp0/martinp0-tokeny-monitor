@@ -65,16 +65,16 @@ export default function LlmCostCalculator() {
           content="Free LLM cost calculator. Estimate monthly API spend for GPT-5, Claude, Gemini, Llama and DeepSeek. Compare token pricing across providers in USD & CZK."
         />
         <meta name="keywords" content="llm cost calculator, ai cost calculator, openai pricing calculator, claude api cost, gpt api cost, token cost calculator, llm pricing" />
-        <link rel="canonical" href="https://tokeny.pohl.uk/llm-cost-calculator" />
+        <link rel="canonical" href="https://tokeny.martinpohl.cz/llm-cost-calculator" />
         <meta property="og:title" content="LLM Cost Calculator — GPT, Claude, Gemini" />
         <meta property="og:description" content="Estimate monthly LLM API spend across GPT-5, Claude, Gemini and more. Free, instant, no signup." />
-        <meta property="og:url" content="https://tokeny.pohl.uk/llm-cost-calculator" />
+        <meta property="og:url" content="https://tokeny.martinpohl.cz/llm-cost-calculator" />
         <meta property="og:type" content="website" />
         <script type="application/ld+json">{JSON.stringify({
           "@context": "https://schema.org",
           "@type": "WebApplication",
           name: "LLM Cost Calculator",
-          url: "https://tokeny.pohl.uk/llm-cost-calculator",
+          url: "https://tokeny.martinpohl.cz/llm-cost-calculator",
           applicationCategory: "BusinessApplication",
           operatingSystem: "Web",
           description: "Free calculator to estimate monthly LLM API costs across GPT, Claude, Gemini and other models.",
