@@ -3,6 +3,7 @@
 import type { Db } from "./db.js";
 import { freeHistoryFloor } from "./lib/plan.js";
 import { getBudgetAlert, getExchangeRate } from "./repo.js";
+import { forecastMonth } from "./lib/forecast.js";
 
 export function validTz(tz: string | null): string {
   if (!tz) return "Europe/Prague";
@@ -46,6 +47,7 @@ export async function usageSummary(db: Db, userId: string, isPro: boolean, tzPar
   const zero = () => ({ cost_usd: 0, tokens: 0, requests: 0 });
   const todayAgg = zero(), monthAgg = zero(), prevAgg = zero();
   const daily: Record<string, number> = {};
+  const allDaily: Record<string, number> = {}; // every fetched day, for the shared forecast
   const models: Record<string, number> = {};
   const providers: Record<string, number> = {};
   let lastActivity: string | null = null;
@@ -62,11 +64,17 @@ export async function usageSummary(db: Db, userId: string, isPro: boolean, tzPar
       providers[r.provider_name] = (providers[r.provider_name] ?? 0) + cost;
     } else if (k.startsWith(prevMonthKey)) add(prevAgg);
     if (last30.has(k)) daily[k] = (daily[k] ?? 0) + cost;
+    allDaily[k] = (allDaily[k] ?? 0) + cost;
     if (!lastActivity || r.created_at > lastActivity) lastActivity = r.created_at;
   }
-  const dayOfMonth = Number(today.slice(8, 10));
-  const daysInMonth = new Date(Date.UTC(y, mo, 0)).getUTCDate();
-  const [budget, rate] = await Promise.all([getBudgetAlert(db, userId), getExchangeRate(db)]);
+  const [budget, rate, first] = await Promise.all([
+    getBudgetAlert(db, userId),
+    getExchangeRate(db),
+    isPro ? db.query<{ first_at: string | null }>(`select min(created_at) as first_at from activity_rows where user_id = $1`, [userId]) : null,
+  ]);
+  // Same method as the dashboard budget card (server/lib/forecast.ts), in the caller's time zone.
+  const firstAt = first?.rows[0]?.first_at;
+  const forecast = isPro ? forecastMonth(allDaily, firstAt ? dayKey(new Date(firstAt), tz) : null, now, tz) : null;
   const fin = (a: ReturnType<typeof zero>) => ({ ...a, cost_usd: round(a.cost_usd) });
   const top = (o: Record<string, number>, n: number) =>
     Object.entries(o).sort((a, b) => b[1] - a[1]).slice(0, n).map(([name, c]) => ({ name, cost_usd: round(c) }));
@@ -78,7 +86,16 @@ export async function usageSummary(db: Db, userId: string, isPro: boolean, tzPar
     today: fin(todayAgg),
     month: { ...fin(monthAgg), key: monthKey },
     previous_month: isPro ? { ...fin(prevAgg), key: prevMonthKey } : null,
-    forecast_month_usd: isPro ? round(dayOfMonth > 0 ? (monthAgg.cost_usd / dayOfMonth) * daysInMonth : 0) : null,
+    forecast_month_usd: forecast ? round(forecast.forecast_usd ?? forecast.spent_usd) : null,
+    forecast: forecast
+      ? {
+          low_usd: forecast.low_usd == null ? null : round(forecast.low_usd),
+          high_usd: forecast.high_usd == null ? null : round(forecast.high_usd),
+          confidence: forecast.confidence,
+          days_observed: forecast.days_observed,
+          method: forecast.method,
+        }
+      : null,
     budget: budget
       ? { monthly_usd: Number(budget.monthly_budget_usd), threshold_pct: Number(budget.threshold_pct), enabled: !!budget.enabled }
       : null,

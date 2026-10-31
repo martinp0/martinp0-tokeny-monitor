@@ -3,6 +3,7 @@
 // (`…ForCron`, `…ByShareToken`, `…ByCustomer`, `userIdByMcpToken`). Tenant isolation is
 // tested against a real Postgres (PGlite) in src/test/server-isolation.test.ts.
 import { createHash, randomBytes } from "node:crypto";
+import { BUDGET_TZ, localDay } from "./lib/forecast.js";
 import type { Db } from "./db.js";
 import { freeHistoryFloor, isProSubscription, syncableCredentialIds } from "./lib/plan.js";
 import { decryptSecret, encryptSecret, EncryptionKeyError } from "./crypto.js";
@@ -294,20 +295,45 @@ export async function saveBudgetAlert(
 }
 
 /** Cost per UTC day and provider_source since `from` (YYYY-MM-DD), plus first-ever usage day per source. */
-export async function dailyCostsBySource(db: Db, userId: string, from: string) {
-  const [{ rows: days }, { rows: firsts }] = await Promise.all([
-    db.query<{ day: string; source: string; cost: number }>(
-      `select left(created_at, 10) as day, provider_source as source, coalesce(sum(cost_total), 0)::float8 as cost
+/**
+ * Cost per local day (default Europe/Prague) and provider since `from` (a UTC ISO prefix), plus each
+ * provider's first local day. Rows are bucketed by UTC hour in SQL (created_at is UTC ISO text) and
+ * mapped to local days here; Prague's offset is whole hours, so this is exact across DST.
+ */
+export async function dailyCostsBySource(db: Db, userId: string, from: string, tz: string = BUDGET_TZ) {
+  const [{ rows: hours }, { rows: firstHours }] = await Promise.all([
+    db.query<{ hour: string; source: string; cost: number }>(
+      `select left(created_at, 13) as hour, provider_source as source, coalesce(sum(cost_total), 0)::float8 as cost
          from activity_rows where user_id = $1 and created_at >= $2 group by 1, 2`,
       [userId, from],
     ),
-    db.query<{ source: string; first_day: string }>(
-      `select provider_source as source, left(min(created_at), 10) as first_day
+    db.query<{ source: string; first_hour: string }>(
+      `select provider_source as source, left(min(created_at), 13) as first_hour
          from activity_rows where user_id = $1 group by 1`,
       [userId],
     ),
   ]);
-  return { days, firsts };
+  const acc = new Map<string, { day: string; source: string; cost: number }>();
+  for (const h of hours) {
+    const day = utcHourToLocalDay(h.hour, tz);
+    if (!day) continue;
+    const k = `${day}|${h.source}`;
+    const e = acc.get(k);
+    if (e) e.cost += Number(h.cost);
+    else acc.set(k, { day, source: h.source, cost: Number(h.cost) });
+  }
+  const firsts = firstHours
+    .map((f) => ({ source: f.source, first_day: utcHourToLocalDay(f.first_hour, tz) }))
+    .filter((f): f is { source: string; first_day: string } => !!f.first_day);
+  return { days: [...acc.values()], firsts };
+}
+
+/** "YYYY-MM-DDTHH" (UTC; "T" or " " separator) → local day; a bare "YYYY-MM-DD" is kept as is. */
+export function utcHourToLocalDay(hour: string, tz: string = BUDGET_TZ): string | null {
+  const m = /^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}))?/.exec(hour ?? "");
+  if (!m) return null;
+  if (m[4] === undefined) return `${m[1]}-${m[2]}-${m[3]}`;
+  return localDay(Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4]), tz);
 }
 
 export interface BudgetEvent {

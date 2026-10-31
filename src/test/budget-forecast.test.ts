@@ -9,7 +9,10 @@ import path from "node:path";
 import type { Db } from "../../server/db";
 import { createApp } from "../../server/app";
 import { checkBudgets } from "../../server/cron";
-import { forecastMonth } from "../../server/lib/forecast";
+import { addDays, forecastMonth, localDay, localMidnight } from "../../server/lib/forecast";
+import { budgetStatus } from "../../server/budget-status";
+import { utcHourToLocalDay } from "../../server/repo";
+import { usageSummary } from "../../server/usage-summary";
 import { evaluateAlerts, parseBudgetInput } from "../../server/lib/budget";
 
 const days = (from: string, n: number, v: number | ((i: number) => number)) => {
@@ -20,7 +23,7 @@ const days = (from: string, n: number, v: number | ((i: number) => number)) => {
 };
 
 describe("forecastMonth (weighted run-rate)", () => {
-  const noon15 = new Date("2026-11-15T12:00:00Z"); // 30-day month, 15.5 days left
+  const noon15 = new Date("2026-11-15T11:00:00Z"); // 12:00 in Prague (CET); 30-day month, 15.5 days left
 
   it("constant spend → exact projection, tight range, high confidence", () => {
     const f = forecastMonth(days("2026-10-01", 46, 2), "2026-10-01", noon15);
@@ -73,7 +76,7 @@ describe("forecastMonth (weighted run-rate)", () => {
   });
 
   it("first day of the month uses last month's days for the rate", () => {
-    const f = forecastMonth(days("2026-10-01", 31, 1), "2026-10-01", new Date("2026-11-01T00:00:00Z"));
+    const f = forecastMonth(days("2026-10-01", 31, 1), "2026-10-01", new Date("2026-10-31T23:00:00Z")); // Prague midnight, Nov 1
     expect(f.spent_usd).toBe(0);
     expect(f.forecast_usd).toBeCloseTo(30, 6);
   });
@@ -242,5 +245,63 @@ describe("Pro budget, forecast and alerts", () => {
   it("account deletion removes budget events", async () => {
     await pg.query('delete from neon_auth."user" where id = $1', [C]);
     expect((await pg.query("select count(*)::int n from budget_events where user_id = $1", [C])).rows[0]).toEqual({ n: 0 });
+  });
+});
+
+describe("Europe/Prague months and days (DST-safe)", () => {
+  it("local day, midnight and 23/25-hour DST days", () => {
+    expect(localDay(new Date("2026-10-31T23:30:00Z"))).toBe("2026-11-01");
+    expect(localDay(new Date("2026-07-31T21:59:00Z"))).toBe("2026-07-31");
+    expect(localDay(new Date("2026-07-31T22:00:00Z"))).toBe("2026-08-01");
+    expect(new Date(localMidnight("2026-11-01")).toISOString()).toBe("2026-10-31T23:00:00.000Z");
+    expect(new Date(localMidnight("2026-08-01")).toISOString()).toBe("2026-07-31T22:00:00.000Z");
+    expect(localMidnight("2026-10-26") - localMidnight("2026-10-25")).toBe(25 * 3600e3); // CEST → CET
+    expect(localMidnight("2026-03-30") - localMidnight("2026-03-29")).toBe(23 * 3600e3); // CET → CEST
+    expect(addDays("2026-03-01", -1)).toBe("2026-02-28");
+    expect(utcHourToLocalDay("2026-10-31T23")).toBe("2026-11-01");
+    expect(utcHourToLocalDay("2026-07-31T21")).toBe("2026-07-31");
+    expect(utcHourToLocalDay("2026-07-31 22")).toBe("2026-08-01");
+    expect(utcHourToLocalDay("2026-07-31")).toBe("2026-07-31");
+    expect(utcHourToLocalDay("garbage")).toBeNull();
+  });
+
+  it("the month flips at Prague midnight, not UTC midnight", () => {
+    const d = days("2026-10-01", 31, 1);
+    const before = forecastMonth(d, "2026-10-01", new Date("2026-10-31T22:59:00Z")); // 23:59 Prague, Oct 31
+    expect(before.period).toBe("2026-10");
+    expect(before.day_of_month).toBe(31);
+    expect(before.days_remaining).toBeCloseTo(1 / 1440, 5); // one minute left
+    const after = forecastMonth(d, "2026-10-01", new Date("2026-10-31T23:01:00Z")); // 00:01 Prague, Nov 1 (UTC still Oct 31)
+    expect(after.period).toBe("2026-11");
+    expect(after.day_of_month).toBe(1);
+    expect(after.spent_usd).toBe(0);
+  });
+
+  it("days remaining on the 25-hour DST day", () => {
+    // 2026-10-25 12:00 CET = 11:00Z; 13 of 25 hours gone; Oct has 31 days
+    const f = forecastMonth(days("2026-10-01", 25, 1), "2026-10-01", new Date("2026-10-25T11:00:00Z"));
+    expect(f.day_of_month).toBe(25);
+    expect(f.days_remaining).toBeCloseTo(6 + 12 / 25, 6);
+  });
+
+  it("budget status buckets rows into Prague days; usage-summary uses the same forecast", async () => {
+    const D = "dddddddd-dddd-4ddd-8ddd-dddddddddddd";
+    await pg.query('insert into neon_auth."user" (id, name, email) values ($1, \'D\', \'d@example.test\')', [D]);
+    await pg.query("insert into subscriptions (user_id, stripe_customer_id, stripe_subscription_id, status, current_period_end) values ($1, 'cus_d', 'sub_d', 'active', now() + interval '400 days')", [D]);
+    const ins = (id: string, at: string, cost: number) =>
+      pg.query("insert into activity_rows (user_id, generation_id, created_at, cost_total, provider_source) values ($1, $2, $3, $4, 'openai')", [D, id, at, cost]);
+    for (let i = 1; i <= 20; i++) await ins(`d-oct-${i}`, `2026-10-${String(i).padStart(2, "0")}T10:00:00.000Z`, 1);
+    await ins("d-late", "2026-10-31T23:30:00.000Z", 7); // 00:30 Prague on Nov 1
+    const now = new Date("2026-11-01T10:00:00Z");
+    const s = await budgetStatus(db, D, null, now, 23.5);
+    expect(s.period).toBe("2026-11");
+    expect(s.tz).toBe("Europe/Prague");
+    expect(s.total.forecast.spent_usd).toBeCloseTo(7, 6);
+    expect(s.days).toEqual([{ date: "2026-11-01", cost_usd: 7 }]);
+    const u = await usageSummary(db, D, true, "Europe/Prague", now);
+    expect(u.month.cost_usd).toBeCloseTo(7, 6);
+    expect(u.forecast_month_usd).toBeCloseTo(s.total.forecast.forecast_usd!, 4);
+    expect(u.forecast?.confidence).toBe(s.total.forecast.confidence);
+    expect(u.forecast?.method).toBe("weighted_run_rate");
   });
 });

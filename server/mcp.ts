@@ -3,7 +3,8 @@ import { McpServer, StreamableHttpTransport } from "mcp-lite";
 import { AsyncLocalStorage } from "node:async_hooks";
 import { proRequiredBody } from "./lib/plan.js";
 import type { Db } from "./db.js";
-import { aggregateActivity, deleteActivity } from "./repo.js";
+import { aggregateActivity, deleteActivity, getBudgetAlert } from "./repo.js";
+import { budgetStatus } from "./budget-status.js";
 
 export interface McpDeps {
   /** Resolves the Bearer token to a user id, or null. */
@@ -14,7 +15,7 @@ export interface McpDeps {
   db(): Db;
 }
 
-export const SERVER_INFO = { name: "tokeny", version: "1.2.0" };
+export const SERVER_INFO = { name: "tokeny", version: "1.3.0" };
 
 const CORS: Record<string, string> = {
   "Access-Control-Allow-Origin": "*",
@@ -59,6 +60,23 @@ export function createMcpApp(deps: McpDeps) {
         total_cost_usd: +(row?.cost_total ?? 0).toFixed(4),
         requests: Number(row?.request_count ?? 0),
         rows: Number(row?.row_count ?? 0),
+      });
+    },
+  });
+
+  mcp.tool("get_month_forecast", {
+    description: "This month's spend, month-end forecast (weighted run-rate, ~80 % range, confidence) and budget, overall and per provider. Months and days in Europe/Prague time. / Útrata tento měsíc, odhad na konec měsíce a rozpočet.",
+    annotations: READ_ONLY,
+    inputSchema: { type: "object", properties: {} },
+    handler: async () => {
+      const userId = currentUserId();
+      const cfg = await getBudgetAlert(deps.db(), userId);
+      const s = await budgetStatus(deps.db(), userId, cfg);
+      return text({
+        period: s.period, tz: s.tz, usd_czk: s.usd_czk,
+        budget: cfg ? { amount: cfg.budget_amount, currency: cfg.budget_currency, budget_usd: s.total.budget_usd, enabled: cfg.enabled } : null,
+        total: s.total.forecast,
+        providers: s.providers.map((p) => ({ provider: p.scope, budget_usd: p.budget_usd, ...p.forecast })),
       });
     },
   });
