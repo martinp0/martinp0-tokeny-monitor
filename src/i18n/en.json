@@ -72,7 +72,8 @@
   "support": {
     "title": "Support development with",
     "titleHighlight": "a coffee",
-    "desc": "Tokeny is free and open-source. If it saves you time or money, you can say thanks with a symbolic coffee. Every bit of support motivates further improvements."
+    "desc": "Tokeny is free and open-source. If it saves you time or money, a coffee on Buy Me a Coffee covers servers and time for the next release.",
+    "button": "Buy me a coffee"
   },
   "cta": {
     "title": "Ready to take",

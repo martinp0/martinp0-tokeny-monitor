@@ -25,6 +25,7 @@ import {
 import { useCurrency } from "@/hooks/useCurrency";
 import { SITE_URL } from "@/config/site";
 import { maybeSignedIn } from "@/lib/auth-client";
+import SupportCard from "@/components/SupportCard";
 
 
 const FEATURES = [
@@ -238,7 +239,7 @@ export default function Landing() {
         </section>
 
         {/* Closing CTA */}
-        <section className="px-4 sm:px-6 pb-24 md:pb-32 max-w-4xl mx-auto text-center">
+        <section className="px-4 sm:px-6 pb-16 md:pb-20 max-w-4xl mx-auto text-center">
           <h2 className="text-3xl md:text-5xl font-semibold tracking-tight mb-4">{t("landing.cta.title")}</h2>
           <p className="text-muted-foreground text-lg mb-8">{t("landing.cta.subtitle")}</p>
           <Button asChild size="lg" className="gap-2">
@@ -247,6 +248,10 @@ export default function Landing() {
               <ArrowRight className="h-4 w-4" aria-hidden />
             </Link>
           </Button>
+        </section>
+
+        <section className="px-4 sm:px-6 pb-20 md:pb-28 max-w-3xl mx-auto">
+          <SupportCard placement="landing" />
         </section>
       </main>
 
