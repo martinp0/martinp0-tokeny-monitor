@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import SupportCard from "@/components/SupportCard";
+import { isNativeAppSurface } from "@/lib/support";
 import { ArrowRight, BookOpen, Calculator, Coffee, FileText, Github, Sparkles, TrendingDown, Zap } from "lucide-react";
 import { PublicHeader } from "@/components/PublicHeader";
 
@@ -397,9 +398,11 @@ export default function LlmCostCalculator() {
         </div>
       </section>
 
-      <div className="container mx-auto px-4 pb-12">
-        <SupportCard placement="calculator" />
-      </div>
+      {!isNativeAppSurface() && (
+        <div className="container mx-auto px-4 pb-12">
+          <SupportCard placement="calculator" />
+        </div>
+      )}
 
       <footer className="border-t border-border/40 py-8 text-center text-sm text-muted-foreground">
         <p>Ceny jsou orientační, odpovídají publikovaným sazbám providerů ke květnu 2026.</p>

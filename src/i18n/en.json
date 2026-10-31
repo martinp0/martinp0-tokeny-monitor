@@ -75,6 +75,10 @@
     "desc": "Tokeny is free and open-source. If it saves you time or money, a coffee on Buy Me a Coffee covers servers and time for the next release.",
     "button": "Buy me a coffee"
   },
+  "blogSupport": {
+    "lead": "Written after hours. If this helped,",
+    "link": "support my work with a coffee ☕"
+  },
   "cta": {
     "title": "Ready to take",
     "titleHighlight": "control of AI costs?",

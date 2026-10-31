@@ -75,6 +75,10 @@
     "desc": "Tokeny je zdarma a open-source. Když ti ušetří čas nebo peníze, kafe na Buy Me a Coffee pokryje servery a čas na další verze.",
     "button": "Podpořit kafem"
   },
+  "blogSupport": {
+    "lead": "Psal jsem to po večerech. Pokud ti článek pomohl,",
+    "link": "podpoř mě kafem ☕"
+  },
   "cta": {
     "title": "Připraven/a převzít",
     "titleHighlight": "kontrolu nad AI náklady?",

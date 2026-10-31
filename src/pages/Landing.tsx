@@ -26,7 +26,7 @@ import { useCurrency } from "@/hooks/useCurrency";
 import { SITE_URL } from "@/config/site";
 import { maybeSignedIn } from "@/lib/auth-client";
 import SupportCard from "@/components/SupportCard";
-
+import { isNativeAppSurface, SUPPORT_PAGE } from "@/lib/support";
 
 const FEATURES = [
   { key: "currency", icon: Coins },
@@ -250,9 +250,11 @@ export default function Landing() {
           </Button>
         </section>
 
-        <section className="px-4 sm:px-6 pb-20 md:pb-28 max-w-3xl mx-auto">
-          <SupportCard placement="landing" />
-        </section>
+        {!isNativeAppSurface() && (
+          <section className="px-4 sm:px-6 pb-20 md:pb-28 max-w-3xl mx-auto">
+            <SupportCard placement="landing" />
+          </section>
+        )}
       </main>
 
       <footer className="border-t border-border bg-card pb-safe">
@@ -283,9 +285,11 @@ export default function Landing() {
             <FooterLink href="https://martinpohl.cz" external>martinpohl.cz</FooterLink>
             <FooterLink to="/privacy">{t("landing.footer.privacy")}</FooterLink>
             <FooterLink to="/terms">{t("landing.footer.terms")}</FooterLink>
-            <FooterLink href="https://buymeacoffee.com/martinp0" external>
-              <Coffee className="h-4 w-4" aria-hidden /> {t("landing.footer.coffee")}
-            </FooterLink>
+            {!isNativeAppSurface() && (
+              <FooterLink href={SUPPORT_PAGE} external>
+                <Coffee className="h-4 w-4" aria-hidden /> {t("landing.footer.coffee")}
+              </FooterLink>
+            )}
           </FooterCol>
         </div>
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 border-t border-border text-xs text-muted-foreground flex flex-wrap justify-between gap-2">
