@@ -4,6 +4,7 @@ import {
   handleStripeEvent,
   invoiceSubscriptionId,
   parseInterval,
+  portalSessionParams,
   safeAppUrl,
   shouldWriteSubscription,
   subscriptionPeriod,
@@ -254,5 +255,20 @@ describe("checkout helpers", () => {
     expect(safeAppUrl("https://tokeny.pohl.uk", allowed, "https://tokeny.martinpohl.cz/")).toBe("https://tokeny.pohl.uk");
     expect(safeAppUrl("https://evil.example", allowed, "https://tokeny.martinpohl.cz/")).toBe("https://tokeny.martinpohl.cz");
     expect(safeAppUrl(null, allowed, "https://tokeny.martinpohl.cz")).toBe("https://tokeny.martinpohl.cz");
+  });
+});
+
+describe("portalSessionParams", () => {
+  const ret = "https://tokeny.martinpohl.cz/settings";
+  it("pins the Tokeny portal configuration when set", () => {
+    expect(portalSessionParams("cus_1", ret, "bpc_1UWWl56jFD9ux2ZIFNMakNRR")).toEqual({
+      customer: "cus_1", return_url: ret, configuration: "bpc_1UWWl56jFD9ux2ZIFNMakNRR",
+    });
+    expect(portalSessionParams("cus_1", ret, "  bpc_abc \n").configuration).toBe("bpc_abc");
+  });
+  it("falls back to the account default when unset or malformed", () => {
+    expect(portalSessionParams("cus_1", ret, undefined)).toEqual({ customer: "cus_1", return_url: ret });
+    expect(portalSessionParams("cus_1", ret, "")).not.toHaveProperty("configuration");
+    expect(portalSessionParams("cus_1", ret, "price_123")).not.toHaveProperty("configuration");
   });
 });

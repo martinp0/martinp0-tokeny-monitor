@@ -1,7 +1,7 @@
 // Stripe Pro billing: checkout, customer portal, subscription status, webhook, account-deletion hooks.
 import Stripe from "stripe";
 import type { Db } from "./db.js";
-import { handleStripeEvent, parseInterval, safeAppUrl, trialDaysFor, type StripeSubscriptionLike } from "./lib/billing.js";
+import { handleStripeEvent, parseInterval, portalSessionParams, safeAppUrl, trialDaysFor, type StripeSubscriptionLike } from "./lib/billing.js";
 import type { BillingDeps, StripeSubLite } from "./lib/account-deletion.js";
 import { isProSubscription } from "./lib/plan.js";
 import { getSubscription, upsertSubscription, userExists, userIdByCustomer } from "./repo.js";
@@ -89,7 +89,9 @@ export async function createPortal(db: Db, userId: string, origin: string | null
   const sub = await getSubscription(db, userId);
   if (!sub?.stripe_customer_id) return { status: 404, body: { error: "no_customer" } };
   const base = safeAppUrl(origin, allowedOrigins(), appUrl());
-  const session = await stripeClient().billingPortal.sessions.create({ customer: sub.stripe_customer_id, return_url: `${base}/settings` });
+  const session = await stripeClient().billingPortal.sessions.create(
+    portalSessionParams(sub.stripe_customer_id, `${base}/settings`, process.env.STRIPE_PORTAL_CONFIGURATION),
+  );
   return { status: 200, body: { url: session.url } };
 }
 

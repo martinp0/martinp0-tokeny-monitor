@@ -94,7 +94,7 @@ Frontend sám (`bun dev`, port 8080) běží i bez backendu; přihlášení a da
 | `CRON_SECRET` | náhodný řetězec; Vercel Cron ho posílá jako Bearer |
 | `APP_URL` | např. `https://tokeny.martinpohl.cz` |
 | `ANTHROPIC_API_KEY` | volitelné – AI agent a AI zábava |
-| `STRIPE_*` | volitelné – Pro předplatné (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_MONTHLY`, `STRIPE_PRICE_YEARLY`, `STRIPE_TRIAL_DAYS`) |
+| `STRIPE_*` | volitelné – Pro předplatné (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_MONTHLY`, `STRIPE_PRICE_YEARLY`, `STRIPE_PORTAL_CONFIGURATION` (bpc_… Tokeny portal), `STRIPE_TRIAL_DAYS`) |
 
 V Neon Auth přidej svou doménu do **Trusted domains**. Kompletní seznam je v `.env.example`.
 
