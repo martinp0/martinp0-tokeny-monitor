@@ -13,7 +13,7 @@ type Props = {
 
 /**
  * Quiet "support the project" card for the public web.
- * Hidden inside the native (Capacitor) app: App Store guideline 3.1.1 forbids
+ * Hidden inside the native (Capacitor) app. App Store guideline 3.1.1 forbids
  * external tip/donation links in iOS apps. No popups, no counters, no urgency.
  */
 export default function SupportCard({ placement, className = "" }: Props) {
