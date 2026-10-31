@@ -17,13 +17,35 @@ public struct AppConfig: Sendable, Equatable {
         self.appGroup = appGroup
     }
 
-    public static let production = AppConfig(
-        supabaseURL: URL(string: "https://cfjusewixhycahgxoylm.supabase.co")!,
-        anonKey:
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNmanVzZXdpeGh5Y2FoZ3hveWxtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NjU4NjYsImV4cCI6MjA5MDU0MTg2Nn0.1AD8jt0ZUoXBtQWyiO2BDn3Bycgmy_RxhMsR-_6cQp8",
-        webURL: URL(string: "https://tokeny.martinpohl.cz")!,
-        appGroup: "group.cz.martinpohl.tokeny"
-    )
+    /// Built-in fallback, used by SwiftPM tests and when a bundle carries no backend keys.
+    public static let fallbackSupabaseHost = "cfjusewixhycahgxoylm.supabase.co"
+    public static let fallbackAnonKey =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNmanVzZXdpeGh5Y2FoZ3hveWxtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NjU4NjYsImV4cCI6MjA5MDU0MTg2Nn0.1AD8jt0ZUoXBtQWyiO2BDn3Bycgmy_RxhMsR-_6cQp8"
+
+    /// The backend comes from the `TokenySupabaseHost` / `TokenySupabaseAnonKey` Info.plist keys,
+    /// which Xcode fills from `apple/Config/Backend.xcconfig`. Moving the backend is a config
+    /// change, not a code change.
+    public static let production = AppConfig.fromInfo(Bundle.main.infoDictionary ?? [:])
+
+    /// Builds the config from Info.plist values, falling back to the built-in backend for any key
+    /// that is missing, empty, or still an unexpanded `$(…)` build setting.
+    public static func fromInfo(_ info: [String: Any]) -> AppConfig {
+        func value(_ key: String) -> String? {
+            guard let raw = (info[key] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines),
+                  !raw.isEmpty, !raw.hasPrefix("$(") else { return nil }
+            return raw
+        }
+        var host = value("TokenySupabaseHost") ?? fallbackSupabaseHost
+        if let range = host.range(of: "://") { host = String(host[range.upperBound...]) }
+        while host.hasSuffix("/") { host.removeLast() }
+        let url = URL(string: "https://\(host)") ?? URL(string: "https://\(fallbackSupabaseHost)")!
+        return AppConfig(
+            supabaseURL: url,
+            anonKey: value("TokenySupabaseAnonKey") ?? fallbackAnonKey,
+            webURL: URL(string: "https://tokeny.martinpohl.cz")!,
+            appGroup: "group.cz.martinpohl.tokeny"
+        )
+    }
 
     public var authURL: URL { supabaseURL.appending(path: "auth/v1") }
     public var functionsURL: URL { supabaseURL.appending(path: "functions/v1") }

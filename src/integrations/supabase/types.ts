@@ -316,12 +316,13 @@ export type Database = {
       }
       provider_credentials: {
         Row: {
-          api_key: string
+          api_key_secret_id: string | null
           created_at: string
           enabled: boolean
           id: string
           key_preview: string
           label: string
+          last_sync_attempt_at: string | null
           last_sync_error: string | null
           last_sync_status: string | null
           last_synced_at: string | null
@@ -332,12 +333,13 @@ export type Database = {
           user_id: string
         }
         Insert: {
-          api_key: string
+          api_key_secret_id?: string | null
           created_at?: string
           enabled?: boolean
           id?: string
           key_preview: string
           label?: string
+          last_sync_attempt_at?: string | null
           last_sync_error?: string | null
           last_sync_status?: string | null
           last_synced_at?: string | null
@@ -348,12 +350,13 @@ export type Database = {
           user_id: string
         }
         Update: {
-          api_key?: string
+          api_key_secret_id?: string | null
           created_at?: string
           enabled?: boolean
           id?: string
           key_preview?: string
           label?: string
+          last_sync_attempt_at?: string | null
           last_sync_error?: string | null
           last_sync_status?: string | null
           last_synced_at?: string | null

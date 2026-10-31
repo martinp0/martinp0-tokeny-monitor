@@ -1,0 +1,10 @@
+// Supabase backend the apps talk to. Change these two values (and nothing in Swift) when the
+// backend moves, e.g. off Lovable Cloud (see docs/migrate-off-lovable.md).
+//
+// xcconfig treats "//" as a comment, so only the host is stored here; AppConfig builds the
+// https URL. Both values are public: they are the same ones the web app ships in its bundle.
+// To override locally without committing, create Config/Backend.local.xcconfig (git-ignored).
+TOKENY_SUPABASE_HOST = cfjusewixhycahgxoylm.supabase.co
+TOKENY_SUPABASE_ANON_KEY = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNmanVzZXdpeGh5Y2FoZ3hveWxtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NjU4NjYsImV4cCI6MjA5MDU0MTg2Nn0.1AD8jt0ZUoXBtQWyiO2BDn3Bycgmy_RxhMsR-_6cQp8
+
+#include? "Backend.local.xcconfig"

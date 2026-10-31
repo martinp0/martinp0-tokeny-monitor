@@ -12,6 +12,7 @@ import { RequestsTable } from "@/components/dashboard/RequestsTable";
 import { Activity, ArrowLeft, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCurrency } from "@/hooks/useCurrency";
+import { ogDashboardUrl } from "@/lib/public-urls";
 
 interface SharedData {
   label: string;
@@ -32,7 +33,7 @@ export default function SharedDashboard() {
     if (!token) return;
 
     // Inject OG meta tags pointing to the dynamic preview endpoint
-    const ogImage = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/og-dashboard?token=${token}`;
+    const ogImage = ogDashboardUrl(token);
     const pageUrl = `${window.location.origin}/shared/${token}`;
     const tags: Array<[string, string, string]> = [
       ["property", "og:image", ogImage],

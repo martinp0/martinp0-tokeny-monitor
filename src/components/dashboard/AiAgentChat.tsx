@@ -86,7 +86,7 @@ export function AiAgentChat({ onAction }: Props) {
               </div>
               <div>
                 <div className="text-sm font-semibold">AI Asistent</div>
-                <div className="text-xs text-muted-foreground tabular-nums">Powered by Lovable AI</div>
+                <div className="text-xs text-muted-foreground tabular-nums">Claude (Anthropic)</div>
               </div>
             </div>
             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setOpen(false)}>

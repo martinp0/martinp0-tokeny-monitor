@@ -1,3 +1,6 @@
+# Supabase project this repo deploys to. Change it (together with .env, vercel.json and the
+# Apple xcconfig) with: node scripts/set-backend.mjs <ref> <publishable-key>
+# CI links the project from the SUPABASE_PROJECT_REF secret, see ci/supabase-deploy.yml.
 project_id = "cfjusewixhycahgxoylm"
 
 [functions]

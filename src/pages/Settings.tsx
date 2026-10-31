@@ -19,6 +19,7 @@ import { UpgradeModal } from "@/components/UpgradeModal";
 import { ProGate } from "@/components/ProGate";
 import type { BillingInterval } from "@/config/pricing";
 import { McpClientGuides } from "@/components/settings/McpClientGuides";
+import { mcpServerUrl } from "@/lib/public-urls";
 
 interface BudgetAlert {
   id: string;
@@ -149,7 +150,7 @@ const Settings = () => {
     else void load();
   }
 
-  const mcpUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/mcp`;
+  const mcpUrl = mcpServerUrl();
 
   const budgetId = useId();
   const thresholdId = useId();

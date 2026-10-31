@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Share2, Copy, ExternalLink, Trash2, ImagePlus, ImageOff, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
+import { ogDashboardUrl } from "@/lib/public-urls";
 
 interface SharedRow {
   id: string;
@@ -116,7 +117,7 @@ export function SharedDashboardsManager() {
   }
 
   function autoOgUrl(token: string) {
-    return `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/og-dashboard?token=${token}`;
+    return ogDashboardUrl(token);
   }
 
   return (

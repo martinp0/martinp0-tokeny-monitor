@@ -1,15 +1,16 @@
 // Save (insert/update) a per-user API credential for OpenRouter / Anthropic / OpenAI.
 //
-// The browser never sends the api_key directly into a row — we route through this
-// edge function so the api_key column stays unreadable from the client (see
-// migration 20260508120000_multi_provider.sql for column-level GRANTs).
+// The key is encrypted at rest in Supabase Vault by the save_provider_credential RPC
+// (migration 20261030140000_provider_keys_vault.sql); the table only keeps a Vault reference and a
+// masked preview. The browser can never read a key back.
 //
 // Body: { provider: 'openrouter' | 'anthropic' | 'openai', label?: string, api_key: string, organization_id?: string }
-// Returns: { id, provider, label, key_preview, enabled, last_synced_at }
+// Returns: { credential: { id, provider, label, key_preview, enabled, organization_id, last_synced_at } }
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { getIsPro } from "../_shared/entitlements.ts";
 import { canAddProvider, proRequiredBody } from "../_shared/plan.ts";
+import { saveCredentialKey } from "../_shared/credential-keys.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -21,12 +22,6 @@ const corsHeaders = {
 // Keep in sync with SUPPORTED_SYNC_PROVIDERS in _shared/sync-core.ts and the DB CHECK constraint.
 const ALLOWED_PROVIDERS = new Set(["openrouter", "anthropic", "openai"]);
 
-function preview(key: string): string {
-  if (!key) return "";
-  const trimmed = key.trim();
-  if (trimmed.length <= 10) return "****" + trimmed.slice(-2);
-  return trimmed.slice(0, 4) + "…" + trimmed.slice(-4);
-}
 
 function validateKeyShape(provider: string, key: string): string | null {
   const k = key.trim();
@@ -104,26 +99,15 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Upsert by (user_id, provider, label) — overwrite if user re-saves with same label.
-    const row = {
-      user_id: userRes.user.id,
+    // Upsert by (user_id, provider, label); the key is encrypted into Supabase Vault in the same
+    // transaction and only a masked preview (last 4 characters) is stored on the row.
+    const data = await saveCredentialKey(svc, {
+      userId: userRes.user.id,
       provider,
       label,
-      api_key: apiKey,
-      key_preview: preview(apiKey),
-      organization_id: organizationId,
-      enabled: true,
-      last_sync_status: null,
-      last_sync_error: null,
-    };
-
-    const { data, error } = await svc
-      .from("provider_credentials")
-      .upsert(row, { onConflict: "user_id,provider,label" })
-      .select("id, provider, label, key_preview, enabled, organization_id, last_synced_at")
-      .single();
-
-    if (error) throw error;
+      apiKey,
+      organizationId,
+    });
 
     return new Response(JSON.stringify({ credential: data }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
