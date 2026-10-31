@@ -7,8 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, Bell, Key, Plus, Trash2, Copy, Terminal, Zap, ExternalLink } from "lucide-react";
+import { ArrowLeft, Key, Plus, Trash2, Copy, Terminal, Zap, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import { ProviderConnections } from "@/components/dashboard/ProviderConnections";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -21,14 +20,7 @@ import type { BillingInterval } from "@/config/pricing";
 import { McpClientGuides } from "@/components/settings/McpClientGuides";
 import { mcpServerUrl } from "@/lib/public-urls";
 import { AiKeySettings } from "@/components/ai/AiKeySettings";
-
-interface BudgetAlert {
-  id: string;
-  monthly_budget_usd: number;
-  notify_email: string | null;
-  threshold_pct: number;
-  enabled: boolean;
-}
+import { BudgetSettings } from "@/components/settings/BudgetSettings";
 
 interface McpToken {
   id: string;
@@ -55,19 +47,22 @@ const Settings = () => {
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(!!upgradeParam);
   const [upgradeInterval] = useState<BillingInterval>(upgradeParam === "monthly" || upgradeParam === "month" ? "month" : "year");
   const [portalLoading, setPortalLoading] = useState(false);
-  const [alert, setAlert] = useState<BudgetAlert | null>(null);
   const [tokens, setTokens] = useState<McpToken[]>([]);
   const [newToken, setNewToken] = useState<string | null>(null);
   const [tokenName, setTokenName] = useState("Claude Desktop");
-  const [budget, setBudget] = useState("50");
-  const [threshold, setThreshold] = useState("80");
-  const [email, setEmail] = useState("");
-  const [enabled, setEnabled] = useState(true);
 
   useEffect(() => {
     if (!session) return;
     void load();
   }, [session]);
+
+  // Deep links like /settings#budget or /settings#ai-key: scroll once the cards have rendered.
+  useEffect(() => {
+    const id = typeof window !== "undefined" ? window.location.hash.slice(1) : "";
+    if (!id || subLoading) return;
+    const timer = window.setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
+    return () => window.clearTimeout(timer);
+  }, [subLoading]);
 
   // Handle Stripe redirect
   useEffect(() => {
@@ -98,37 +93,9 @@ const Settings = () => {
   }
 
   async function load() {
-    const [{ alert: a }, { tokens: t }] = await Promise.all([
-      api<{ alert: BudgetAlert | null }>("/budget-alert"),
-      api<{ tokens: McpToken[] }>("/mcp-tokens"),
-    ]).catch((e: Error) => {
-      toast.error(e.message);
-      return [{ alert: null }, { tokens: [] as McpToken[] }] as const;
-    });
-    if (a) {
-      setAlert(a);
-      setBudget(String(a.monthly_budget_usd));
-      setThreshold(String(a.threshold_pct));
-      setEmail(a.notify_email ?? "");
-      setEnabled(a.enabled);
-    } else {
-      setEmail(session?.user.email ?? "");
-    }
-    setTokens(t ?? []);
-  }
-
-  async function saveAlert() {
-    if (!session) return;
-    const payload = {
-      monthly_budget_usd: Number(budget),
-      threshold_pct: Number(threshold),
-      notify_email: email || null,
-      enabled,
-    };
     try {
-      await api("/budget-alert", { method: "PUT", body: payload });
-      toast.success("Uloženo");
-      void load();
+      const { tokens: t } = await api<{ tokens: McpToken[] }>("/mcp-tokens");
+      setTokens(t ?? []);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : String(e));
     }
@@ -157,20 +124,17 @@ const Settings = () => {
 
   const mcpUrl = mcpServerUrl();
 
-  const budgetId = useId();
-  const thresholdId = useId();
-  const emailId = useId();
   const tokenNameId = useId();
 
   return (
     <div className="min-h-screen bg-background">
       <Helmet>
-        <title>Nastavení – budget alerty a MCP tokeny | Tokeny</title>
-        <meta name="description" content="Spravuj měsíční budget alerty, MCP tokeny pro Grok Bot, Claude, Cursor a Zed a propojené API providery." />
+        <title>Nastavení – rozpočet, upozornění a MCP tokeny | Tokeny</title>
+        <meta name="description" content="Spravuj měsíční rozpočet a upozornění, MCP tokeny pro Grok Bot, Claude, Cursor a Zed a propojené API providery." />
         <link rel="canonical" href="https://tokeny.martinpohl.cz/settings" />
         <meta name="robots" content="noindex,nofollow" />
         <meta property="og:title" content="Nastavení – Tokeny" />
-        <meta property="og:description" content="Budget alerty, MCP tokeny a propojení API providerů v Tokenech." />
+        <meta property="og:description" content="Rozpočet a upozornění, MCP tokeny a propojení API providerů v Tokenech." />
         <meta property="og:url" content="https://tokeny.martinpohl.cz/settings" />
       </Helmet>
       <header className="sticky top-0 z-40 glass-bar pt-safe px-4 sm:px-6 py-2">
@@ -257,40 +221,7 @@ const Settings = () => {
 
         <AiKeySettings />
 
-        <Card className="glass border-border">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Bell className="h-4 w-4 text-primary" /> Budget alerty
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <ProGate feature="budget_alerts">
-            <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <Label htmlFor={budgetId} className="text-xs">Měsíční budget (USD)</Label>
-                <Input id={budgetId} type="number" value={budget} onChange={(e) => setBudget(e.target.value)} className="mt-1 tabular-nums" />
-              </div>
-              <div>
-                <Label htmlFor={thresholdId} className="text-xs">Alert při (%)</Label>
-                <Input id={thresholdId} type="number" value={threshold} onChange={(e) => setThreshold(e.target.value)} className="mt-1 tabular-nums" />
-              </div>
-              <div>
-                <Label htmlFor={emailId} className="text-xs">Notifikační e-mail</Label>
-                <Input id={emailId} type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1 tabular-nums" />
-              </div>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Switch checked={enabled} onCheckedChange={setEnabled} />
-                <span className="text-sm">Alerty zapnuté</span>
-              </div>
-              <Button onClick={saveAlert}>Uložit</Button>
-            </div>
-            </div>
-            </ProGate>
-          </CardContent>
-        </Card>
+        <BudgetSettings />
 
         <Card className="glass border-border">
           <CardHeader>

@@ -17,6 +17,8 @@ import { aiError, chatAgent, funAi, isFunMode, type AiContext } from "./ai.js";
 import { AI_PROVIDERS, PROVIDERS, isAiProvider, isModelId, listProviderModels, verifyProviderKey, type AiProvider } from "./ai-providers.js";
 import { createCheckout, createPortal, stripeBilling, stripeWebhook, subscriptionStatus } from "./stripe.js";
 import { refreshExchangeRate, runDaily } from "./cron.js";
+import { budgetStatus, FALLBACK_USD_CZK } from "./budget-status.js";
+import { parseBudgetInput, toUsd } from "./lib/budget.js";
 import { EncryptionKeyError } from "./crypto.js";
 
 type Env = { Variables: { user: AuthUser } };
@@ -302,16 +304,41 @@ export function createApp(opts: AppOptions = {}) {
   authed.put("/budget-alert", async (c) => {
     const userId = c.get("user").id;
     if (!(await repo.isPro(db(), userId))) return pro("budget_alerts")(c);
-    const b = await c.req.json().catch(() => ({}));
-    const budget = Number(b.monthly_budget_usd);
-    const pct = Math.round(Number(b.threshold_pct ?? 80));
-    if (!Number.isFinite(budget) || budget <= 0 || budget > 1_000_000) return c.json({ error: "Invalid budget" }, 400);
-    if (!Number.isFinite(pct) || pct < 1 || pct > 100) return c.json({ error: "Invalid threshold" }, 400);
-    const email = typeof b.notify_email === "string" && b.notify_email.trim() ? b.notify_email.trim().slice(0, 254) : null;
-    const alert = await repo.saveBudgetAlert(db(), userId, {
-      monthly_budget_usd: budget, threshold_pct: pct, notify_email: email, enabled: b.enabled !== false,
-    });
+    const parsed = parseBudgetInput(await c.req.json().catch(() => ({})));
+    if ("error" in parsed) return c.json({ error: parsed.error }, 400);
+    const rate = (await repo.getExchangeRate(db()))?.rate ?? FALLBACK_USD_CZK;
+    const v = parsed.value;
+    const alert = await repo.saveBudgetAlert(db(), userId, { ...v, monthly_budget_usd: toUsd(v.budget_amount, v.budget_currency, rate) });
     return c.json({ alert });
+  });
+
+  // budget progress + month-end forecast (Pro) ---------------------------------------
+  authed.get("/budget", async (c) => {
+    const userId = c.get("user").id;
+    if (!(await repo.isPro(db(), userId))) return pro("forecast")(c);
+    const cfg = await repo.getBudgetAlert(db(), userId);
+    return c.json({ budget: cfg, status: await budgetStatus(db(), userId, cfg) });
+  });
+
+  // in-app alert center (Pro; alerts are written by the daily cron) ---------------------
+  authed.get("/alerts", async (c) => {
+    const userId = c.get("user").id;
+    if (!(await repo.isPro(db(), userId))) return pro("budget_alerts")(c);
+    return c.json(await repo.listBudgetEvents(db(), userId));
+  });
+
+  authed.post("/alerts/read", async (c) => {
+    const userId = c.get("user").id;
+    if (!(await repo.isPro(db(), userId))) return pro("budget_alerts")(c);
+    const b = await c.req.json().catch(() => ({}));
+    const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    let ids: string[] | null = null;
+    if (Array.isArray(b.ids)) {
+      const valid: string[] = b.ids.filter((x: unknown) => typeof x === "string" && uuid.test(x)).slice(0, 200);
+      if (!valid.length) return c.json({ marked: 0 });
+      ids = valid;
+    }
+    return c.json({ marked: await repo.markBudgetEventsRead(db(), userId, ids) });
   });
 
   authed.delete("/budget-alert", async (c) => {

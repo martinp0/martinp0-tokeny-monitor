@@ -17,7 +17,8 @@ import { RealLifeComparison } from "@/components/dashboard/RealLifeComparison";
 import { CsvUpload } from "@/components/dashboard/CsvUpload";
 import { DateRangePicker } from "@/components/dashboard/DateRangePicker";
 import { ModelComparison } from "@/components/dashboard/ModelComparison";
-import { CostForecast } from "@/components/dashboard/CostForecast";
+import { BudgetForecastCard } from "@/components/dashboard/BudgetForecastCard";
+import { AlertCenter } from "@/components/dashboard/AlertCenter";
 import { AnomalyPanel } from "@/components/dashboard/AnomalyPanel";
 import type { AgentAction } from "@/components/dashboard/AiAgentChat";
 
@@ -152,6 +153,7 @@ const Index = () => {
               </DropdownMenuContent>
             </DropdownMenu>
             <ProGate feature="sharing" compact><ShareDashboardButton /></ProGate>
+            <AlertCenter />
             <ChangelogModal />
             <LanguageSwitcher />
             <ThemeToggle />
@@ -226,6 +228,7 @@ const Index = () => {
                     <p className="text-xs uppercase tracking-wider text-muted-foreground">Ostatní</p>
                     <ProGate feature="sharing" compact><ShareDashboardButton /></ProGate>
                     <div className="flex items-center gap-2">
+                      <AlertCenter />
                       <ChangelogModal />
                       <LanguageSwitcher />
             <ThemeToggle />
@@ -282,7 +285,7 @@ const Index = () => {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <ProGate feature="forecast"><CostForecast data={data} /></ProGate>
+              <BudgetForecastCard />
               <AnomalyPanel data={data} />
             </div>
 

@@ -79,6 +79,7 @@ export async function endBilling(customerId: string | null, deps: BillingDeps): 
 /** Tables with per-user rows, deleted before the auth user (most also cascade from auth.users). */
 export const USER_TABLES = [
   "activity_rows",
+  "budget_events",
   "budget_alerts",
   "mcp_tokens",
   "shared_dashboards",
