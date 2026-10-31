@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Sparkles, Send, X, Loader2, Bot, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
-import { aiKeyProblem, type AiKeyInfo, type AiKeyProblem } from "@/lib/ai-key";
+import { aiKeyIssue, PROVIDER_LINKS, type AiActive, type AiKeyIssue, type AiKeyState } from "@/lib/ai-key";
 import { AiKeyEmptyState } from "@/components/ai/AiKeyEmptyState";
 import { toast } from "sonner";
 
@@ -36,14 +36,18 @@ export function AiAgentChat({ onAction }: Props) {
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   // The assistant runs on the user's own Anthropic key; without one we show the empty state.
-  const [keyProblem, setKeyProblem] = useState<AiKeyProblem | null>(null);
+  const [keyProblem, setKeyProblem] = useState<AiKeyIssue | null>(null);
+  const [active, setActive] = useState<AiActive | null>(null);
   const [keyChecked, setKeyChecked] = useState(false);
 
   useEffect(() => {
     if (!open || keyChecked) return;
     setKeyChecked(true);
-    api<{ key: AiKeyInfo | null }>("/ai-key")
-      .then((r) => setKeyProblem(r.key ? null : "missing"))
+    api<AiKeyState>("/ai-key")
+      .then((r) => {
+        setActive(r.active);
+        setKeyProblem(r.active ? null : { problem: "missing", provider: null });
+      })
       .catch(() => {});
   }, [open, keyChecked]);
 
@@ -69,7 +73,7 @@ export function AiAgentChat({ onAction }: Props) {
         onAction(a);
       }
     } catch (e: any) {
-      const problem = aiKeyProblem(e);
+      const problem = aiKeyIssue(e);
       if (problem) {
         setKeyProblem(problem);
         setMessages((prev) => prev.slice(0, -1));
@@ -103,7 +107,7 @@ export function AiAgentChat({ onAction }: Props) {
               </div>
               <div>
                 <div className="text-sm font-semibold">AI Asistent</div>
-                <div className="text-xs text-muted-foreground tabular-nums">Claude (Anthropic) · tvůj klíč</div>
+                <div className="text-xs text-muted-foreground tabular-nums">{active ? `${PROVIDER_LINKS[active.provider].label} · ${active.model}` : "Tvůj vlastní AI klíč"}</div>
               </div>
             </div>
             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setOpen(false)}>
@@ -113,7 +117,7 @@ export function AiAgentChat({ onAction }: Props) {
 
           {keyProblem ? (
             <div className="flex-1 overflow-y-auto px-4 py-6 flex items-center">
-              <AiKeyEmptyState problem={keyProblem} className="w-full" />
+              <AiKeyEmptyState problem={keyProblem.problem} provider={keyProblem.provider} className="w-full" />
             </div>
           ) : (
           <>

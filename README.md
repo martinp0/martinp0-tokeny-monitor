@@ -29,7 +29,7 @@ AI API účty umí nenápadně růst. Tokeny ti ukáže, **které modely, provid
 - 💱 **CZK & USD** — automatický kurz z ČNB, přepínání jedním klikem
 - 🚨 **Budget alerty** — hlídání měsíčního rozpočtu a prahů pro upozornění
 - ☕ **Real-life srovnání** — kolik káv/piv/pizz odpovídá tvým API nákladům
-- 🤖 **AI agent** — ptej se dashboardu přirozeným jazykem (běží na tvém vlastním API klíči Anthropic, žádný sdílený serverový klíč)
+- 🤖 **AI agent** — ptej se dashboardu přirozeným jazykem (v obou tarifech, běží na tvém vlastním API klíči Anthropic, OpenAI nebo OpenRouter; žádný sdílený serverový klíč)
 - 🔗 **MCP server** — připoj Claude Desktop, Cursor nebo Zed a ptej se na náklady přímo v chatu
 - 🔒 **Bezpečné základy** — Neon Auth (Better Auth), serverová izolace dat podle uživatele (testovaná), šifrované API klíče
 - 📱 **Nativní appky (ve vývoji)** — iPhone s widgety, Mac menu bar, Apple Watch s komplikací a Zkratky; přihlášení přes Apple nebo e-mail ([apple/](apple/README.md))
@@ -114,7 +114,7 @@ docker compose up --build   # statický frontend přes nginx na :8080 (API běž
 | Data | Neon Postgres (Free), serverová izolace dat v `server/repo.ts` |
 | Backend | Jedna Vercel Function (Hono), Neon Auth (Better Auth), Vercel Cron (denně) |
 | Providers | OpenRouter Activity API, Anthropic Admin API, OpenAI Organization Usage/Costs API |
-| AI | Anthropic API pro chat/fun s klíčem uživatele (BYOK, `ai_keys`, šifrováno AES-256-GCM) |
+| AI | Anthropic / OpenAI / OpenRouter s klíčem uživatele (BYOK, `ai_keys` + `ai_settings`, šifrováno AES-256-GCM, adaptéry v `server/ai-providers.ts`) |
 | Apple | SwiftUI (iOS/macOS/watchOS 26), WidgetKit, App Intents, XcodeGen + Xcode Cloud |
 | Web app | PWA |
 | Testing | Vitest, Playwright |

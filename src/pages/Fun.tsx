@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Activity, Laugh, Image, Loader2, ArrowLeft, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
-import { aiKeyProblem, type AiKeyInfo, type AiKeyProblem } from "@/lib/ai-key";
+import { aiKeyIssue, type AiKeyIssue, type AiKeyState } from "@/lib/ai-key";
 import { AiKeyEmptyState } from "@/components/ai/AiKeyEmptyState";
 
 type FunResult = { joke?: string; image?: string; text?: string };
@@ -22,10 +22,10 @@ export default function Fun() {
   const [loadingJoke, setLoadingJoke] = useState(false);
   const [loadingImage, setLoadingImage] = useState(false);
   // Runs on the user's own Anthropic key (BYOK); null = fine or not known yet.
-  const [keyProblem, setKeyProblem] = useState<AiKeyProblem | null>(null);
+  const [keyProblem, setKeyProblem] = useState<AiKeyIssue | null>(null);
   useEffect(() => {
-    api<{ key: AiKeyInfo | null }>("/ai-key")
-      .then((r) => setKeyProblem(r.key ? null : "missing"))
+    api<AiKeyState>("/ai-key")
+      .then((r) => setKeyProblem(r.active ? null : { problem: "missing", provider: null }))
       .catch(() => {}); // signed out: the buttons explain that on click
   }, []);
 
@@ -35,7 +35,7 @@ export default function Fun() {
       const data = await api<FunResult>("/fun-ai", { body: { mode: "joke" } });
       setJoke(data.joke ?? null);
     } catch (e) {
-      const problem = aiKeyProblem(e);
+      const problem = aiKeyIssue(e);
       if (problem) setKeyProblem(problem);
       else toast.error(funError(e, "Nepodařilo se vygenerovat vtip"));
     } finally {
@@ -54,7 +54,7 @@ export default function Fun() {
         toast.info(data?.text || "Obrázek se nepodařilo vygenerovat, zkus to znovu!");
       }
     } catch (e) {
-      const problem = aiKeyProblem(e);
+      const problem = aiKeyIssue(e);
       if (problem) setKeyProblem(problem);
       else toast.error(funError(e, "Nepodařilo se vygenerovat obrázek"));
     } finally {
@@ -66,10 +66,10 @@ export default function Fun() {
     <main className="min-h-screen bg-background p-4 md:p-8">
       <Helmet>
         <title>AI Zábava – generátor vtipů a obrázků | Tokeny</title>
-        <meta name="description" content="Generuj české AI vtipy a obrázky pomocí Claude s vlastním API klíčem Anthropic." />
+        <meta name="description" content="Generuj české AI vtipy a obrázky s vlastním API klíčem Anthropic, OpenAI nebo OpenRouter." />
         <link rel="canonical" href="https://tokeny.martinpohl.cz/fun" />
         <meta property="og:title" content="AI Zábava – vtipy a obrázky generované AI" />
-        <meta property="og:description" content="Generátor českých vtipů a obrázků poháněný Claude (tvůj vlastní klíč Anthropic)." />
+        <meta property="og:description" content="Generátor českých vtipů a obrázků na tvém vlastním AI klíči (Anthropic, OpenAI, OpenRouter)." />
         <meta property="og:url" content="https://tokeny.martinpohl.cz/fun" />
       </Helmet>
       <div className="max-w-2xl mx-auto space-y-8">
@@ -90,7 +90,7 @@ export default function Fun() {
           </div>
         </div>
 
-        {keyProblem && <AiKeyEmptyState problem={keyProblem} />}
+        {keyProblem && <AiKeyEmptyState problem={keyProblem.problem} provider={keyProblem.provider} />}
 
         {/* Joke Section */}
         <Card className="glass animate-fade-in" style={{ animationDelay: "100ms", animationFillMode: "forwards" }}>
@@ -110,7 +110,7 @@ export default function Fun() {
 
             <Button
               onClick={generateJoke}
-              disabled={loadingJoke || keyProblem === "missing"}
+              disabled={loadingJoke || keyProblem?.problem === "missing"}
               className="gap-2 tabular-nums hover:opacity-90 border-0"
             >
               {loadingJoke ? (
@@ -154,7 +154,7 @@ export default function Fun() {
 
             <Button
               onClick={generateImage}
-              disabled={loadingImage || keyProblem === "missing"}
+              disabled={loadingImage || keyProblem?.problem === "missing"}
               variant="outline"
               className="gap-2 tabular-nums glass glass-hover border-accent/30 text-primary"
             >
@@ -169,7 +169,7 @@ export default function Fun() {
         </Card>
 
         <p className="text-center text-muted-foreground tabular-nums text-xs animate-fade-in" style={{ animationDelay: "300ms", animationFillMode: "forwards" }}>
-          ✨ Claude od Anthropic na tvém vlastním klíči • obrázky kreslí Pollinations.ai ✨
+          ✨ AI na tvém vlastním klíči (Anthropic, OpenAI, OpenRouter) • obrázky kreslí Pollinations.ai ✨
         </p>
       </div>
     </main>

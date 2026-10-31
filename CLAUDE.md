@@ -67,7 +67,7 @@ The frontend needs no backend keys (everything is same-origin `/api`). Optional:
 | `credentials`, `credentials/:id/sync` | Provider keys (encrypted with `CREDENTIALS_ENCRYPTION_KEY`, only a masked preview is returned) and user-initiated sync (`server/lib/sync-runner.ts`) |
 | `budget-alert`, `mcp-tokens`, `shares` | Pro features (403 `pro_required` for free users) |
 | `subscription`, `billing/checkout`, `billing/portal`, `stripe-webhook` | Stripe Pro tier; `subscriptions` is written only by the webhook |
-| `chat-agent`, `fun-ai`, `ai-key` | AI features with the **user's own** Anthropic key (`ai_keys`, encrypted, BYOK; no server key, never add one); chat agent is Pro, data tools scoped to the caller |
+| `chat-agent`, `fun-ai`, `ai-key` | AI features with the **user's own** Anthropic / OpenAI / OpenRouter key (`ai_keys` encrypted + `ai_settings` provider/model, BYOK; adapters + tool calling in `server/ai-providers.ts`; no server key, never add one); open to every plan (`ai-settings`, `ai-models` too), data tools scoped to the caller |
 | `mcp` | Stateless Streamable-HTTP MCP server (`server/mcp.ts`, `mcp-lite`); `Authorization: Bearer orm_…`, Pro only, every tool scoped to the token owner |
 | `usage-summary` | JSON summary for the native apps and widgets (session cookie, JWT or Pro `orm_` token) |
 | `shared/:token`, `og-dashboard` | Public share snapshot / OG image (SVG) |

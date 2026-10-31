@@ -31,7 +31,7 @@ export type BillingInterval = "month" | "year";
 
 /** i18n keys under `pricing.features.*` */
 export const PLAN_FEATURES: Record<PlanId, string[]> = {
-  free: ["dashboard", "oneProvider", "history30", "csvImport", "currency", "calculator"],
+  free: ["dashboard", "oneProvider", "history30", "csvImport", "currency", "calculator", "aiAgent"],
   pro: [
     "everythingFree",
     "unlimitedProviders",
@@ -39,7 +39,6 @@ export const PLAN_FEATURES: Record<PlanId, string[]> = {
     "autoSync",
     "budgetAlerts",
     "forecast",
-    "aiAgent",
     "exports",
     "sharing",
     "mcp",

@@ -301,12 +301,10 @@ const Index = () => {
         feature={upgradeFeature ?? undefined}
       />
 
-      {/* AI agent is Pro-only (chat-agent returns 403 otherwise). */}
-      <ProGate feature="ai_agent" hideWhenLocked>
-        <Suspense fallback={null}>
-          <AiAgentChat onAction={handleAgentAction} />
-        </Suspense>
-      </ProGate>
+      {/* AI assistant: every plan, runs on the user's own key (BYOK). */}
+      <Suspense fallback={null}>
+        <AiAgentChat onAction={handleAgentAction} />
+      </Suspense>
     </div>
   );
 };

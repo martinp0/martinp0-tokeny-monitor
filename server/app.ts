@@ -13,7 +13,8 @@ import { deleteAccount } from "./lib/account-deletion.js";
 import { createMcpApp } from "./mcp.js";
 import { buildSvg } from "./og.js";
 import { usageSummary } from "./usage-summary.js";
-import { aiError, chatAgent, funAi, isFunMode, verifyAnthropicKey } from "./ai.js";
+import { aiError, chatAgent, funAi, isFunMode, type AiContext } from "./ai.js";
+import { AI_PROVIDERS, PROVIDERS, isAiProvider, isModelId, listProviderModels, verifyProviderKey, type AiProvider } from "./ai-providers.js";
 import { createCheckout, createPortal, stripeBilling, stripeWebhook, subscriptionStatus } from "./stripe.js";
 import { refreshExchangeRate, runDaily } from "./cron.js";
 import { EncryptionKeyError } from "./crypto.js";
@@ -398,39 +399,96 @@ export function createApp(opts: AppOptions = {}) {
   });
 
   // AI (bring your own key) -----------------------------------------------------------
-  // The user's own Anthropic key, stored encrypted. Only metadata (masked preview) is ever returned.
-  authed.get("/ai-key", async (c) => c.json({ key: await repo.getAiKeyInfo(db(), c.get("user").id) }));
+  // The user's own Anthropic / OpenAI / OpenRouter keys, stored encrypted (v1, AAD = user id).
+  // Only metadata (masked preview) is ever returned. Open to every signed-in user.
+
+  /** The provider + model the AI features use: the saved choice if its key exists, else the first key. */
+  const activeAi = async (userId: string): Promise<{ provider: AiProvider; model: string } | null> => {
+    const [keys, settings] = await Promise.all([repo.listAiKeys(db(), userId), repo.getAiSettings(db(), userId)]);
+    const have = new Set(keys.map((k) => k.provider));
+    if (settings && isAiProvider(settings.provider) && have.has(settings.provider)) {
+      return { provider: settings.provider, model: isModelId(settings.model) ? settings.model : PROVIDERS[settings.provider].defaultModel };
+    }
+    const first = AI_PROVIDERS.find((p) => have.has(p));
+    return first ? { provider: first, model: PROVIDERS[first].defaultModel } : null;
+  };
+
+  const providerParam = (c: Context, b?: { provider?: unknown }) =>
+    String(b?.provider ?? c.req.query("provider") ?? "").toLowerCase();
+
+  authed.get("/ai-key", async (c) => {
+    const userId = c.get("user").id;
+    const [keys, active] = await Promise.all([repo.listAiKeys(db(), userId), activeAi(userId)]);
+    return c.json({ keys, active, providers: AI_PROVIDERS.map((p) => PROVIDERS[p]) });
+  });
 
   authed.put("/ai-key", async (c) => {
     const userId = c.get("user").id;
     const b = await c.req.json().catch(() => ({}));
-    const provider = String(b?.provider ?? "anthropic").toLowerCase();
+    const provider = providerParam(c, b) || "anthropic";
     const apiKey = typeof b?.api_key === "string" ? b.api_key.trim() : "";
     const shapeError = validateAiKeyShape(provider, apiKey);
-    if (shapeError) return c.json({ error: shapeError, code: "ai_key_shape" }, 400);
-    const check = await verifyAnthropicKey(apiKey);
-    if (check === "invalid") return c.json({ error: "Anthropic tento klíč odmítl. Zkontroluj, že je platný a aktivní.", code: "ai_key_invalid" }, 400);
+    if (shapeError || !isAiProvider(provider)) return c.json({ error: shapeError ?? "Nepodporovaný poskytovatel AI.", code: "ai_key_shape" }, 400);
+    const label = PROVIDERS[provider].label;
+    const check = await verifyProviderKey(provider, apiKey);
+    if (check === "invalid") return c.json({ error: `${label} tento klíč odmítl. Zkontroluj, že je platný a aktivní.`, code: "ai_key_invalid", provider }, 400);
+    if (check === "management") {
+      return c.json({ error: `Tohle je management klíč ${label}, ten neumí volat modely. Vytvoř si běžný API klíč.`, code: "ai_key_management", provider }, 400);
+    }
     const key = await repo.saveAiKey(db(), userId, provider, apiKey);
-    return c.json({ key, verified: check === "ok" });
+    // First key: make it the active one with the cheap default model.
+    if (!(await repo.getAiSettings(db(), userId))) await repo.saveAiSettings(db(), userId, provider, PROVIDERS[provider].defaultModel);
+    return c.json({ key, verified: check === "ok", active: await activeAi(userId) });
   });
 
-  authed.delete("/ai-key", async (c) => c.json({ deleted: await repo.deleteAiKey(db(), c.get("user").id) }));
+  authed.delete("/ai-key", async (c) => {
+    const userId = c.get("user").id;
+    const provider = providerParam(c, await c.req.json().catch(() => ({}))) || "anthropic";
+    if (!isAiProvider(provider)) return c.json({ error: "Nepodporovaný poskytovatel AI." }, 400);
+    const deleted = await repo.deleteAiKey(db(), userId, provider);
+    await repo.clearAiSettingsFor(db(), userId, provider);
+    return c.json({ deleted, active: await activeAi(userId) });
+  });
 
-  /** The caller's own key, or the AiResult to return when it is missing / unusable. */
-  const userAiKey = async (userId: string) => {
-    const key = await repo.aiKeyForUser(db(), userId);
-    if (key === null) return { error: aiError("ai_key_missing") };
-    if (key === "undecryptable") return { error: aiError("ai_key_invalid") };
-    return { key };
+  authed.put("/ai-settings", async (c) => {
+    const userId = c.get("user").id;
+    const b = await c.req.json().catch(() => ({}));
+    const provider = providerParam(c, b);
+    if (!isAiProvider(provider)) return c.json({ error: "Nepodporovaný poskytovatel AI." }, 400);
+    const model = typeof b?.model === "string" && b.model.trim() ? b.model.trim() : PROVIDERS[provider].defaultModel;
+    if (!isModelId(model)) return c.json({ error: "Neplatné ID modelu.", code: "ai_model_invalid" }, 400);
+    if (!(await repo.getAiKeyInfo(db(), userId, provider))) {
+      return c.json({ error: `Nejdřív přidej svůj API klíč ${PROVIDERS[provider].label}.`, code: "ai_key_missing", provider }, 400);
+    }
+    await repo.saveAiSettings(db(), userId, provider, model);
+    return c.json({ active: await activeAi(userId) });
+  });
+
+  /** The caller's AI context, or the error to return when no usable key exists. */
+  const userAi = async (userId: string): Promise<{ ctx: AiContext } | { error: { status: number; body: unknown } }> => {
+    const active = await activeAi(userId);
+    if (!active) return { error: aiError("ai_key_missing") };
+    const key = await repo.aiKeyForUser(db(), userId, active.provider);
+    if (key === null) return { error: aiError("ai_key_missing", active.provider) };
+    if (key === "undecryptable") return { error: aiError("ai_key_invalid", active.provider) };
+    return { ctx: { ...active, key } };
   };
+
+  authed.get("/ai-models", async (c) => {
+    const userId = c.get("user").id;
+    const provider = providerParam(c);
+    if (!isAiProvider(provider)) return c.json({ error: "Nepodporovaný poskytovatel AI." }, 400);
+    const key = await repo.aiKeyForUser(db(), userId, provider);
+    if (typeof key !== "string" || key === "undecryptable") return c.json({ models: null, suggested: PROVIDERS[provider].models });
+    return c.json({ models: await listProviderModels(provider, key), suggested: PROVIDERS[provider].models });
+  });
 
   authed.post("/chat-agent", async (c) => {
     const userId = c.get("user").id;
-    if (!(await repo.isPro(db(), userId))) return pro("ai_agent")(c);
-    const k = await userAiKey(userId);
-    if (k.error) return c.json(k.error.body as object, k.error.status as 400);
-    const r = await chatAgent(db(), userId, await c.req.json().catch(() => ({})), k.key);
-    if (r.status === 200) await repo.markAiKeyUsed(db(), userId);
+    const ai = await userAi(userId);
+    if (!("ctx" in ai)) return c.json(ai.error.body as object, ai.error.status as 400);
+    const r = await chatAgent(db(), userId, await c.req.json().catch(() => ({})), ai.ctx);
+    if (r.status === 200) await repo.markAiKeyUsed(db(), userId, ai.ctx.provider);
     return c.json(r.body as object, r.status as 200);
   });
 
@@ -438,10 +496,10 @@ export function createApp(opts: AppOptions = {}) {
     const userId = c.get("user").id;
     const b = await c.req.json().catch(() => ({}));
     if (!isFunMode(b?.mode)) return c.json({ error: "Invalid mode" }, 400);
-    const k = await userAiKey(userId);
-    if (k.error) return c.json(k.error.body as object, k.error.status as 400);
-    const r = await funAi(b.mode, k.key);
-    if (r.status === 200) await repo.markAiKeyUsed(db(), userId);
+    const ai = await userAi(userId);
+    if (!("ctx" in ai)) return c.json(ai.error.body as object, ai.error.status as 400);
+    const r = await funAi(b.mode, ai.ctx);
+    if (r.status === 200) await repo.markAiKeyUsed(db(), userId, ai.ctx.provider);
     return c.json(r.body as object, r.status as 200);
   });
 
