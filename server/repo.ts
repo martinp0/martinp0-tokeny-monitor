@@ -551,6 +551,11 @@ export interface AiKeyInfo {
 }
 
 /** Public metadata only: never the ciphertext, never the key. */
+export async function listAiKeys(db: Db, userId: string): Promise<AiKeyInfo[]> {
+  const { rows } = await db.query<AiKeyInfo>(`select ${AI_KEY_PUBLIC_COLS} from ai_keys where user_id = $1 order by created_at`, [userId]);
+  return rows;
+}
+
 export async function getAiKeyInfo(db: Db, userId: string, provider = "anthropic"): Promise<AiKeyInfo | null> {
   const { rows } = await db.query<AiKeyInfo>(
     `select ${AI_KEY_PUBLIC_COLS} from ai_keys where user_id = $1 and provider = $2`,
@@ -596,4 +601,26 @@ export async function aiKeyForUser(db: Db, userId: string, provider = "anthropic
 
 export async function markAiKeyUsed(db: Db, userId: string, provider = "anthropic"): Promise<void> {
   await db.query("update ai_keys set last_used_at = now() where user_id = $1 and provider = $2", [userId, provider]);
+}
+
+export interface AiSettings { provider: string; model: string }
+
+export async function getAiSettings(db: Db, userId: string): Promise<AiSettings | null> {
+  const { rows } = await db.query<AiSettings>("select provider, model from ai_settings where user_id = $1", [userId]);
+  return rows[0] ?? null;
+}
+
+export async function saveAiSettings(db: Db, userId: string, provider: string, model: string): Promise<AiSettings> {
+  const { rows } = await db.query<AiSettings>(
+    `insert into ai_settings (user_id, provider, model) values ($1, $2, $3)
+     on conflict (user_id) do update set provider = excluded.provider, model = excluded.model, updated_at = now()
+     returning provider, model`,
+    [userId, provider, model],
+  );
+  return rows[0];
+}
+
+/** Forget the provider choice when it points at a key the user just removed. */
+export async function clearAiSettingsFor(db: Db, userId: string, provider: string): Promise<void> {
+  await db.query("delete from ai_settings where user_id = $1 and provider = $2", [userId, provider]);
 }

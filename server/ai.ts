@@ -1,13 +1,17 @@
-// AI agent (Pro) and the "Fun" page helpers. Both call Anthropic with the CALLER'S OWN API key
-// (ai_keys, BYOK); there is deliberately no shared server key. The user pays Anthropic directly.
-// Data tools read only the caller's rows (repo.aggregateActivity). Keys are never logged or returned.
+// AI assistant and the "Fun" page helpers. Both call the user's chosen provider (Anthropic, OpenAI
+// or OpenRouter) with the CALLER'S OWN API key (ai_keys, BYOK); there is deliberately no shared
+// server key. The user pays the provider directly. Data tools read only the caller's rows
+// (repo.aggregateActivity). Keys are never logged or returned.
 import type { Db } from "./db.js";
 import { aggregateActivity, type AggRow } from "./repo.js";
+import { PROVIDERS, providerChat, type AiErrorCode, type AiProvider, type NeutralMessage, type ToolDef } from "./ai-providers.js";
 
-const ANTHROPIC_API = "https://api.anthropic.com/v1/messages";
-const MODEL = "claude-haiku-4-5-20251001";
+export type { AiErrorCode } from "./ai-providers.js";
 
-const SYSTEM_PROMPT = `Jsi AI asistent v dashboardu OpenRouter Monitor (analytika nákladů na AI modely).
+/** The caller's resolved AI setup: provider, their own key, and the model to use. */
+export interface AiContext { provider: AiProvider; key: string; model: string }
+
+const SYSTEM_PROMPT = `Jsi AI asistent v dashboardu Tokeny (analytika nákladů na AI modely).
 Mluvíš česky, stručně a přátelsky. Máš k dispozici tools pro dotazy nad daty a pro ovládání UI.
 
 Pravidla:
@@ -17,11 +21,11 @@ Pravidla:
 - Když uživatel řekne "vyčisti filtry", "zruš filtr", zavolej apply_filters s null hodnotami.
 - Buď proaktivní: pokud něco vypadá zajímavě (extrémní cena, anomálie), zmiň to.`;
 
-const tools = [
+const tools: ToolDef[] = [
   {
     name: "query_stats",
     description: "Spočítá statistiky nad daty aktivit (cost, tokens, requests, avg latency) s volitelnými filtry.",
-    input_schema: {
+    parameters: {
       type: "object",
       properties: {
         group_by: { type: "string", enum: ["model", "provider", "day", "hour", "none"], description: "Jak grupovat výsledky" },
@@ -37,12 +41,12 @@ const tools = [
   {
     name: "list_models",
     description: "Vrátí seznam všech modelů a providerů, které jsou v datech.",
-    input_schema: { type: "object", properties: {} },
+    parameters: { type: "object", properties: {} },
   },
   {
     name: "apply_filters",
     description: "Aplikuje filtry v dashboard UI (model, date range). Předej null pro vyčištění.",
-    input_schema: {
+    parameters: {
       type: "object",
       properties: {
         model: { type: "string", description: "Plný model_permaslug nebo null pro reset" },
@@ -54,7 +58,7 @@ const tools = [
   {
     name: "set_currency",
     description: "Přepne zobrazenou měnu v UI.",
-    input_schema: {
+    parameters: {
       type: "object",
       properties: { currency: { type: "string", enum: ["USD", "CZK"] } },
       required: ["currency"],
@@ -63,7 +67,7 @@ const tools = [
   {
     name: "export_data",
     description: "Spustí export dashboardu (PNG nebo PDF).",
-    input_schema: {
+    parameters: {
       type: "object",
       properties: { format: { type: "string", enum: ["png", "pdf"] } },
       required: ["format"],
@@ -72,7 +76,7 @@ const tools = [
   {
     name: "detect_anomalies",
     description: "Najde neobvyklé výdaje – dny/modely s extrémně vysokým costem oproti průměru.",
-    input_schema: { type: "object", properties: {} },
+    parameters: { type: "object", properties: {} },
   },
 ];
 
@@ -143,73 +147,35 @@ async function executeTool(name: string, args: any, db: Db, userId: string): Pro
 
 export interface AiResult { status: number; body: unknown }
 
-export const AI_KEY_HELP_URL = "https://console.anthropic.com/settings/keys";
-
-/** Stable error codes the UI maps to an empty state / message. */
-export type AiErrorCode = "ai_key_missing" | "ai_key_invalid" | "ai_key_no_credit" | "ai_rate_limited" | "ai_unavailable";
-
-const AI_ERRORS: Record<AiErrorCode, { status: number; error: string }> = {
-  ai_key_missing: { status: 428, error: "AI funkce používají tvůj vlastní API klíč Anthropic. Přidej ho v Nastavení." },
-  ai_key_invalid: { status: 422, error: "Anthropic tvůj API klíč odmítl. Zkontroluj ho a ulož znovu v Nastavení." },
-  ai_key_no_credit: { status: 402, error: "Na tvém účtu Anthropic došel kredit. Dobij ho v console.anthropic.com." },
-  ai_rate_limited: { status: 429, error: "Anthropic hlásí limit požadavků, zkus to za chvíli." },
-  ai_unavailable: { status: 502, error: "AI teď neodpovídá, zkus to za chvíli." },
+const AI_ERRORS: Record<AiErrorCode, { status: number; error: (p: string) => string }> = {
+  ai_key_missing: { status: 428, error: () => "AI funkce používají tvůj vlastní API klíč (Anthropic, OpenAI nebo OpenRouter). Přidej ho v Nastavení." },
+  ai_key_invalid: { status: 422, error: (p) => `${p} tvůj API klíč odmítl. Zkontroluj ho a ulož znovu v Nastavení.` },
+  ai_key_no_credit: { status: 402, error: (p) => `Na tvém účtu ${p} došel kredit nebo narazil na limit útraty. Dobij ho přímo u ${p}.` },
+  ai_model_unavailable: { status: 422, error: (p) => `Zvolený model ${p} nezná nebo k němu tvůj klíč nemá přístup. Vyber jiný model v Nastavení.` },
+  ai_rate_limited: { status: 429, error: (p) => `${p} hlásí limit požadavků, zkus to za chvíli.` },
+  ai_unavailable: { status: 502, error: () => "AI teď neodpovídá, zkus to za chvíli." },
 };
 
-export function aiError(code: AiErrorCode): AiResult {
+/** Error body for the UI: message, stable code, the provider and where to fix it. */
+export function aiError(code: AiErrorCode, provider?: AiProvider): AiResult {
+  const info = provider ? PROVIDERS[provider] : null;
   const e = AI_ERRORS[code];
-  return { status: e.status, body: { error: e.error, code, help_url: AI_KEY_HELP_URL } };
+  return {
+    status: e.status,
+    body: {
+      error: e.error(info?.label ?? "Poskytovatel AI"),
+      code,
+      provider: provider ?? null,
+      help_url: code === "ai_key_no_credit" && info ? info.billingUrl : info ? info.keysUrl : "/settings#ai-key",
+    },
+  };
 }
 
-/** Map a non-OK Anthropic response to our error (status + parsed body only; never the key). */
-export function classifyAnthropicError(status: number, body: unknown): AiErrorCode {
-  const msg = JSON.stringify(body ?? "").toLowerCase();
-  if (status === 401 || status === 403) return "ai_key_invalid";
-  if (status === 429) return "ai_rate_limited";
-  if ((status === 400 || status === 402) && msg.includes("credit")) return "ai_key_no_credit";
-  return "ai_unavailable";
-}
+const MAX_TOKENS = 2048;
 
-async function callAnthropic(key: string, body: unknown): Promise<{ ok: true; data: any } | { ok: false; code: AiErrorCode }> {
-  let resp: Response;
-  try {
-    resp = await fetch(ANTHROPIC_API, {
-      method: "POST",
-      headers: { "x-api-key": key, "anthropic-version": "2023-06-01", "content-type": "application/json" },
-      body: JSON.stringify(body),
-    });
-  } catch {
-    console.error("Anthropic API unreachable");
-    return { ok: false, code: "ai_unavailable" };
-  }
-  if (!resp.ok) {
-    const errBody = await resp.json().catch(() => null);
-    const code = classifyAnthropicError(resp.status, errBody);
-    console.error("Anthropic API error", resp.status, code);
-    return { ok: false, code };
-  }
-  const data = await resp.json().catch(() => null);
-  if (!data || typeof data !== "object") return { ok: false, code: "ai_unavailable" };
-  return { ok: true, data };
-}
-
-/** Cheap check that a key works (lists models; no tokens are billed). "unknown" = could not tell. */
-export async function verifyAnthropicKey(key: string): Promise<"ok" | "invalid" | "unknown"> {
-  try {
-    const r = await fetch("https://api.anthropic.com/v1/models?limit=1", {
-      headers: { "x-api-key": key, "anthropic-version": "2023-06-01" },
-    });
-    if (r.ok) return "ok";
-    if (r.status === 401 || r.status === 403) return "invalid";
-    return "unknown";
-  } catch {
-    return "unknown";
-  }
-}
-
-/** Caller must already be authenticated and Pro; `key` is the caller's own Anthropic key. */
+/** `ctx` is the caller's own provider + key + model. Open to every signed-in user (BYOK). */
 // deno-lint-ignore no-explicit-any
-export async function chatAgent(db: Db, userId: string, input: any, key: string): Promise<AiResult> {
+export async function chatAgent(db: Db, userId: string, input: any, ctx: AiContext): Promise<AiResult> {
   const messages = input?.messages;
   if (!Array.isArray(messages)) return { status: 400, body: { error: "messages must be an array" } };
   if (messages.length === 0 || messages.length > 20) return { status: 400, body: { error: "messages length must be between 1 and 20" } };
@@ -223,29 +189,30 @@ export async function chatAgent(db: Db, userId: string, input: any, key: string)
       return { status: 400, body: { error: `message content exceeds ${MAX_CONTENT_CHARS} characters` } };
     }
   }
-  // deno-lint-ignore no-explicit-any
-  const anthropicMessages: any[] = messages.filter((m: any) => m.role !== "system");
+  // Client history is plain text; client-sent "system" messages are ignored.
+  const convo: NeutralMessage[] = messages
+    // deno-lint-ignore no-explicit-any
+    .filter((m: any) => m.role !== "system")
+    // deno-lint-ignore no-explicit-any
+    .map((m: any): NeutralMessage => {
+      const text = typeof m.content === "string" ? m.content : JSON.stringify(m.content ?? "");
+      return m.role === "user" ? { role: "user", text } : { role: "assistant", text, toolCalls: [] };
+    });
   // deno-lint-ignore no-explicit-any
   const uiActions: Array<{ name: string; args: any }> = [];
   for (let iter = 0; iter < 4; iter++) {
-    const resp = await callAnthropic(key, { model: MODEL, max_tokens: 1024, system: SYSTEM_PROMPT, messages: anthropicMessages, tools });
-    if (resp.ok === false) return aiError(resp.code);
-    const data = resp.data;
-    const content = data.content ?? [];
-    anthropicMessages.push({ role: "assistant", content });
-    if (data.stop_reason !== "tool_use") {
-      // deno-lint-ignore no-explicit-any
-      const text = content.find((b: any) => b.type === "text");
-      return { status: 200, body: { reply: text?.text ?? "", ui_actions: uiActions } };
+    const resp = await providerChat(ctx.provider, ctx.key, { model: ctx.model, system: SYSTEM_PROMPT, messages: convo, tools, maxTokens: MAX_TOKENS });
+    if (resp.ok === false) return aiError(resp.code, ctx.provider);
+    const turn = resp.turn;
+    convo.push({ role: "assistant", text: turn.text, toolCalls: turn.toolCalls, raw: turn.raw });
+    if (turn.toolCalls.length === 0) return { status: 200, body: { reply: turn.text, ui_actions: uiActions } };
+    const results: { id: string; name: string; content: string }[] = [];
+    for (const call of turn.toolCalls) {
+      const result = await executeTool(call.name, call.args, db, userId);
+      if (["apply_filters", "set_currency", "export_data"].includes(call.name)) uiActions.push({ name: call.name, args: call.args });
+      results.push({ id: call.id, name: call.name, content: JSON.stringify(result) });
     }
-    const toolResults: unknown[] = [];
-    for (const block of content) {
-      if (block.type !== "tool_use") continue;
-      const result = await executeTool(block.name, block.input, db, userId);
-      if (["apply_filters", "set_currency", "export_data"].includes(block.name)) uiActions.push({ name: block.name, args: block.input });
-      toolResults.push({ type: "tool_result", tool_use_id: block.id, content: JSON.stringify(result) });
-    }
-    anthropicMessages.push({ role: "user", content: toolResults });
+    convo.push({ role: "tool", results });
   }
   return { status: 200, body: { reply: "Příliš mnoho kroků, zkus zjednodušit dotaz.", ui_actions: uiActions } };
 }
@@ -254,26 +221,25 @@ export async function chatAgent(db: Db, userId: string, input: any, key: string)
 export const isFunMode = (mode: unknown): mode is "joke" | "image" => mode === "joke" || mode === "image";
 
 /** "Fun" page: a joke or a cartoon prompt + Pollinations image URL, with the caller's own key. */
-export async function funAi(mode: "joke" | "image", key: string): Promise<AiResult> {
+export async function funAi(mode: "joke" | "image", ctx: AiContext): Promise<AiResult> {
+  const ask = (system: string, user: string, maxTokens: number) =>
+    providerChat(ctx.provider, ctx.key, { model: ctx.model, system, messages: [{ role: "user", text: user }], maxTokens });
   if (mode === "joke") {
-    const r = await callAnthropic(key, {
-      model: MODEL,
-      max_tokens: 256,
-      system: "Jsi vtipný český komik. Generuj originální, krátké vtipy v češtině. Můžeš dělat vtipy o programování, AI, technologiích, nebo obecné vtipy. Buď kreativní a překvapivý. Vrať POUZE vtip, nic jiného. Žádné uvozovky, žádné komentáře.",
-      messages: [{ role: "user", content: "Vygeneruj jeden krátký vtip." }],
-    });
-    if (r.ok === false) return aiError(r.code);
-    const data = r.data;
-    return { status: 200, body: { joke: data.content?.[0]?.text || "Žádný vtip se nenašel 😢" } };
+    const r = await ask(
+      "Jsi vtipný český komik. Generuj originální, krátké vtipy v češtině. Můžeš dělat vtipy o programování, AI, technologiích, nebo obecné vtipy. Buď kreativní a překvapivý. Vrať POUZE vtip, nic jiného. Žádné uvozovky, žádné komentáře.",
+      "Vygeneruj jeden krátký vtip.",
+      512,
+    );
+    if (r.ok === false) return aiError(r.code, ctx.provider);
+    return { status: 200, body: { joke: r.turn.text || "Žádný vtip se nenašel 😢" } };
   }
-  const r = await callAnthropic(key, {
-    model: MODEL,
-    max_tokens: 128,
-    system: "Generate a short, vivid English image prompt (max 20 words) for a funny, absurd cartoon scene. Be creative and surprising. Reply with ONLY the prompt, no quotes, no explanation.",
-    messages: [{ role: "user", content: "Generate one funny image prompt." }],
-  });
-  if (r.ok === false) return aiError(r.code);
-  const prompt = r.data.content?.[0]?.text?.trim() || "a cat coding on a laptop while drinking coffee";
+  const r = await ask(
+    "Generate a short, vivid English image prompt (max 20 words) for a funny, absurd cartoon scene. Be creative and surprising. Reply with ONLY the prompt, no quotes, no explanation.",
+    "Generate one funny image prompt.",
+    256,
+  );
+  if (r.ok === false) return aiError(r.code, ctx.provider);
+  const prompt = r.turn.text || "a cat coding on a laptop while drinking coffee";
   const image = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?nologo=true&model=flux&width=512&height=512`;
   return { status: 200, body: { image, text: prompt } };
 }

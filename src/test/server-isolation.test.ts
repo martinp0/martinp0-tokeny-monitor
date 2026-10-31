@@ -161,7 +161,8 @@ describe("shares, tokens, budget alerts", () => {
     expect((await call("a", "POST", "/api/shares", { label: "x" })).json.error).toBe("pro_required");
     expect((await call("a", "POST", "/api/mcp-tokens", { name: "x" })).status).toBe(403);
     expect((await call("a", "PUT", "/api/budget-alert", { monthly_budget_usd: 10 })).status).toBe(403);
-    expect((await call("a", "POST", "/api/chat-agent", { messages: [] })).status).toBe(403);
+    // the AI assistant is open to every plan (own key): without a key it is 428, not a Pro 403
+    expect((await call("a", "POST", "/api/chat-agent", { messages: [] })).status).toBe(428);
   });
   it("B's share is public by token, but invisible and undeletable for A", async () => {
     expect((await call("b", "GET", "/api/me")).json.profile.display_name).toBe("Bob"); // profile is created lazily

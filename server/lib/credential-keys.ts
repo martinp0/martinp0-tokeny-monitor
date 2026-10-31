@@ -28,19 +28,27 @@ export class MissingKeyError extends Error {
 }
 
 /** Providers the user can store an own AI key for (keep in sync with the ai_keys CHECK). */
-export const AI_KEY_PROVIDERS = new Set(["anthropic"]);
+export const AI_KEY_PROVIDERS = new Set(["anthropic", "openai", "openrouter"]);
 
 /**
- * The user's own key for the AI features. Must be a normal Anthropic API key: Admin keys
- * (sk-ant-admin…, used for usage sync) cannot call the Messages API.
+ * The user's own key for the AI features. Must be a normal inference key: admin / management
+ * keys (used for usage sync) cannot call models, so they are rejected where the prefix shows it.
  */
 export function validateAiKeyShape(provider: string, key: string): string | null {
   const k = key.trim();
-  if (!AI_KEY_PROVIDERS.has(provider)) return "Unsupported AI provider";
+  if (!AI_KEY_PROVIDERS.has(provider)) return "Nepodporovaný poskytovatel AI.";
   if (!k) return "API klíč je prázdný.";
   if (/\s/.test(k)) return "API klíč nesmí obsahovat mezery.";
   if (k.length < 20 || k.length > 300) return "API klíč nemá správnou délku.";
-  if (k.startsWith("sk-ant-admin")) return "Admin klíč neumí volat AI. Vytvoř si běžný API klíč v console.anthropic.com.";
-  if (!k.startsWith("sk-ant-")) return "Klíč Anthropic začíná na sk-ant-.";
+  if (provider === "anthropic") {
+    if (k.startsWith("sk-ant-admin")) return "Admin klíč neumí volat AI. Vytvoř si běžný API klíč v console.anthropic.com.";
+    if (!k.startsWith("sk-ant-")) return "Klíč Anthropic začíná na sk-ant-.";
+  }
+  if (provider === "openai") {
+    if (k.startsWith("sk-admin-")) return "Admin klíč OpenAI neumí volat AI. Vytvoř si běžný API klíč v platform.openai.com.";
+    if (k.startsWith("sk-ant-") || k.startsWith("sk-or-")) return "Tohle není klíč OpenAI.";
+    if (!k.startsWith("sk-")) return "Klíč OpenAI začíná na sk-.";
+  }
+  if (provider === "openrouter" && !k.startsWith("sk-or-")) return "Klíč OpenRouter začíná na sk-or-.";
   return null;
 }

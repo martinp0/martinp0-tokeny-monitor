@@ -83,6 +83,8 @@ export const USER_TABLES = [
   "mcp_tokens",
   "shared_dashboards",
   "provider_credentials",
+  "ai_settings",
+  "ai_keys",
   "subscriptions",
   "profiles",
 ] as const;

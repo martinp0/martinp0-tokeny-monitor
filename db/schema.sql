@@ -164,7 +164,18 @@ CREATE TABLE IF NOT EXISTS public.ai_keys (
   created_at         timestamptz NOT NULL DEFAULT now(),
   updated_at         timestamptz NOT NULL DEFAULT now(),
   PRIMARY KEY (user_id, provider),
-  CONSTRAINT ai_keys_provider_check CHECK (provider IN ('anthropic'))
+  CONSTRAINT ai_keys_provider_check CHECK (provider IN ('anthropic', 'openai', 'openrouter'))
+);
+-- Widen the provider list on databases created before OpenAI / OpenRouter were added.
+ALTER TABLE public.ai_keys DROP CONSTRAINT IF EXISTS ai_keys_provider_check;
+ALTER TABLE public.ai_keys ADD CONSTRAINT ai_keys_provider_check CHECK (provider IN ('anthropic', 'openai', 'openrouter'));
+
+-- Which of the user's own keys the AI features use, and with which model.
+CREATE TABLE IF NOT EXISTS public.ai_settings (
+  user_id    uuid PRIMARY KEY REFERENCES neon_auth."user"(id) ON DELETE CASCADE,
+  provider   text NOT NULL CHECK (provider IN ('anthropic', 'openai', 'openrouter')),
+  model      text NOT NULL,
+  updated_at timestamptz NOT NULL DEFAULT now()
 );
 
 -- Same rule as server/lib/plan.ts isProSubscription().

@@ -246,7 +246,7 @@ export function portalSessionParams(customer: string, returnUrl: string, configu
 }
 
 /** Version of the terms of service at /terms. Bump when the terms change materially. */
-export const TERMS_VERSION = "2026-10-31.2"; // .2: AI features run on the user's own Anthropic key
+export const TERMS_VERSION = "2026-10-31.3"; // .2: AI on the user's own key; .3: OpenAI/OpenRouter keys, AI in Free
 
 export interface CheckoutConsent {
   terms_version: string;
