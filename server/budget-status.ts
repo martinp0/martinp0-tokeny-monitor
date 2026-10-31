@@ -1,10 +1,9 @@
 // Budget progress + month-end forecast for one user (Pro). Shared by GET /api/budget and the daily cron.
 import type { Db } from "./db.js";
-import { FORECAST_WINDOW_DAYS, forecastMonth, type Forecast } from "./lib/forecast.js";
+import { BUDGET_TZ, FORECAST_WINDOW_DAYS, addDays, forecastMonth, localDay, type Forecast } from "./lib/forecast.js";
 import { evaluateAlerts, toUsd, type AlertCandidate, type ScopeStatus } from "./lib/budget.js";
 import { dailyCostsBySource, getExchangeRate, type BudgetRow } from "./repo.js";
 
-const DAY = 86_400_000;
 export const FALLBACK_USD_CZK = 23.5;
 
 export interface BudgetStatus {
@@ -12,15 +11,22 @@ export interface BudgetStatus {
   usd_czk: number;
   total: ScopeStatus;
   providers: Array<ScopeStatus & { has_budget: boolean }>;
-  /** This month's cost per UTC day (for the chart). */
+  /** Time zone of period/days (Europe/Prague). */
+  tz: string;
+  /** This month's cost per local day, for the chart. */
   days: Array<{ date: string; cost_usd: number }>;
 }
 
 export async function budgetStatus(db: Db, userId: string, cfg: BudgetRow | null, now = new Date(), usdCzk?: number): Promise<BudgetStatus> {
   const rate = usdCzk ?? (await getExchangeRate(db))?.rate ?? FALLBACK_USD_CZK;
-  const monthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
-  const windowStart = new Date(Math.min(monthStart.getTime(), now.getTime() - (FORECAST_WINDOW_DAYS + 1) * DAY));
-  const { days, firsts } = await dailyCostsBySource(db, userId, windowStart.toISOString().slice(0, 10));
+  const tz = BUDGET_TZ;
+  const today = localDay(now, tz);
+  const monthStart = `${today.slice(0, 7)}-01`;
+  const windowDay = addDays(today, -(FORECAST_WINDOW_DAYS + 1));
+  const firstDay = windowDay < monthStart ? windowDay : monthStart;
+  // created_at is UTC text; one extra day of margin is harmless (outside the window and the month)
+  const from = addDays(firstDay, -1);
+  const { days, firsts } = await dailyCostsBySource(db, userId, from, tz);
 
   const total: Record<string, number> = {};
   const bySource: Record<string, Record<string, number>> = {};
@@ -32,11 +38,11 @@ export async function budgetStatus(db: Db, userId: string, cfg: BudgetRow | null
   const firstBy = Object.fromEntries(firsts.map((f) => [f.source, f.first_day]));
   const usd = (amount: number | undefined | null) => (cfg && amount ? toUsd(Number(amount), cfg.budget_currency, rate) : null);
 
-  const f: Forecast = forecastMonth(total, firstAll, now);
+  const f: Forecast = forecastMonth(total, firstAll, now, tz);
   const pb = (cfg?.provider_budgets ?? {}) as Record<string, number>;
   const sources = [...new Set([...Object.keys(bySource), ...Object.keys(pb)])].sort();
   const providers = sources
-    .map((s) => ({ scope: s, budget_usd: usd(pb[s]), has_budget: !!pb[s], forecast: forecastMonth(bySource[s] ?? {}, firstBy[s] ?? null, now) }))
+    .map((s) => ({ scope: s, budget_usd: usd(pb[s]), has_budget: !!pb[s], forecast: forecastMonth(bySource[s] ?? {}, firstBy[s] ?? null, now, tz) }))
     .filter((p) => p.has_budget || p.forecast.spent_usd > 0);
 
   const period = f.period;
@@ -44,7 +50,7 @@ export async function budgetStatus(db: Db, userId: string, cfg: BudgetRow | null
     .filter(([d]) => d.startsWith(period))
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([date, c]) => ({ date, cost_usd: Math.round(c * 1e6) / 1e6 }));
-  return { period, usd_czk: rate, total: { scope: "total", budget_usd: usd(cfg?.budget_amount), forecast: f }, providers, days: dayList };
+  return { period, tz, usd_czk: rate, total: { scope: "total", budget_usd: usd(cfg?.budget_amount), forecast: f }, providers, days: dayList };
 }
 
 export function alertsFor(cfg: BudgetRow, status: BudgetStatus): AlertCandidate[] {

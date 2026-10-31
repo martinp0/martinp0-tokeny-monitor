@@ -26,6 +26,8 @@ export interface ScopeStatus {
 
 export interface BudgetStatus {
   period: string;
+  /** Time zone of period/days (Europe/Prague). */
+  tz?: string;
   usd_czk: number;
   total: ScopeStatus;
   providers: ScopeStatus[];

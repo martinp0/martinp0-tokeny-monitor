@@ -393,7 +393,7 @@
     },
     "noForecast": "The forecast needs at least one full day of data. Check back tomorrow.",
     "methodTitle": "How the forecast works",
-    "method": "Weighted average daily spend over the last {{n}} full days (recent days weigh more, 7-day half-life) × days left ({{remaining}}) + what is already spent. The ~80% range comes from how much daily spend varies; fewer days make it wider. Days are UTC, data is from the last sync.",
+    "method": "Weighted average daily spend over the last {{n}} full days (recent days weigh more, 7-day half-life) × days left ({{remaining}}) + what is already spent. The ~80% range comes from how much daily spend varies; fewer days make it wider. Days and the month follow Prague time, data is from the last sync.",
     "methodNone": "The forecast needs at least one full day of data. Until then we only show what is spent.",
     "over": "At this pace you will exceed the budget by about {{amount}}.",
     "under": "At this pace about {{amount}} of the budget will be left.",

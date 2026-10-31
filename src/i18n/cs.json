@@ -393,7 +393,7 @@
     },
     "noForecast": "Na odhad zatím chybí aspoň jeden celý den dat. Zkus to zítra.",
     "methodTitle": "Jak odhad počítáme",
-    "method": "Vážený průměr denní útraty za posledních {{n}} celých dní (novější dny mají větší váhu, poločas 7 dní) × zbývající dny ({{remaining}}) + co už je utracené. Rozpětí ~80 % vychází z kolísání denní útraty; s méně dny je širší. Dny počítáme v UTC, data jsou z poslední synchronizace.",
+    "method": "Vážený průměr denní útraty za posledních {{n}} celých dní (novější dny mají větší váhu, poločas 7 dní) × zbývající dny ({{remaining}}) + co už je utracené. Rozpětí ~80 % vychází z kolísání denní útraty; s méně dny je širší. Dny a měsíc počítáme v pražském čase, data jsou z poslední synchronizace.",
     "methodNone": "Odhad potřebuje aspoň jeden celý den dat. Do té doby ukazujeme jen to, co je utracené.",
     "over": "Podle odhadu rozpočet překročíš asi o {{amount}}.",
     "under": "Podle odhadu zůstane rezerva asi {{amount}}.",
