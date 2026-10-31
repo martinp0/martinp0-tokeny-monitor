@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useMemo } from "react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { api } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
 import { parseCSV, type ActivityRow, type BillingType, type ProviderSource } from "@/lib/csv-parser";
 import { fetchAllPages } from "@/lib/paginate";
@@ -20,6 +20,8 @@ import { isUsageExportHeader, streamUsageExport, usageBreakdown } from "@/lib/us
 /** Upper bound of rows loaded into the browser. Beyond this the dashboard says it is truncated. */
 const MAX_DASHBOARD_ROWS = 100_000;
 const UPSERT_BATCH = 500;
+/** GET /api/activity page size (server max 5000). */
+const PAGE_SIZE = 5000;
 
 type DbRow = Record<string, unknown> & { provider_source?: string | null; request_count?: number | null };
 
@@ -81,7 +83,7 @@ export function useDashboardData(options: { demoMode?: boolean } = {}) {
   const [truncated, setTruncated] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
 
-  // Load ALL of the user's rows (paged; PostgREST returns at most 1000 rows per request).
+  // Load ALL of the user's rows (paged; the API returns at most 5000 rows per request).
   useEffect(() => {
     let cancelled = false;
     async function loadFromDB() {
@@ -97,13 +99,11 @@ export function useDashboardData(options: { demoMode?: boolean } = {}) {
       try {
         const { rows, truncated } = await fetchAllPages<DbRow>(
           (from, to) =>
-            supabase
-              .from("activity_rows")
-              .select("*")
-              .order("created_at", { ascending: false })
-              .order("id", { ascending: true })
-              .range(from, to) as unknown as PromiseLike<{ data: DbRow[] | null; error: { message: string } | null }>,
-          { maxRows: MAX_DASHBOARD_ROWS },
+            api<{ rows: DbRow[] }>(`/activity?offset=${from}&limit=${to - from + 1}`).then(
+              (r) => ({ data: r.rows, error: null }),
+              (e: Error) => ({ data: null, error: { message: e.message } }),
+            ),
+          { pageSize: PAGE_SIZE, maxRows: MAX_DASHBOARD_ROWS },
         );
         if (cancelled) return;
         setTruncated(truncated);
@@ -160,7 +160,7 @@ export function useDashboardData(options: { demoMode?: boolean } = {}) {
       return { parsed: parsed.length, saved: 0, failed: parsed.length, error: "not_authenticated" };
     }
 
-    // Free plan keeps the last 30 days (RLS rejects older rows for free users anyway).
+    // Free plan keeps the last 30 days (the API hides older rows from free users anyway).
     if (skipped > 0) {
       toast.info(
         `${skipped.toLocaleString()} řádků starších než ${FREE_LIMITS.historyDays} dní se ve Free neukládá. S Pro importuješ celou historii.`,
@@ -171,15 +171,13 @@ export function useDashboardData(options: { demoMode?: boolean } = {}) {
     let failed = 0;
     let firstError: string | undefined;
     for (let i = 0; i < toSave.length; i += UPSERT_BATCH) {
-      const batch = toSave.slice(i, i + UPSERT_BATCH).map((r) => ({ ...r, user_id: userId }));
-      const { error } = await supabase
-        .from("activity_rows")
-        .upsert(batch, { onConflict: "user_id,generation_id" });
-      if (error) {
-        failed += batch.length;
-        firstError ??= error.message;
-      } else {
+      const batch = toSave.slice(i, i + UPSERT_BATCH);
+      try {
+        await api("/activity/import", { body: { rows: batch } });
         saved += batch.length;
+      } catch (e) {
+        failed += batch.length;
+        firstError ??= e instanceof Error ? e.message : String(e);
       }
     }
 
@@ -193,7 +191,7 @@ export function useDashboardData(options: { demoMode?: boolean } = {}) {
 
   /**
    * Cursor / Grok Bot usage export: parsed in the browser in streaming chunks (the export can be
-   * tens of MB), written in batches as the user (RLS: user_id = auth.uid()), deduplicated on
+   * tens of MB), written in batches through /api/activity/import (scoped to the session user), deduplicated on
    * (user_id, Billing Item ID) so re-importing the same or an overlapping export adds nothing twice.
    */
   const importUsageExport = useCallback(async (file: File, onProgress?: ImportProgress): Promise<CsvImportResult> => {
@@ -219,19 +217,14 @@ export function useDashboardData(options: { demoMode?: boolean } = {}) {
           const { keep, skipped } = splitRowsForPlan(rows, isPro);
           tooOld += skipped;
           if (keep.length === 0) return;
-          const { data: inserted, error } = await supabase
-            .from("activity_rows")
-            .upsert(keep.map((r) => ({ ...r, user_id: userId })), {
-              onConflict: "user_id,generation_id",
-              ignoreDuplicates: true,
-            })
-            .select("generation_id");
-          if (error) {
+          let n: number;
+          try {
+            n = (await api<{ written: number }>("/activity/import", { body: { rows: keep, ignoreDuplicates: true } })).written;
+          } catch (e) {
             failed += keep.length;
-            firstError ??= error.message;
+            firstError ??= e instanceof Error ? e.message : String(e);
             return;
           }
-          const n = inserted?.length ?? 0;
           saved += n;
           alreadyImported += keep.length - n;
         },

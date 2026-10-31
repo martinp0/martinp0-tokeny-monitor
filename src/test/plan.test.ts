@@ -7,7 +7,7 @@ import {
   isProSubscription,
   proRequiredBody,
   syncableCredentialIds,
-} from "../../supabase/functions/_shared/plan.ts";
+} from "../../server/lib/plan";
 import { splitRowsForPlan } from "@/lib/plan";
 
 const NOW = new Date("2026-10-30T12:00:00Z");

@@ -1,7 +1,7 @@
 import { useEffect, useState, useId } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { supabase } from "@/integrations/supabase/client";
+import { api } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -97,9 +97,15 @@ const Settings = () => {
   }
 
   async function load() {
-    const { data: a } = await supabase.from("budget_alerts").select("*").maybeSingle();
+    const [{ alert: a }, { tokens: t }] = await Promise.all([
+      api<{ alert: BudgetAlert | null }>("/budget-alert"),
+      api<{ tokens: McpToken[] }>("/mcp-tokens"),
+    ]).catch((e: Error) => {
+      toast.error(e.message);
+      return [{ alert: null }, { tokens: [] as McpToken[] }] as const;
+    });
     if (a) {
-      setAlert(a as unknown as BudgetAlert);
+      setAlert(a);
       setBudget(String(a.monthly_budget_usd));
       setThreshold(String(a.threshold_pct));
       setEmail(a.notify_email ?? "");
@@ -107,47 +113,45 @@ const Settings = () => {
     } else {
       setEmail(session?.user.email ?? "");
     }
-    const { data: t } = await supabase.from("mcp_tokens").select("*").order("created_at", { ascending: false });
-    setTokens((t as unknown as McpToken[]) ?? []);
+    setTokens(t ?? []);
   }
 
   async function saveAlert() {
     if (!session) return;
     const payload = {
-      user_id: session.user.id,
       monthly_budget_usd: Number(budget),
       threshold_pct: Number(threshold),
       notify_email: email || null,
       enabled,
     };
-    const { error } = alert
-      ? await supabase.from("budget_alerts").update(payload).eq("id", alert.id)
-      : await supabase.from("budget_alerts").insert(payload);
-    if (error) toast.error(error.message);
-    else {
+    try {
+      await api("/budget-alert", { method: "PUT", body: payload });
       toast.success("Uloženo");
       void load();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : String(e));
     }
   }
 
   async function createToken() {
-    const { data, error } = await supabase.functions.invoke("create-mcp-token", { body: { name: tokenName } });
-    if (error) {
-      toast.error(error.message);
+    let data: { token?: string };
+    try {
+      data = await api<{ token?: string }>("/mcp-tokens", { body: { name: tokenName } });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : String(e));
       return;
     }
-    if (data?.error) {
-      toast.error(data.error);
-      return;
-    }
-    setNewToken(data.token);
+    setNewToken(data.token ?? null);
     void load();
   }
 
   async function deleteToken(id: string) {
-    const { error } = await supabase.from("mcp_tokens").delete().eq("id", id);
-    if (error) toast.error(error.message);
-    else void load();
+    try {
+      await api(`/mcp-tokens/${id}`, { method: "DELETE" });
+      void load();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : String(e));
+    }
   }
 
   const mcpUrl = mcpServerUrl();

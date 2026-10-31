@@ -18,7 +18,7 @@ interface Props {
 
 /**
  * UI mirror of the server-side Pro checks. Never the only protection: every Pro feature is also
- * enforced in edge functions / RLS (see supabase/functions/_shared/plan.ts).
+ * enforced by the /api routes (see server/lib/plan.ts).
  */
 export function ProGate({ feature, children, compact, hideWhenLocked }: Props) {
   const { isPro, loading } = useSubscription();

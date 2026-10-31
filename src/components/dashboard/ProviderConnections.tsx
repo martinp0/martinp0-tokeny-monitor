@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { api } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -14,7 +14,7 @@ import { useSubscription } from "@/hooks/useSubscription";
 import { UpgradeModal } from "@/components/UpgradeModal";
 import { FREE_LIMITS, proRequiredFeature } from "@/lib/plan";
 
-// Only providers with a working server-side sync (see supabase/functions/_shared/sync-core.ts).
+// Only providers with a working server-side sync (see server/lib/sync-core.ts).
 type ProviderId = "openrouter" | "anthropic" | "openai";
 
 /** Order of providers in the picker. */
@@ -54,17 +54,7 @@ const PROVIDER_META: Record<ProviderId, { label: string; hint: string; docsUrl: 
   },
 };
 
-/** supabase.functions.invoke hides non-2xx bodies behind a generic message; read the real error. */
-async function invokeErrorMessage(error: unknown): Promise<string> {
-  const ctx = (error as { context?: unknown })?.context;
-  if (ctx instanceof Response) {
-    try {
-      const body = await ctx.clone().json();
-      if (body?.error) return String(body.error);
-    } catch {
-      /* not JSON */
-    }
-  }
+function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
@@ -86,15 +76,13 @@ export function ProviderConnections() {
 
   async function load() {
     setLoading(true);
-    const { data, error } = await (supabase as any)
-      .from("provider_credentials")
-      .select(
-        "id, provider, label, key_preview, enabled, organization_id, last_synced_at, last_sync_status, last_sync_error, rows_imported",
-      )
-      .order("created_at", { ascending: true });
-    if (error) toast.error(error.message);
-    // Ignore credentials of providers that are no longer supported (removed stub providers).
-    else setCredentials(((data ?? []) as Credential[]).filter((c) => c.provider in PROVIDER_META));
+    try {
+      const { credentials: data } = await api<{ credentials: Credential[] }>("/credentials");
+      // Ignore credentials of providers that are no longer supported (removed stub providers).
+      setCredentials((data ?? []).filter((c) => c.provider in PROVIDER_META));
+    } catch (e) {
+      toast.error(errorMessage(e));
+    }
     setLoading(false);
   }
 
@@ -108,29 +96,27 @@ export function ProviderConnections() {
       return;
     }
     setSaving(true);
-    const { data, error } = await supabase.functions.invoke("save-provider-credential", {
-      body: {
-        provider,
-        label: label || "Default",
-        api_key: apiKey.trim(),
-        organization_id: orgId.trim() || null,
-      },
-    });
-    setSaving(false);
-    if (error) {
+    try {
+      await api("/credentials", {
+        body: {
+          provider,
+          label: label || "Default",
+          api_key: apiKey.trim(),
+          organization_id: orgId.trim() || null,
+        },
+      });
+    } catch (error) {
+      setSaving(false);
       const proFeature = await proRequiredFeature(error);
       if (proFeature) {
         setDialogOpen(false);
         setUpgradeFeature(proFeature);
         return;
       }
-      toast.error(await invokeErrorMessage(error));
+      toast.error(errorMessage(error));
       return;
     }
-    if (data?.error) {
-      toast.error(data.error);
-      return;
-    }
+    setSaving(false);
     toast.success(`${PROVIDER_META[provider].label} klíč uložen`);
     setDialogOpen(false);
     setApiKey("");
@@ -140,9 +126,10 @@ export function ProviderConnections() {
   }
 
   async function handleDelete(id: string) {
-    const { error } = await (supabase as any).from("provider_credentials").delete().eq("id", id);
-    if (error) {
-      toast.error(error.message);
+    try {
+      await api(`/credentials/${id}`, { method: "DELETE" });
+    } catch (e) {
+      toast.error(errorMessage(e));
       return;
     }
     toast.success("Smazáno");
@@ -151,26 +138,21 @@ export function ProviderConnections() {
 
   async function handleSync(c: Credential) {
     setSyncingId(c.id);
-    const fnName = `sync-${c.provider}`;
-    const { data, error } = await supabase.functions.invoke(fnName, {
-      body: { credential_id: c.id },
-    });
-    setSyncingId(null);
-    if (error) {
+    let data: { inserted?: number };
+    try {
+      data = await api<{ inserted?: number }>(`/credentials/${c.id}/sync`, { body: {} });
+    } catch (error) {
+      setSyncingId(null);
       const proFeature = await proRequiredFeature(error);
       if (proFeature) {
         setUpgradeFeature(proFeature);
         return;
       }
-      toast.error(`${PROVIDER_META[c.provider].label}: ${await invokeErrorMessage(error)}`);
+      toast.error(`${PROVIDER_META[c.provider].label}: ${errorMessage(error)}`);
       await load();
       return;
     }
-    if (data?.error) {
-      toast.error(data.error);
-      await load();
-      return;
-    }
+    setSyncingId(null);
     toast.success(`${PROVIDER_META[c.provider].label}: importováno ${data?.inserted ?? 0} řádků`);
     await load();
   }

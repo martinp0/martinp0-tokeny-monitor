@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import i18n from "@/i18n";
-import { supabase } from "@/integrations/supabase/client";
+import { api, ApiError } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
 import type { BillingInterval } from "@/config/pricing";
 
@@ -24,39 +24,30 @@ const FREE: SubscriptionStatus = {
 };
 
 async function fetchSubscriptionStatus(): Promise<SubscriptionStatus> {
-  const { data, error } = await supabase.functions.invoke("check-subscription");
-  if (error) throw error;
-  return { ...FREE, ...(data as Partial<SubscriptionStatus>) };
-}
-
-async function errorCode(error: unknown): Promise<string | null> {
-  const ctx = (error as { context?: unknown } | null)?.context;
-  if (!ctx || typeof (ctx as Response).clone !== "function") return null;
-  try {
-    return (await (ctx as Response).clone().json())?.error ?? null;
-  } catch {
-    return null;
-  }
+  const data = await api<Partial<SubscriptionStatus>>("/subscription");
+  return { ...FREE, ...data };
 }
 
 async function openPortal(): Promise<void> {
-  const { data, error } = await supabase.functions.invoke("create-portal-session", { body: {} });
-  if (error || !(data as { url?: string })?.url) {
+  try {
+    const { url } = await api<{ url?: string }>("/billing/portal", { body: {} });
+    if (!url) throw new Error("no url");
+    window.location.href = url;
+  } catch {
     toast.error(i18n.t("pricing.portalError"));
-    return;
   }
-  window.location.href = (data as { url: string }).url;
 }
 
 async function startCheckout(interval: BillingInterval = "month"): Promise<void> {
-  const { data, error } = await supabase.functions.invoke("create-checkout", { body: { interval } });
-  if (error) {
+  let url: string | undefined;
+  try {
+    url = (await api<{ url?: string }>("/billing/checkout", { body: { interval } })).url;
+  } catch (e) {
     // Already subscribed (e.g. second tab) → manage the existing subscription instead.
-    if ((await errorCode(error)) === "already_pro") return openPortal();
+    if (e instanceof ApiError && e.body?.error === "already_pro") return openPortal();
     toast.error(i18n.t("pricing.checkoutError"));
     return;
   }
-  const url = (data as { url?: string })?.url;
   if (!url) {
     toast.error(i18n.t("pricing.checkoutError"));
     return;

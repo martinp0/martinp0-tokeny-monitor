@@ -23,8 +23,8 @@ Jazyk obsahu: čeština (částečně EN). Měny: CZK, USD. Kurz: ČNB denní CR
 - [Blog](https://tokeny.martinpohl.cz/blog) — návody k optimalizaci nákladů na AI
 
 ## Bezpečnost a architektura
-- Postgres (Supabase) s Row-Level Security per user_id.
-- Zápisy do DB jdou výhradně přes ověřené Edge Functions s service-role klíčem.
+- Postgres (Neon) a přihlášení přes Neon Auth; každý dotaz serveru je omezený na přihlášeného uživatele.
+- Prohlížeč nemá přímý přístup k databázi, vše jde přes /api na stejné doméně.
 - API klíče providerů se ukládají jen na serveru a nevrací se do prohlížeče.
 - GDPR: uživatel může exportovat všechna data do CSV a smazat účet z /profile.
 

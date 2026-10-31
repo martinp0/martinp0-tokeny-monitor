@@ -71,18 +71,18 @@ no secrets, and the sample data comes from `scripts/app-review/demo-data.mjs`, t
 `src/test/demo-seed.test.ts`.
 
 ```bash
-# Run locally against the production Supabase project (the one the apps use):
-export SUPABASE_URL=https://<ref>.supabase.co
-export SUPABASE_SERVICE_ROLE_KEY=...        # paste in the shell only; never in .env or the repo
+# Run locally against production (Neon project "tokeny", the one the apps use):
+export SITE_URL=https://tokeny.martinpohl.cz
+export DATABASE_URL='postgresql://…'          # Neon connection string; shell only, never in .env or the repo
 export DEMO_EMAIL=appreview@tokeny.martinpohl.cz
 export DEMO_PASSWORD="$(openssl rand -base64 24)"; echo "$DEMO_PASSWORD" | pbcopy  # → App Store Connect
 node scripts/app-review/seed-demo-user.mjs --dry-run   # 375 rows, Pro
 node scripts/app-review/seed-demo-user.mjs             # or --free for a Free-plan account
-unset SUPABASE_SERVICE_ROLE_KEY DEMO_PASSWORD
+unset DATABASE_URL DEMO_PASSWORD
 ```
 
 What it creates:
-- A confirmed email/password user.
+- An email/password user (created through the normal sign-up; e-mail verification is off).
 - 375 `activity_rows` (5 models × 75 days, ids `demo-app-review-*`).
 - A Pro `subscriptions` row with the fake customer `cus_demo_app_review` and no Stripe subscription,
   valid for a year.
@@ -102,7 +102,7 @@ reporting, update both.
 - **Do you or your third-party partners collect data from this app?** Yes.
 - **Contact Info → Email Address:** collected. Linked to the user: yes. Tracking: no. Purpose: App
   Functionality.
-- **Identifiers → User ID:** collected (Supabase account id). Linked: yes. Tracking: no. Purpose:
+- **Identifiers → User ID:** collected (Tokeny account id). Linked: yes. Tracking: no. Purpose:
   App Functionality.
 - **Everything else** (Name, Phone, Location, Contacts, Health, Financial Info, Purchases, Usage Data
   / Product Interaction, Diagnostics, Browsing/Search History, User Content, Sensitive Info): **not

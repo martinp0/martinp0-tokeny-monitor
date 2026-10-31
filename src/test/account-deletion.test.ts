@@ -7,7 +7,7 @@ import {
   type BillingDeps,
   type DeletionDeps,
   type StripeSubLite,
-} from "../../supabase/functions/_shared/account-deletion.ts";
+} from "../../server/lib/account-deletion";
 
 const USER = "11111111-2222-4333-8444-555555555555";
 const missing = () => Object.assign(new Error("No such customer: 'cus_x'"), { code: "resource_missing", statusCode: 404 });

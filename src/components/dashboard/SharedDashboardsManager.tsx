@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useState } from "react";
+import { api } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Share2, Copy, ExternalLink, Trash2, ImagePlus, ImageOff, RefreshCw } from "lucide-react";
+import { Share2, Copy, ExternalLink, Trash2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { ogDashboardUrl } from "@/lib/public-urls";
 
@@ -12,28 +12,22 @@ interface SharedRow {
   share_token: string;
   label: string | null;
   created_at: string;
-  og_image_path: string | null;
 }
-
-const BUCKET = "og-images";
 
 export function SharedDashboardsManager() {
   const { session } = useAuth();
   const [rows, setRows] = useState<SharedRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
-  const fileInputs = useRef<Record<string, HTMLInputElement | null>>({});
 
   async function load() {
     if (!session) return;
     setLoading(true);
-    const { data, error } = await supabase
-      .from("shared_dashboards")
-      .select("id, share_token, label, created_at, og_image_path")
-      .eq("user_id", session.user.id)
-      .order("created_at", { ascending: false });
-    if (error) toast.error(error.message);
-    else setRows((data ?? []) as SharedRow[]);
+    try {
+      setRows((await api<{ shares: SharedRow[] }>("/shares")).shares ?? []);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : String(e));
+    }
     setLoading(false);
   }
 
@@ -41,11 +35,6 @@ export function SharedDashboardsManager() {
     void load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.user.id]);
-
-  function publicUrl(path: string | null) {
-    if (!path) return null;
-    return supabase.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
-  }
 
   function shareUrl(token: string) {
     return `${window.location.origin}/shared/${token}`;
@@ -56,63 +45,17 @@ export function SharedDashboardsManager() {
     toast.success(`${label} zkopírováno`);
   }
 
-  async function uploadOg(row: SharedRow, file: File) {
-    if (!session) return;
-    if (!file.type.startsWith("image/")) {
-      toast.error("Nahraj obrázek (PNG/JPG)");
-      return;
-    }
-    if (file.size > 4 * 1024 * 1024) {
-      toast.error("Maximum 4 MB");
-      return;
-    }
-    setBusyId(row.id);
-    const ext = file.name.split(".").pop() || "png";
-    const path = `${session.user.id}/${row.id}-${Date.now()}.${ext}`;
-    const { error: upErr } = await supabase.storage.from(BUCKET).upload(path, file, {
-      cacheControl: "3600",
-      upsert: true,
-      contentType: file.type,
-    });
-    if (upErr) {
-      toast.error(upErr.message);
-      setBusyId(null);
-      return;
-    }
-    // Remove old
-    if (row.og_image_path && row.og_image_path !== path) {
-      await supabase.storage.from(BUCKET).remove([row.og_image_path]);
-    }
-    const { error: updErr } = await supabase
-      .from("shared_dashboards")
-      .update({ og_image_path: path })
-      .eq("id", row.id);
-    if (updErr) toast.error(updErr.message);
-    else toast.success("OG obrázek nahrán");
-    setBusyId(null);
-    await load();
-  }
-
-  async function removeOg(row: SharedRow) {
-    if (!row.og_image_path) return;
-    setBusyId(row.id);
-    await supabase.storage.from(BUCKET).remove([row.og_image_path]);
-    await supabase.from("shared_dashboards").update({ og_image_path: null }).eq("id", row.id);
-    setBusyId(null);
-    toast.success("OG obrázek odstraněn (bude se generovat automaticky)");
-    await load();
-  }
-
   async function removeShare(row: SharedRow) {
     if (!confirm(`Smazat sdílení "${row.label || "Sdílený dashboard"}"?`)) return;
     setBusyId(row.id);
-    if (row.og_image_path) await supabase.storage.from(BUCKET).remove([row.og_image_path]);
-    const { error } = await supabase.from("shared_dashboards").delete().eq("id", row.id);
-    setBusyId(null);
-    if (error) toast.error(error.message);
-    else {
+    try {
+      await api(`/shares/${row.id}`, { method: "DELETE" });
       toast.success("Sdílení smazáno");
       await load();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : String(e));
+    } finally {
+      setBusyId(null);
     }
   }
 
@@ -134,7 +77,7 @@ export function SharedDashboardsManager() {
       </CardHeader>
       <CardContent className="space-y-3">
         <p className="text-xs text-muted-foreground">
-          Pro každé sdílení můžeš nahrát vlastní náhledový obrázek (1200×630, max 4 MB), nebo nech systém generovat dynamický náhled s aktuálními KPI.
+          Každé sdílení má automaticky generovaný náhled (1200×630) s aktuálními KPI.
         </p>
 
         {loading ? (
@@ -147,8 +90,7 @@ export function SharedDashboardsManager() {
           <div className="space-y-3">
             {rows.map((row) => {
               const url = shareUrl(row.share_token);
-              const ogUrl = row.og_image_path ? publicUrl(row.og_image_path) : autoOgUrl(row.share_token);
-              const isCustom = !!row.og_image_path;
+              const ogUrl = autoOgUrl(row.share_token);
               return (
                 <div
                   key={row.id}
@@ -174,15 +116,6 @@ export function SharedDashboardsManager() {
                       <span className="tabular-nums text-sm font-semibold truncate">
                         {row.label || "Sdílený dashboard"}
                       </span>
-                      <span
-                        className={`text-xs tabular-nums px-2 py-0.5 rounded-full ${
-                          isCustom
-                            ? "bg-primary/10 text-primary border border-accent/30"
-                            : "bg-secondary/60 text-muted-foreground border border-border"
-                        }`}
-                      >
-                        {isCustom ? "vlastní OG" : "auto OG"}
-                      </span>
                     </div>
                     <div className="flex items-center gap-1 text-xs">
                       <code className="font-mono truncate flex-1 text-muted-foreground">{url}</code>
@@ -196,39 +129,6 @@ export function SharedDashboardsManager() {
                       </a>
                     </div>
                     <div className="flex flex-wrap gap-2 pt-1">
-                      <input
-                        ref={(el) => (fileInputs.current[row.id] = el)}
-                        type="file"
-                        accept="image/png,image/jpeg,image/webp"
-                        className="hidden"
-                        onChange={(e) => {
-                          const f = e.target.files?.[0];
-                          if (f) void uploadOg(row, f);
-                          e.target.value = "";
-                        }}
-                      />
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="tabular-nums text-xs gap-1.5"
-                        disabled={busyId === row.id}
-                        onClick={() => fileInputs.current[row.id]?.click()}
-                      >
-                        <ImagePlus className="h-3.5 w-3.5" />
-                        {isCustom ? "Vyměnit obrázek" : "Nahrát vlastní"}
-                      </Button>
-                      {isCustom && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="tabular-nums text-xs gap-1.5"
-                          disabled={busyId === row.id}
-                          onClick={() => void removeOg(row)}
-                        >
-                          <ImageOff className="h-3.5 w-3.5" />
-                          Použít automatický
-                        </Button>
-                      )}
                       <Button
                         variant="ghost"
                         size="sm"

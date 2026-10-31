@@ -1,11 +1,18 @@
 import { useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { supabase } from "@/integrations/supabase/client";
+import { api, ApiError } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Activity, Laugh, Image, Loader2, ArrowLeft, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
+
+type FunResult = { joke?: string; image?: string; text?: string };
+
+function funError(e: unknown, fallback: string): string {
+  if (e instanceof ApiError && e.status === 401) return "Pro AI zábavu se nejdřív přihlas.";
+  return e instanceof Error && e.message ? e.message : fallback;
+}
 
 export default function Fun() {
   const [joke, setJoke] = useState<string | null>(null);
@@ -16,14 +23,10 @@ export default function Fun() {
   const generateJoke = async () => {
     setLoadingJoke(true);
     try {
-      const { data, error } = await supabase.functions.invoke("fun-ai", {
-        body: { mode: "joke" },
-      });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-      setJoke(data.joke);
-    } catch (e: any) {
-      toast.error(e.message || "Nepodařilo se vygenerovat vtip");
+      const data = await api<FunResult>("/fun-ai", { body: { mode: "joke" } });
+      setJoke(data.joke ?? null);
+    } catch (e) {
+      toast.error(funError(e, "Nepodařilo se vygenerovat vtip"));
     } finally {
       setLoadingJoke(false);
     }
@@ -33,18 +36,14 @@ export default function Fun() {
     setLoadingImage(true);
     setImage(null);
     try {
-      const { data, error } = await supabase.functions.invoke("fun-ai", {
-        body: { mode: "image" },
-      });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+      const data = await api<FunResult>("/fun-ai", { body: { mode: "image" } });
       if (data?.image) {
         setImage(data.image);
       } else {
         toast.info(data?.text || "Obrázek se nepodařilo vygenerovat, zkus to znovu!");
       }
-    } catch (e: any) {
-      toast.error(e.message || "Nepodařilo se vygenerovat obrázek");
+    } catch (e) {
+      toast.error(funError(e, "Nepodařilo se vygenerovat obrázek"));
     } finally {
       setLoadingImage(false);
     }

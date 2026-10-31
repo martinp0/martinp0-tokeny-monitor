@@ -55,18 +55,12 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
 
   const prefetchExchangeRate = useCallback(() => {
     if (!rateRequest) {
-      rateRequest = import("@/integrations/supabase/client")
-        .then(({ supabase }) =>
-          supabase
-            .from("exchange_rates")
-            .select("rate, source_date")
-            .eq("currency_pair", "USD_CZK")
-            .single(),
-        )
-        .then(({ data: dbRate }) => {
+      rateRequest = fetch("/api/exchange-rate")
+        .then((r) => (r.ok ? (r.json() as Promise<{ rate?: number; date?: string | null }>) : null))
+        .then((dbRate) => {
           if (!dbRate?.rate) return;
           const rate = Number(dbRate.rate);
-          const date = dbRate.source_date || null;
+          const date = dbRate.date || null;
           localStorage.setItem("exchangeRate", String(rate));
           if (date) localStorage.setItem("exchangeRateDate", date);
           applyRate(rate, date);
@@ -79,7 +73,7 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
   }, [applyRate]);
 
   useEffect(() => {
-    // Keep the Supabase client off the homepage critical path.
+    // Keep the API call off the homepage critical path.
     if (location.pathname === "/") return;
     void prefetchExchangeRate();
   }, [location.pathname, prefetchExchangeRate]);

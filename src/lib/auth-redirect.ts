@@ -3,7 +3,7 @@
  *
  * All redirect URLs are derived from window.location.origin so the same build works on
  * https://tokeny.martinpohl.cz (primary), https://tokeny.pohl.uk (transitional), Vercel previews
- * and localhost — as long as the origin is listed in the Supabase Auth "Redirect URLs".
+ * and localhost — as long as the origin is a trusted domain in Neon Auth.
  */
 export const AUTH_CALLBACK_PATH = "/auth/callback";
 export const DEFAULT_POST_LOGIN_PATH = "/dashboard";

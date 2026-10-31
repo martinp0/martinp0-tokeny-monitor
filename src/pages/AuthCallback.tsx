@@ -2,14 +2,13 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Loader2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { authClient } from "@/lib/auth-client";
 import { readAuthError, sanitizeNext } from "@/lib/auth-redirect";
 
 /**
- * Landing page for OAuth (Google / Apple) and email-confirmation redirects.
- *
- * supabase-js (detectSessionInUrl) consumes the tokens from the URL fragment (implicit flow) or
- * exchanges `?code=` (PKCE) during client initialisation; getSession() resolves after that.
+ * Landing page after Google / Apple sign-in. Neon Auth redirects here with
+ * `?neon_auth_session_verifier=…`; authClient.getSession() exchanges it (through our
+ * /api/auth proxy) for the first-party session cookie.
  */
 export default function AuthCallback() {
   const navigate = useNavigate();
@@ -24,42 +23,15 @@ export default function AuthCallback() {
       return;
     }
 
-    let done = false;
-    const finish = () => {
-      if (done) return;
-      done = true;
-      navigate(next, { replace: true });
-    };
-
-    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "PASSWORD_RECOVERY") {
-        done = true;
-        navigate("/reset-password", { replace: true });
-      } else if (session) {
-        finish();
-      }
+    let cancelled = false;
+    authClient.getSession(true).then((session) => {
+      if (cancelled) return;
+      if (session) navigate(next, { replace: true });
+      else setError("Přihlášení se nepodařilo dokončit. Zkus to prosím znovu.");
     });
-
-    (async () => {
-      let { data, error } = await supabase.auth.getSession();
-      // PKCE: exchange the code explicitly if the client did not do it already.
-      const code = params.get("code");
-      if (!data.session && !error && code) {
-        const res = await supabase.auth.exchangeCodeForSession(code);
-        error = res.error;
-        data = { session: res.data.session };
-      }
-      if (error) setError(error.message);
-      else if (data.session) finish();
-      else {
-        // Give the auth listener a moment (slow token processing), then fail visibly.
-        setTimeout(() => {
-          if (!done) setError("Přihlášení se nepodařilo dokončit. Zkus to prosím znovu.");
-        }, 8000);
-      }
-    })();
-
-    return () => sub.subscription.unsubscribe();
+    return () => {
+      cancelled = true;
+    };
   }, [navigate]);
 
   return (

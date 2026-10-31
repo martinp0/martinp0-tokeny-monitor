@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { api, isProRequiredError } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,19 +24,17 @@ export function ShareDashboardButton() {
   async function createShare() {
     if (!session) return;
     setCreating(true);
-    const { data, error } = await supabase
-      .from("shared_dashboards")
-      .insert({ user_id: session.user.id, label: label || "Sdílený dashboard" } as any)
-      .select("share_token")
-      .single();
-
-    if (error) {
-      toast.error(error.message);
+    let token: string;
+    try {
+      const { share } = await api<{ share: { share_token: string } }>("/shares", { body: { label: label || "Sdílený dashboard" } });
+      token = share.share_token;
+    } catch (e) {
+      toast.error(isProRequiredError(e) ? "Sdílení dashboardu je součástí Tokeny Pro." : e instanceof Error ? e.message : String(e));
       setCreating(false);
       return;
     }
 
-    const url = `${window.location.origin}/shared/${data.share_token}`;
+    const url = `${window.location.origin}/shared/${token}`;
     setShareUrl(url);
     setCreating(false);
   }

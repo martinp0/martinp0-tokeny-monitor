@@ -4,16 +4,8 @@
   "trailingSlash": false,
   "rewrites": [
     {
-      "source": "/api/mcp",
-      "destination": "https://cfjusewixhycahgxoylm.supabase.co/functions/v1/mcp"
-    },
-    {
-      "source": "/api/mcp/:path*",
-      "destination": "https://cfjusewixhycahgxoylm.supabase.co/functions/v1/mcp/:path*"
-    },
-    {
-      "source": "/api/og-dashboard",
-      "destination": "https://cfjusewixhycahgxoylm.supabase.co/functions/v1/og-dashboard"
+      "source": "/api/:path*",
+      "destination": "/api?__path=:path*"
     },
     {
       "source": "/auth",
@@ -114,5 +106,16 @@
         }
       ]
     }
-  ]
+  ],
+  "crons": [
+    {
+      "path": "/api/cron/daily",
+      "schedule": "0 5 * * *"
+    }
+  ],
+  "functions": {
+    "api/index.ts": {
+      "maxDuration": 300
+    }
+  }
 }

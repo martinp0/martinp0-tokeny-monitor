@@ -13,7 +13,7 @@ import {
   openRouterGenerationId,
   upsertInBatches,
   type ActivityRowInsert,
-} from "../../supabase/functions/_shared/sync-core";
+} from "../../server/lib/sync-core";
 
 describe("sync id builders (stable formats — existing rows must keep matching)", () => {
   it("openrouter", () => {

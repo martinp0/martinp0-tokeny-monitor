@@ -5,8 +5,7 @@ import reactRefresh from "eslint-plugin-react-refresh";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-  // supabase/functions is Deno code; it is type-checked with `bun run check:functions` (deno check).
-  { ignores: ["dist", "apple", "ios", "android", "supabase/functions"] },
+  { ignores: ["dist", "apple", "ios", "android"] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ["**/*.{ts,tsx}"],

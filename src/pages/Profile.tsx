@@ -1,7 +1,8 @@
 import { useState, useEffect, useId } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { supabase } from "@/integrations/supabase/client";
+import { api } from "@/lib/api";
+import { authClient, authErrorMessage } from "@/lib/auth-client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,6 +28,7 @@ const Profile = () => {
   const { session, signOut } = useAuth();
   const navigate = useNavigate();
   const [displayName, setDisplayName] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [saving, setSaving] = useState(false);
@@ -35,31 +37,29 @@ const Profile = () => {
 
   useEffect(() => {
     if (!session) return;
-    supabase
-      .from("profiles")
-      .select("display_name")
-      .eq("user_id", session.user.id)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (data?.display_name) setDisplayName(data.display_name);
-      });
+    api<{ profile: { display_name: string | null } | null }>("/me")
+      .then(({ profile }) => {
+        if (profile?.display_name) setDisplayName(profile.display_name);
+      })
+      .catch(() => {});
   }, [session]);
 
   async function updateProfile() {
     if (!session) return;
     setSaving(true);
-    const { error } = await supabase
-      .from("profiles")
-      .update({ display_name: displayName })
-      .eq("user_id", session.user.id);
-    setSaving(false);
-    if (error) toast.error(error.message);
-    else toast.success("Profil uložen");
+    try {
+      await api("/profile", { method: "PATCH", body: { display_name: displayName } });
+      toast.success("Profil uložen");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : String(e));
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function changePassword() {
-    if (newPassword.length < 6) {
-      toast.error("Heslo musí mít alespoň 6 znaků");
+    if (newPassword.length < 8) {
+      toast.error("Heslo musí mít alespoň 8 znaků");
       return;
     }
     if (newPassword !== confirmPassword) {
@@ -67,13 +67,16 @@ const Profile = () => {
       return;
     }
     setSaving(true);
-    const { error } = await supabase.auth.updateUser({ password: newPassword });
-    setSaving(false);
-    if (error) toast.error(error.message);
-    else {
+    try {
+      await authClient.changePassword(currentPassword, newPassword);
       toast.success("Heslo změněno");
+      setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
+    } catch (e) {
+      toast.error(authErrorMessage(e));
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -81,17 +84,14 @@ const Profile = () => {
     if (!session) return;
     setExporting(true);
     try {
-      // Paged: a single select is capped at 1000 rows by PostgREST; a GDPR export must be complete.
+      // Paged: the API returns at most 5000 rows per request; a GDPR export must be complete.
       const { rows: data } = await fetchAllPages<Record<string, unknown>>(
         (from, to) =>
-          supabase
-            .from("activity_rows")
-            .select("*")
-            .eq("user_id", session.user.id)
-            .order("created_at", { ascending: false })
-            .order("id", { ascending: true })
-            .range(from, to) as unknown as PromiseLike<{ data: Record<string, unknown>[] | null; error: { message: string } | null }>,
-        { maxRows: 10_000_000 },
+          api<{ rows: Record<string, unknown>[] }>(`/activity?offset=${from}&limit=${to - from + 1}`).then(
+            (r) => ({ data: r.rows, error: null }),
+            (e: Error) => ({ data: null, error: { message: e.message } }),
+          ),
+        { pageSize: 5000, maxRows: 10_000_000 },
       );
       if (!data || data.length === 0) {
         toast.info("Nemáš žádná data k exportu");
@@ -129,13 +129,7 @@ const Profile = () => {
     if (!session) return;
     setDeleting(true);
     try {
-      const { data, error } = await supabase.functions.invoke("delete-account", { method: "POST" });
-      if (error) {
-        // Non-2xx: the function's JSON body carries a readable message (e.g. Pro couldn't be canceled).
-        const body = await (error as { context?: Response }).context?.json?.().catch(() => null);
-        throw new Error(body?.error || error.message);
-      }
-      if (data?.error) throw new Error(data.error);
+      await api("/account/delete", { body: {} });
       toast.success("Účet smazán");
       await signOut();
       navigate("/");
@@ -147,6 +141,7 @@ const Profile = () => {
 
   const emailId = useId();
   const nameId = useId();
+  const currentPwdId = useId();
   const newPwdId = useId();
   const confirmPwdId = useId();
 
@@ -212,6 +207,18 @@ const Profile = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
+              <Label htmlFor={currentPwdId} className="text-xs">Současné heslo</Label>
+              <Input
+                id={currentPwdId}
+                type="password"
+                autoComplete="current-password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                className="mt-1 tabular-nums"
+                placeholder="Tvé současné heslo"
+              />
+            </div>
+            <div>
               <Label htmlFor={newPwdId} className="text-xs">Nové heslo</Label>
               <Input
                 id={newPwdId}
@@ -219,7 +226,7 @@ const Profile = () => {
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 className="mt-1 tabular-nums"
-                placeholder="Min. 6 znaků"
+                placeholder="Min. 8 znaků"
               />
             </div>
             <div>

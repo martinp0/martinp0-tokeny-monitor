@@ -7,7 +7,7 @@
  *   yearly 990 Kč  → price_1UW9Pz6jFD9ux2ZIzt5tYuVw (lookup_key tokeny_pro_yearly)
  * The edge functions read the price ids from STRIPE_PRICE_MONTHLY / STRIPE_PRICE_YEARLY; the
  * amounts here are display-only and must match Stripe. Limits are enforced server-side
- * (supabase/functions/_shared/plan.ts + RLS) — the UI only mirrors them.
+ * (server/lib/plan.ts, enforced by the /api routes) — the UI only mirrors them.
  */
 import { FREE_LIMITS } from "@/lib/plan";
 

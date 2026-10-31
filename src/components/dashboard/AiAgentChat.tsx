@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Sparkles, Send, X, Loader2, Bot, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
+import { api } from "@/lib/api";
 import { toast } from "sonner";
 
 export interface AgentAction {
@@ -46,11 +46,9 @@ export function AiAgentChat({ onAction }: Props) {
     setLoading(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke("chat-agent", {
+      const data = await api<{ reply?: string; ui_actions?: AgentAction[] }>("/chat-agent", {
         body: { messages: newMsgs.map((m) => ({ role: m.role, content: m.content })) },
       });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
 
       setMessages((prev) => [...prev, { role: "assistant", content: data.reply || "(prázdná odpověď)" }]);
 

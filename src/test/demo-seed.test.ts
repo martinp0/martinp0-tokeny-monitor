@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { DEMO_PREFIX, demoActivityRows, demoSubscription } from "../../scripts/app-review/demo-data.mjs";
-import { isProSubscription } from "../../supabase/functions/_shared/plan.ts";
+import { isProSubscription } from "../../server/lib/plan";
 
 const NOW = new Date("2026-10-30T12:00:00Z");
 

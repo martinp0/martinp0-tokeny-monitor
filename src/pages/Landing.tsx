@@ -24,22 +24,8 @@ import {
 } from "lucide-react";
 import { useCurrency } from "@/hooks/useCurrency";
 import { SITE_URL } from "@/config/site";
+import { maybeSignedIn } from "@/lib/auth-client";
 
-function readStoredSession() {
-  try {
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (!key || !key.startsWith("sb-") || !key.includes("auth-token")) continue;
-      const raw = localStorage.getItem(key);
-      if (!raw) continue;
-      const parsed = JSON.parse(raw);
-      if (parsed?.access_token || parsed?.currentSession?.access_token) return true;
-    }
-  } catch {
-    /* ignore broken storage */
-  }
-  return false;
-}
 
 const FEATURES = [
   { key: "currency", icon: Coins },
@@ -60,33 +46,8 @@ export default function Landing() {
   const [hasSession, setHasSession] = useState(false);
 
   useEffect(() => {
-    setHasSession(readStoredSession());
-
-    // Email confirmation / magic links land on "/" with tokens in the URL.
-    // Load the auth client immediately so it can store the session before
-    // the user navigates away and the tokens are lost.
-    const { hash, search } = window.location;
-    const hasAuthParams =
-      /(?:^|[#&])(access_token|refresh_token|error_description)=/.test(hash) ||
-      /[?&](code|token_hash|error_description)=/.test(search);
-    if (!hasAuthParams) return;
-
-    let cancelled = false;
-    let unsubscribe = () => {};
-    import("@/integrations/supabase/client").then(({ supabase }) => {
-      if (cancelled) return;
-      const { data } = supabase.auth.onAuthStateChange((_event, session) => {
-        if (!cancelled) setHasSession(!!session);
-      });
-      unsubscribe = () => data.subscription.unsubscribe();
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        if (!cancelled) setHasSession(!!session);
-      });
-    });
-    return () => {
-      cancelled = true;
-      unsubscribe();
-    };
+    // Optimistic CTA: the hint is set by the auth client; /dashboard re-checks the real session.
+    setHasSession(maybeSignedIn());
   }, []);
 
   const ctaHref = hasSession ? "/dashboard" : "/auth";

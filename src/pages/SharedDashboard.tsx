@@ -1,7 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { supabase } from "@/integrations/supabase/client";
 import { KpiCards } from "@/components/dashboard/KpiCards";
 import { CostTimeChart } from "@/components/dashboard/CostTimeChart";
 import { TokensChart } from "@/components/dashboard/TokensChart";
@@ -58,13 +57,8 @@ export default function SharedDashboard() {
       el.setAttribute("content", value);
     });
 
-    // Use fetch directly since we need query params
-    const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-shared-dashboard?token=${token}`;
-    fetch(url, {
-      headers: {
-        apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-      },
-    })
+    // Public, read-only endpoint (no session needed).
+    fetch(`/api/shared/${encodeURIComponent(token ?? "")}`)
       .then((r) => r.json())
       .then((d) => {
         if (d.error) setError(d.error);

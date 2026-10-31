@@ -12,7 +12,7 @@ import {
   type StripeEventLike,
   type StripeSubscriptionLike,
   type WebhookDeps,
-} from "../../supabase/functions/_shared/billing.ts";
+} from "../../server/lib/billing";
 
 const USER = "11111111-2222-4333-8444-555555555555";
 const OTHER = "99999999-2222-4333-8444-555555555555";
