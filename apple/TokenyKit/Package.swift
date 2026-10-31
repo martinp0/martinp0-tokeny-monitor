@@ -11,18 +11,16 @@ let package = Package(
         .library(name: "TokenyAuth", targets: ["TokenyAuth"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/supabase/supabase-swift.git", from: "2.55.5"),
         .package(url: "https://github.com/apple/swift-crypto.git", "3.0.0"..<"5.0.0"),
     ],
     targets: [
         // Models, formatting, budget rules, API client, App Group cache. Foundation only.
         .target(name: "TokenyCore"),
-        // Supabase Auth (Sign in with Apple, e-mail) and session access for the apps and extensions.
+        // Neon Auth (Better Auth) client: e-mail, Sign in with Apple, Keychain session (+ swift-crypto for the Apple nonce).
         .target(
             name: "TokenyAuth",
             dependencies: [
                 "TokenyCore",
-                .product(name: "Auth", package: "supabase-swift"),
                 .product(name: "Crypto", package: "swift-crypto"),
             ]
         ),

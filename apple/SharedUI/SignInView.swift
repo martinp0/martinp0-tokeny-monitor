@@ -3,7 +3,7 @@ import SwiftUI
 import TokenyAuth
 import TokenyCore
 
-/// Sign in with Apple, or e-mail and password against the same Supabase project as the web.
+/// Sign in with Apple, or e-mail and password against the same Neon Auth as the web.
 struct SignInView: View {
     @Environment(AppModel.self) private var model
     @Environment(\.openURL) private var openURL
@@ -182,7 +182,8 @@ struct SignInView: View {
     private func resetPassword() {
         run {
             try await model.auth.sendPasswordReset(email: email)
-            infoText = String(localized: "We sent you a link to set a new password.")
+            infoText = String(localized: "We e-mailed you a code. Enter it on the web to set a new password.")
+            openURL(model.config.resetPasswordURL(email: email.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()))
         }
     }
 

@@ -16,7 +16,7 @@ const OPERATOR_NAME = "Bc. Martin Pohl";
 const OPERATOR_ICO: string | null = null;
 /** TODO(martin): a contact e-mail for privacy requests. Shown only when set. */
 const CONTACT_EMAIL: string | null = null;
-const CONTACT_WEB = "https://martin.pohl.uk";
+const CONTACT_WEB = "https://martinpohl.cz";
 
 type Block = { h: string; p?: string[]; ul?: string[] };
 type Copy = { title: string; intro: string; updated: string; blocks: Block[] };

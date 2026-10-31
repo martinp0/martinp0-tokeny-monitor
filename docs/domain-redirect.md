@@ -26,18 +26,14 @@ Two consequences:
 
 1. **The new domain works.** Deploy the stack with `vercel.json` to the Vercel project behind
    `tokeny.martinpohl.cz`, then check that `/auth/callback`, `/dashboard` and `/privacy` return 200.
-2. **Supabase Auth → URL Configuration.** Set Site URL to `https://tokeny.martinpohl.cz`. Keep both
-   `https://tokeny.martinpohl.cz/**` and `https://tokeny.pohl.uk/**` in Redirect URLs (remove the
-   old one only after a few weeks).
-3. **Test login on `https://tokeny.martinpohl.cz` with every provider:**
-   - Google. The Google Cloud OAuth client redirect URI is the Supabase callback
-     (`https://<ref>.supabase.co/auth/v1/callback`); it doesn't change. Only add the domain under
-     "Authorized JavaScript origins" if Google asks for it.
-   - Sign in with Apple. The Services ID return URL is also the Supabase callback. Under Domains,
-     add `tokeny.martinpohl.cz` if Apple refuses it.
-   - Email and password: sign-up confirmation, magic link and password reset. The links come from
-     Site URL and `redirectTo`.
-   - Phone (SMS) and anonymous/demo, if they're still on.
+2. **Neon Auth → Trusted domains.** Keep both `https://tokeny.martinpohl.cz` and
+   `https://tokeny.pohl.uk` (already set; remove the old one only after a few weeks).
+3. **Test login on `https://tokeny.martinpohl.cz`:**
+   - Email and password: sign-up, sign-in, password reset (e-mailed code on `/reset-password`).
+   - Google: Neon Auth currently uses its shared development credentials. For production, create
+     your own Google OAuth client; its redirect URI is the Neon Auth callback (shown in the Neon
+     Console), not our domain.
+   - Sign in with Apple: not configured yet (the button is hidden until `VITE_AUTH_APPLE_ENABLED=true`).
 4. **Point `tokeny.pohl.uk` at Vercel.** In Vercel → Project → Domains → Add `tokeny.pohl.uk`, then
    set the DNS record that Vercel shows (CNAME or A) at the DNS provider of `pohl.uk`. This is a DNS
    change; I didn't make it.

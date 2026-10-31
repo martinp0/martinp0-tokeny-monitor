@@ -33,9 +33,9 @@ Marketing version stays `MARKETING_VERSION` in `project.yml` (1.0.0). Bump it th
 
 - **General:** name `PR – build & test`; *Restrict editing* on.
 - **Environment:** Xcode *Latest Release* (26 or newer), macOS *Latest*. No environment variables or
-  secrets needed (the Supabase URL and the publishable anon key are public and in the code).
+  secrets needed (the only backend setting is the public web host in `apple/Config/Backend.xcconfig`).
 - **Start conditions:** *Pull Request Changes*, source branch *Any*, target branch *Any*.
-  *Files and folders:* start only when files in `apple/` or `supabase/functions/usage-summary/` change.
+  *Files and folders:* start only when files in `apple/` or `server/usage-summary.ts` change.
   Turn *Auto-cancel builds* on.
 - **Actions:**
   - *Test* → scheme **Tokeny**, platform iOS, destination *iPhone 17 (Latest iOS)*. Runs the
@@ -64,7 +64,7 @@ with Apple, Keychain sharing); approve them.
 ## Checklist before the first TestFlight build
 
 - [ ] App IDs and the App Group exist (README → One-time setup, step 1)
-- [ ] Supabase Apple provider has the two bundle IDs as Client IDs
+- [ ] Neon Auth Apple provider configured and accepts the two bundle IDs (unverified whether Neon Auth supports extra native audiences)
 - [ ] `usage-summary` deployed with JWT support
 - [ ] Both App Store Connect app records exist
 - [ ] Workflows created, first PR build green

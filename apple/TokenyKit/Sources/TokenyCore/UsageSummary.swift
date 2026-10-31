@@ -1,6 +1,6 @@
 import Foundation
 
-/// Response of the `usage-summary` edge function (supabase/functions/usage-summary/index.ts).
+/// Response of `GET /api/usage-summary` (server/usage-summary.ts).
 /// All money values are USD as stored by the providers; convert with ``usdToCZK``.
 public struct UsageSummary: Codable, Equatable, Sendable {
     public enum Plan: String, Codable, Sendable {

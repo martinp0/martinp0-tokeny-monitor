@@ -1,5 +1,7 @@
 # Moving Tokeny off Lovable Cloud
 
+> **Historické (říjen 2026).** Tokeny už na Supabase neběží – backend je Neon + Vercel (viz CLAUDE.md, sekce *Backend*). Tento dokument popisuje původní plán přesunu z Lovable Cloud a slouží jen pro kontext.
+
 Runbook for moving the backend (Postgres, Auth, Edge Functions, Storage, cron) from the
 Lovable Cloud-managed Supabase project `cfjusewixhycahgxoylm` (“old”) to a Supabase project in
 Martin's own org (“new”). The frontend already runs on Vercel (`tokeny.martinpohl.cz`) and stays.

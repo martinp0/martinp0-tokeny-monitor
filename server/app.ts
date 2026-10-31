@@ -145,7 +145,7 @@ export function createApp(opts: AppOptions = {}) {
   app.all("/mcp", (c) => mcpApp.fetch(c.req.raw));
   app.all("/mcp/*", (c) => mcpApp.fetch(c.req.raw));
 
-  // Native apps & widgets: Neon Auth JWT (any plan) or orm_ token (Pro).
+  // Native apps & widgets: Neon Auth session cookie or JWT (any plan), or orm_ token (Pro).
   app.get("/usage-summary", async (c) => {
     const t = bearerToken(c.req.raw);
     let userId: string | null = null;
@@ -388,7 +388,7 @@ export function createApp(opts: AppOptions = {}) {
       deleteAuthUser: (id) => repo.deleteUserCascade(db(), id),
       log: (msg, extra) => console.log(msg, JSON.stringify(extra ?? {})),
     });
-    if (!result.ok) {
+    if ("error" in result) {
       const message = result.error === "delete_failed"
         ? "Smazání se nepovedlo, zkus to prosím znovu."
         : "Nepodařilo se ukončit předplatné Pro, účet zatím nemažeme. Zkus to prosím znovu, nebo napiš na podporu.";

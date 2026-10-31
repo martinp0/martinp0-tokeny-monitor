@@ -17,7 +17,7 @@ public struct CachedSummary: Codable, Equatable, Sendable {
 
 /// Non-secret shared state in the App Group (`UserDefaults(suiteName:)`): the last summary for
 /// widgets and complications, the display currency and the last budget alert. Tokens never go
-/// here; the Supabase session lives in the Keychain (see TokenyAuth).
+/// here; the Neon Auth session lives in the Keychain (see TokenyAuth).
 public struct SummaryStore: Sendable {
     /// nil = `UserDefaults.standard` (tests, or a target without the App Group).
     public let suiteName: String?

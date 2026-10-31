@@ -2,8 +2,8 @@ import { SITE_URL } from "@/config/site";
 
 /**
  * Public URLs that users copy or that end up in other people's apps (MCP client configs, link
- * previews) live on our own domain. vercel.json rewrites them to the Supabase edge functions, so
- * moving the backend (e.g. off Lovable Cloud) never breaks a URL someone already saved.
+ * previews) live on our own domain and are served by the single Vercel Function (api/index.ts),
+ * so moving the database or auth provider never breaks a URL someone already saved.
  */
 export const PUBLIC_API_PATHS = {
   mcp: "/api/mcp",

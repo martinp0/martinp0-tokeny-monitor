@@ -9,15 +9,19 @@ public enum UsageAPIError: Error, Equatable, Sendable {
     case unauthorized
     /// The server refused a Pro-only request (`{"error":"pro_required"}`).
     case proRequired
-    /// The `usage-summary` function is not deployed on this project.
+    /// The `/api/usage-summary` endpoint is missing (server being deployed or rolled back).
     case notDeployed
     case server(status: Int)
     case offline
     case badResponse
 }
 
-/// Talks to the Tokeny edge functions with the signed-in user's Supabase access token.
+/// Talks to the Tokeny API (`/api/*` on the web origin) as the signed-in user.
 /// Read-only except ``deleteAccount(accessToken:)``.
+///
+/// `accessToken` is the credential from ``TokenyAuth``: either the Neon Auth session cookie
+/// (`name=value`, sent as `Cookie`) or a Neon Auth JWT (sent as `Authorization: Bearer`).
+/// The server accepts both (server/auth.ts).
 public struct UsageAPI: Sendable {
     public typealias Transport = @Sendable (URLRequest) async throws -> (Data, URLResponse)
 
@@ -30,7 +34,7 @@ public struct UsageAPI: Sendable {
     }
 
     public func summaryRequest(accessToken: String, timeZone: TimeZone = .current) -> URLRequest {
-        var comps = URLComponents(url: config.functionsURL.appending(path: "usage-summary"), resolvingAgainstBaseURL: false)!
+        var comps = URLComponents(url: config.apiURL.appending(path: "usage-summary"), resolvingAgainstBaseURL: false)!
         comps.queryItems = [URLQueryItem(name: "tz", value: timeZone.identifier)]
         var req = URLRequest(url: comps.url!)
         req.httpMethod = "GET"
@@ -47,7 +51,7 @@ public struct UsageAPI: Sendable {
 
     /// Deletes the account and all its data (App Store guideline 5.1.1(v)); same as on the web.
     public func deleteAccount(accessToken: String) async throws {
-        var req = URLRequest(url: config.functionsURL.appending(path: "delete-account"))
+        var req = URLRequest(url: config.apiURL.appending(path: "account").appending(path: "delete"))
         req.httpMethod = "POST"
         req.timeoutInterval = 30
         req.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -84,10 +88,19 @@ public struct UsageAPI: Sendable {
     }
 
     private func authorize(_ req: inout URLRequest, accessToken: String) {
-        req.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
-        // The functions gateway wants the project's publishable key next to the user JWT.
-        req.setValue(config.anonKey, forHTTPHeaderField: "apikey")
+        Self.authorize(&req, credential: accessToken)
         req.setValue("application/json", forHTTPHeaderField: "Accept")
+    }
+
+    /// Puts a session cookie (`name=value`) in `Cookie`, anything else in `Authorization: Bearer`.
+    /// Cookies are set by hand, so URLSession's shared cookie jar is never involved.
+    public static func authorize(_ req: inout URLRequest, credential: String) {
+        req.httpShouldHandleCookies = false
+        if credential.contains("=") {
+            req.setValue(credential, forHTTPHeaderField: "Cookie")
+        } else {
+            req.setValue("Bearer \(credential)", forHTTPHeaderField: "Authorization")
+        }
     }
 
     private func send(_ req: URLRequest) async throws -> Data {

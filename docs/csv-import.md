@@ -28,5 +28,5 @@ Upload a CSV from the dashboard ("Upload CSV" or the first-run screen). The impo
 - **Not stored:** `User Email`, `Principal ID`, `Principal Type`, `Charge Category`.
 - **RLS:** rows are inserted by the signed-in user, so the existing `user_id = auth.uid()` policies apply. No service role is involved. On Free, rows older than 30 days are not stored (same as the OpenRouter import).
 - **Dashboard:** when imported rows are present, a "Cursor a Grok Bot: tokeny a tarif" card shows reads from cache / writes to cache / fresh input / output, and the cost in the plan vs over the plan.
-- **Migration:** `supabase/migrations/20261030150000_usage_export_import.sql` widens the `provider_source` CHECK and adds the two new columns. **Not applied anywhere yet.**
+- **Migration:** `db/schema.sql` (formerly the Supabase migration `20261030150000_usage_export_import.sql`) widens the `provider_source` CHECK and adds the two new columns. **Not applied anywhere yet.**
 - **Tests:** `src/test/usage-export.test.ts`, using the anonymized fixture `src/test/fixtures/usage-export-sample.csv`. The fixture IDs are made up and its email is example.com.

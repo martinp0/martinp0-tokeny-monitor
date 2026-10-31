@@ -7,12 +7,7 @@ import Testing
     import FoundationNetworking
 #endif
 
-private let config = AppConfig(
-    supabaseURL: URL(string: "https://example.supabase.co")!,
-    anonKey: "anon-key",
-    webURL: URL(string: "https://tokeny.example")!,
-    appGroup: "group.test"
-)
+private let config = AppConfig(webURL: URL(string: "https://tokeny.example")!, appGroup: "group.test")
 
 private func stub(status: Int, body: Data, capture: (@Sendable (URLRequest) -> Void)? = nil) -> UsageAPI.Transport {
     { request in
@@ -32,9 +27,16 @@ struct UsageAPITests {
         let api = UsageAPI(config: config)
         let req = api.summaryRequest(accessToken: "jwt123", timeZone: TimeZone(identifier: "Europe/Prague")!)
         #expect(req.httpMethod == "GET")
-        #expect(req.url?.absoluteString == "https://example.supabase.co/functions/v1/usage-summary?tz=Europe/Prague")
+        #expect(req.url?.absoluteString == "https://tokeny.example/api/usage-summary?tz=Europe/Prague")
         #expect(req.value(forHTTPHeaderField: "Authorization") == "Bearer jwt123")
-        #expect(req.value(forHTTPHeaderField: "apikey") == "anon-key")
+        #expect(req.value(forHTTPHeaderField: "Cookie") == nil)
+        #expect(req.httpShouldHandleCookies == false)
+    }
+
+    @Test func sessionCookieGoesInCookieHeader() {
+        let req = UsageAPI(config: config).summaryRequest(accessToken: "__Secure-neon-auth.session_token=abc.def")
+        #expect(req.value(forHTTPHeaderField: "Cookie") == "__Secure-neon-auth.session_token=abc.def")
+        #expect(req.value(forHTTPHeaderField: "Authorization") == nil)
     }
 
     @Test func fetchesAndDecodes() async throws {
@@ -75,29 +77,24 @@ struct UsageAPITests {
             config: config, transport: stub(status: 200, body: Data(#"{"success":true}"#.utf8)) { box.request = $0 })
         try await api.deleteAccount(accessToken: "jwt")
         #expect(box.request?.httpMethod == "POST")
-        #expect(box.request?.url?.path == "/functions/v1/delete-account")
+        #expect(box.request?.url?.path == "/api/account/delete")
         #expect(box.request?.value(forHTTPHeaderField: "Authorization") == "Bearer jwt")
     }
 
     @Test func configURLs() {
-        #expect(config.authURL.absoluteString == "https://example.supabase.co/auth/v1")
+        #expect(config.apiURL.absoluteString == "https://tokeny.example/api")
+        #expect(config.authURL.absoluteString == "https://tokeny.example/api/auth")
         #expect(config.accountURL.absoluteString == "https://tokeny.example/settings")
+        #expect(config.resetPasswordURL(email: "a@b.cz").absoluteString == "https://tokeny.example/reset-password?email=a@b.cz")
         #expect(AppConfig.production.webURL.host == "tokeny.martinpohl.cz")
     }
 
     @Test func configFromInfoPlist() {
-        let moved = AppConfig.fromInfo([
-            "TokenySupabaseHost": "newref.supabase.co",
-            "TokenySupabaseAnonKey": "new-anon",
-        ])
-        #expect(moved.supabaseURL.absoluteString == "https://newref.supabase.co")
-        #expect(moved.functionsURL.absoluteString == "https://newref.supabase.co/functions/v1")
-        #expect(moved.anonKey == "new-anon")
+        #expect(AppConfig.fromInfo(["TokenyWebHost": "tokeny.pohl.uk"]).webURL.absoluteString == "https://tokeny.pohl.uk")
         // A pasted full URL is tolerated.
-        #expect(AppConfig.fromInfo(["TokenySupabaseHost": "https://x.supabase.co/"]).supabaseURL.absoluteString == "https://x.supabase.co")
-        // Missing or unexpanded build settings fall back to the built-in backend.
-        let fallback = AppConfig.fromInfo(["TokenySupabaseHost": "$(TOKENY_SUPABASE_HOST)", "TokenySupabaseAnonKey": ""])
-        #expect(fallback.supabaseURL.host == AppConfig.fallbackSupabaseHost)
-        #expect(fallback.anonKey == AppConfig.fallbackAnonKey)
+        #expect(AppConfig.fromInfo(["TokenyWebHost": "https://x.example/"]).webURL.absoluteString == "https://x.example")
+        // Missing or unexpanded build settings fall back to the built-in origin.
+        #expect(AppConfig.fromInfo(["TokenyWebHost": "$(TOKENY_WEB_HOST)"]).webURL.host == AppConfig.fallbackWebHost)
+        #expect(AppConfig.fromInfo([:]).webURL.host == AppConfig.fallbackWebHost)
     }
 }

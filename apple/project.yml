@@ -17,7 +17,7 @@ packages:
   TokenyKit:
     path: TokenyKit
 
-# Backend endpoint (Supabase host + publishable key) for every target; see Config/Backend.xcconfig.
+# Backend origin (web host; API + Neon Auth are same-origin under /api) for every target; see Config/Backend.xcconfig.
 configFiles:
   Debug: Config/Backend.xcconfig
   Release: Config/Backend.xcconfig
@@ -66,8 +66,7 @@ targets:
       properties:
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
-        TokenySupabaseHost: $(TOKENY_SUPABASE_HOST)
-        TokenySupabaseAnonKey: $(TOKENY_SUPABASE_ANON_KEY)
+        TokenyWebHost: $(TOKENY_WEB_HOST)
         TokenyKeychainGroup: $(AppIdentifierPrefix)cz.martinpohl.tokeny.shared
         BGTaskSchedulerPermittedIdentifiers: [cz.martinpohl.tokeny.refresh]
         UIBackgroundModes: [fetch]
@@ -114,8 +113,7 @@ targets:
       properties:
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
-        TokenySupabaseHost: $(TOKENY_SUPABASE_HOST)
-        TokenySupabaseAnonKey: $(TOKENY_SUPABASE_ANON_KEY)
+        TokenyWebHost: $(TOKENY_WEB_HOST)
         TokenyKeychainGroup: $(AppIdentifierPrefix)cz.martinpohl.tokeny.shared
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
@@ -153,8 +151,7 @@ targets:
       properties:
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
-        TokenySupabaseHost: $(TOKENY_SUPABASE_HOST)
-        TokenySupabaseAnonKey: $(TOKENY_SUPABASE_ANON_KEY)
+        TokenyWebHost: $(TOKENY_WEB_HOST)
         ITSAppUsesNonExemptEncryption: false
     settings:
       base:
@@ -193,8 +190,7 @@ targets:
       properties:
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
-        TokenySupabaseHost: $(TOKENY_SUPABASE_HOST)
-        TokenySupabaseAnonKey: $(TOKENY_SUPABASE_ANON_KEY)
+        TokenyWebHost: $(TOKENY_WEB_HOST)
         WKApplication: true
     settings:
       base:
@@ -227,8 +223,7 @@ targets:
       properties:
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
-        TokenySupabaseHost: $(TOKENY_SUPABASE_HOST)
-        TokenySupabaseAnonKey: $(TOKENY_SUPABASE_ANON_KEY)
+        TokenyWebHost: $(TOKENY_WEB_HOST)
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
     settings:

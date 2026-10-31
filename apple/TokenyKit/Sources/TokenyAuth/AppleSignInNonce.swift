@@ -2,7 +2,7 @@ import Crypto
 import Foundation
 
 /// Nonce for Sign in with Apple: Apple gets the SHA-256 (in `ASAuthorizationAppleIDRequest.nonce`),
-/// Supabase gets the raw value and checks that it matches the `nonce` claim of the ID token.
+/// Neon Auth (Better Auth) gets the raw value and checks that it matches the `nonce` claim of the ID token.
 public struct AppleSignInNonce: Sendable, Equatable {
     public let raw: String
     public var sha256: String { Self.sha256Hex(raw) }

@@ -1,6 +1,6 @@
 import Foundation
 
-/// Responses captured from supabase/functions/usage-summary (shape of version 1).
+/// Responses of /api/usage-summary (shape of version 1; same as the former edge function).
 enum Fixtures {
     static let proSummary = Data(
         #"""

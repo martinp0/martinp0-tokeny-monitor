@@ -9,7 +9,7 @@
 	<array/>
 	<key>NSPrivacyCollectedDataTypes</key>
 	<array>
-		<!-- The Tokeny account (Supabase Auth): e-mail and user ID, linked to the user, for app functionality. -->
+		<!-- The Tokeny account (Neon Auth): e-mail and user ID, linked to the user, for app functionality. -->
 		<dict>
 			<key>NSPrivacyCollectedDataType</key>
 			<string>NSPrivacyCollectedDataTypeEmailAddress</string>

@@ -76,7 +76,7 @@ export default function Landing() {
           operatingSystem: "Web",
           description: t("landing.metaDesc"),
           offers: { "@type": "Offer", price: "0", priceCurrency: "CZK" },
-          author: { "@type": "Person", name: "Martin Pohl", url: "https://martin.pohl.uk" },
+          author: { "@type": "Person", name: "Martin Pohl", url: "https://martinpohl.cz" },
         })}</script>
         <script type="application/ld+json">{JSON.stringify({
           "@context": "https://schema.org",
@@ -275,7 +275,7 @@ export default function Landing() {
             <FooterLink href="https://github.com/martinp0/tokeny-monitor" external>
               <Github className="h-4 w-4" aria-hidden /> GitHub
             </FooterLink>
-            <FooterLink href="https://martin.pohl.uk" external>martin.pohl.uk</FooterLink>
+            <FooterLink href="https://martinpohl.cz" external>martinpohl.cz</FooterLink>
             <FooterLink to="/privacy">{t("landing.footer.privacy")}</FooterLink>
             <FooterLink href="https://buymeacoffee.com/martinpohlp" external>
               <Coffee className="h-4 w-4" aria-hidden /> {t("landing.footer.coffee")}

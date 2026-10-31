@@ -1,10 +1,10 @@
-// Supabase backend the apps talk to. Change these two values (and nothing in Swift) when the
-// backend moves, e.g. off Lovable Cloud (see docs/migrate-off-lovable.md).
+// Web origin the apps talk to. Since the move to Neon everything is same-origin:
+// the API is https://<host>/api/* and sign-in is the Neon Auth proxy at https://<host>/api/auth/*.
+// Change this value (and nothing in Swift) when the domain moves.
 //
 // xcconfig treats "//" as a comment, so only the host is stored here; AppConfig builds the
-// https URL. Both values are public: they are the same ones the web app ships in its bundle.
+// https URL. Nothing here is a secret.
 // To override locally without committing, create Config/Backend.local.xcconfig (git-ignored).
-TOKENY_SUPABASE_HOST = cfjusewixhycahgxoylm.supabase.co
-TOKENY_SUPABASE_ANON_KEY = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNmanVzZXdpeGh5Y2FoZ3hveWxtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NjU4NjYsImV4cCI6MjA5MDU0MTg2Nn0.1AD8jt0ZUoXBtQWyiO2BDn3Bycgmy_RxhMsR-_6cQp8
+TOKENY_WEB_HOST = tokeny.martinpohl.cz
 
 #include? "Backend.local.xcconfig"
