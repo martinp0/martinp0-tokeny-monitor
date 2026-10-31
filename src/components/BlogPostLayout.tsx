@@ -11,13 +11,15 @@ interface BlogPostLayoutProps {
   description: string;
   slug: string;
   date: string;
+  /** Human-readable date shown on the page (defaults to the ISO date). */
+  dateLabel?: string;
   tag: string;
   keywords: string;
   children: ReactNode;
 }
 
-export default function BlogPostLayout({ title, description, slug, date, tag, keywords, children }: BlogPostLayoutProps) {
-  const url = `https://tokeny.pohl.uk/blog/${slug}`;
+export default function BlogPostLayout({ title, description, slug, date, dateLabel, tag, keywords, children }: BlogPostLayoutProps) {
+  const url = `https://tokeny.martinpohl.cz/blog/${slug}`;
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Helmet>
@@ -38,12 +40,12 @@ export default function BlogPostLayout({ title, description, slug, date, tag, ke
           publisher: {
             "@type": "Organization",
             name: "Tokeny Monitor",
-            logo: { "@type": "ImageObject", url: "https://tokeny.pohl.uk/icon-512.png" },
+            logo: { "@type": "ImageObject", url: "https://tokeny.martinpohl.cz/icon-512.png" },
           },
           datePublished: date,
           dateModified: date,
           inLanguage: "cs-CZ",
-          image: "https://tokeny.pohl.uk/og-image.png",
+          image: "https://tokeny.martinpohl.cz/og-image.png",
           mainEntityOfPage: { "@type": "WebPage", "@id": url },
           url,
         })}</script>
@@ -51,8 +53,8 @@ export default function BlogPostLayout({ title, description, slug, date, tag, ke
           "@context": "https://schema.org",
           "@type": "BreadcrumbList",
           itemListElement: [
-            { "@type": "ListItem", position: 1, name: "Domů", item: "https://tokeny.pohl.uk/" },
-            { "@type": "ListItem", position: 2, name: "Blog", item: "https://tokeny.pohl.uk/blog" },
+            { "@type": "ListItem", position: 1, name: "Domů", item: "https://tokeny.martinpohl.cz/" },
+            { "@type": "ListItem", position: 2, name: "Blog", item: "https://tokeny.martinpohl.cz/blog" },
             { "@type": "ListItem", position: 3, name: title, item: url },
           ],
         })}</script>
@@ -75,7 +77,7 @@ export default function BlogPostLayout({ title, description, slug, date, tag, ke
         </Link>
         <div className="flex items-center gap-3 text-xs font-mono text-muted-foreground mb-4">
           <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary">{tag}</span>
-          <span className="flex items-center gap-1"><Calendar className="h-3 w-3" /> {date}</span>
+          <span className="flex items-center gap-1"><Calendar className="h-3 w-3" /> <time dateTime={date}>{dateLabel ?? date}</time></span>
         </div>
         <h1 className="text-3xl md:text-5xl font-display font-bold tracking-tight mb-6">{title}</h1>
         <p className="text-lg text-muted-foreground mb-6">{description}</p>

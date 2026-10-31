@@ -1,6 +1,6 @@
 # 🔮 Tokeny Monitor — AI Cost Dashboard
 
-[![Live](https://img.shields.io/badge/live-tokeny.pohl.uk-8b5cf6?style=flat-square)](https://tokeny.pohl.uk)
+[![Live](https://img.shields.io/badge/live-tokeny.martinpohl.cz-8b5cf6?style=flat-square)](https://tokeny.martinpohl.cz)
 [![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE)
 [![Docker](https://img.shields.io/badge/docker-ready-2496ED?style=flat-square&logo=docker)](Dockerfile)
 [![Buy Me a Coffee](https://img.shields.io/badge/☕-Buy_Me_a_Coffee-FFDD00?style=flat-square)](https://buymeacoffee.com/martinpohlp)
@@ -8,7 +8,7 @@
 > Open-source dashboard pro sledování nákladů na AI tokeny napříč OpenRouterem, Anthropic Admin API a OpenAI Admin API. CZK & USD, automatický sync, budget alerty, MCP server a AI agent — vše v jednom.
 
 <p align="center">
-  <a href="https://tokeny.pohl.uk"><strong>🚀 Live demo</strong></a> ·
+  <a href="https://tokeny.martinpohl.cz"><strong>🚀 Live demo</strong></a> ·
   <a href="#-fork--self-host"><strong>Self-host</strong></a> ·
   <a href="#-changelog"><strong>Changelog</strong></a> ·
   <a href="https://buymeacoffee.com/martinpohlp"><strong>Support ☕</strong></a>
@@ -38,7 +38,7 @@ AI API účty umí nenápadně růst. Tokeny Monitor ti ukáže, **které modely
 
 ## 🚀 Live Demo
 
-👉 **[tokeny.pohl.uk](https://tokeny.pohl.uk)** — live demo s ukázkovými daty, bez nutnosti registrace.
+👉 **[tokeny.martinpohl.cz](https://tokeny.martinpohl.cz)** — live demo s ukázkovými daty, bez nutnosti registrace.
 
 ---
 
@@ -243,6 +243,6 @@ MIT — dělej si s tím co chceš. Pokud ti to pomáhá, [kup mi kafe ☕](http
 
 <p align="center">
   Crafted by <a href="https://martinpohl.cz">Martin Pohl</a> ·
-  <a href="https://tokeny.pohl.uk">Live App</a> ·
+  <a href="https://tokeny.martinpohl.cz">Live App</a> ·
   <a href="https://buymeacoffee.com/martinpohlp">Support ☕</a>
 </p>

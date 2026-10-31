@@ -77,10 +77,10 @@ export default function Auth() {
       <Helmet>
         <title>{title} – OpenRouter Monitor</title>
         <meta name="description" content="Přihlaste se nebo si vytvořte účet v OpenRouter Monitoru a začněte sledovat náklady na AI tokeny." />
-        <link rel="canonical" href="https://tokeny.pohl.uk/auth" />
+        <link rel="canonical" href="https://tokeny.martinpohl.cz/auth" />
         <meta property="og:title" content={`${title} – OpenRouter Monitor`} />
         <meta property="og:description" content="Přihlášení nebo registrace do OpenRouter Monitoru – dashboardu pro náklady na AI tokeny." />
-        <meta property="og:url" content="https://tokeny.pohl.uk/auth" />
+        <meta property="og:url" content="https://tokeny.martinpohl.cz/auth" />
         <meta name="robots" content="noindex,follow" />
       </Helmet>
       <Card className="w-full max-w-md border-border bg-card">

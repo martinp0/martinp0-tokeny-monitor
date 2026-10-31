@@ -157,10 +157,10 @@ export default function Landing() {
       <Helmet>
         <title>OpenRouter Monitor – Přehled nákladů a spotřeby AI tokenů</title>
         <meta name="description" content="Sledujte náklady, spotřebu tokenů a výkon modelů na OpenRouter. Dashboard pro analýzu API volání v reálném čase s podporou CZK a USD." />
-        <link rel="canonical" href="https://tokeny.pohl.uk/" />
+        <link rel="canonical" href="https://tokeny.martinpohl.cz/" />
         <meta property="og:title" content="OpenRouter Monitor – Přehled nákladů a tokenů" />
         <meta property="og:description" content="Sledujte náklady, spotřebu tokenů a výkon AI modelů na OpenRouter v reálném čase." />
-        <meta property="og:url" content="https://tokeny.pohl.uk/" />
+        <meta property="og:url" content="https://tokeny.martinpohl.cz/" />
         <script type="application/ld+json">{JSON.stringify({
           "@context": "https://schema.org",
           "@type": "FAQPage",
@@ -183,7 +183,7 @@ export default function Landing() {
           step: [
             { "@type": "HowToStep", position: 1, name: "Otevři OpenRouter Activity", text: "Přihlas se na openrouter.ai a otevři stránku Activity.", url: "https://openrouter.ai/activity" },
             { "@type": "HowToStep", position: 2, name: "Stáhni CSV", text: "Klikni na Export → CSV." },
-            { "@type": "HowToStep", position: 3, name: "Nahraj CSV do dashboardu", text: "Přetáhni soubor do uploaderu na dashboardu.", url: "https://tokeny.pohl.uk/" },
+            { "@type": "HowToStep", position: 3, name: "Nahraj CSV do dashboardu", text: "Přetáhni soubor do uploaderu na dashboardu.", url: "https://tokeny.martinpohl.cz/" },
           ],
         })}</script>
       </Helmet>

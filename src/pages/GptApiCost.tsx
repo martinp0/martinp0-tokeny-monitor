@@ -32,10 +32,10 @@ export default function GptApiCost() {
           content="GPT API cost breakdown for GPT-5, GPT-4o and GPT-4o mini. Per-token pricing, real monthly examples and how to track actual OpenAI spend."
         />
         <meta name="keywords" content="gpt api cost, openai api cost, gpt-4o pricing, gpt-5 pricing, openai pricing, chatgpt api cost, gpt token cost" />
-        <link rel="canonical" href="https://tokeny.pohl.uk/gpt-api-cost" />
+        <link rel="canonical" href="https://tokeny.martinpohl.cz/gpt-api-cost" />
         <meta property="og:title" content="GPT API Cost 2026 — Full OpenAI Pricing Breakdown" />
         <meta property="og:description" content="How much does the GPT API really cost? GPT-5, GPT-4o, mini pricing with real-world monthly examples." />
-        <meta property="og:url" content="https://tokeny.pohl.uk/gpt-api-cost" />
+        <meta property="og:url" content="https://tokeny.martinpohl.cz/gpt-api-cost" />
         <meta property="og:type" content="article" />
         <script type="application/ld+json">{JSON.stringify({
           "@context": "https://schema.org",
@@ -44,7 +44,7 @@ export default function GptApiCost() {
           description: "Per-token pricing for GPT-5, GPT-4o and mini variants with monthly cost examples.",
           author: { "@type": "Person", name: "Martin Pohl", url: "https://martinpohl.cz" },
           datePublished: "2026-05-19",
-          url: "https://tokeny.pohl.uk/gpt-api-cost",
+          url: "https://tokeny.martinpohl.cz/gpt-api-cost",
         })}</script>
         <script type="application/ld+json">{JSON.stringify({
           "@context": "https://schema.org",

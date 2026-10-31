@@ -75,4 +75,4 @@ Disallow: /dashboard
 Disallow: /settings
 Disallow: /profile
 
-Sitemap: https://tokeny.pohl.uk/sitemap.xml
+Sitemap: https://tokeny.martinpohl.cz/sitemap.xml

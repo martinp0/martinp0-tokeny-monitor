@@ -168,9 +168,9 @@ export default function SharedDashboard() {
       <Helmet>
         <title>{data?.label ? `${data.label} – Sdílený dashboard` : "Sdílený dashboard"} | OpenRouter Monitor</title>
         <meta name="description" content={`Sdílený read-only dashboard nákladů na AI tokeny${data?.owner ? ` od ${data.owner}` : ""}.`} />
-        <link rel="canonical" href={`https://tokeny.pohl.uk/shared/${token}`} />
+        <link rel="canonical" href={`https://tokeny.martinpohl.cz/shared/${token}`} />
         <meta name="robots" content="noindex,follow" />
-        <meta property="og:url" content={`https://tokeny.pohl.uk/shared/${token}`} />
+        <meta property="og:url" content={`https://tokeny.martinpohl.cz/shared/${token}`} />
         <meta property="og:title" content={data?.label ? `${data.label} – Sdílený dashboard` : "Sdílený dashboard"} />
       </Helmet>
       <header className="border-b border-white/[0.06] px-6 py-3 glass">

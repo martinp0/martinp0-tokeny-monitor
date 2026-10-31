@@ -73,11 +73,11 @@ const Index = () => {
       <Helmet>
         <title>Dashboard – OpenRouter Monitor</title>
         <meta name="description" content="Tvůj přehled nákladů, tokenů, modelů a providerů na OpenRouteru. Filtruj podle data, exportuj a sleduj anomálie." />
-        <link rel="canonical" href="https://tokeny.pohl.uk/dashboard" />
+        <link rel="canonical" href="https://tokeny.martinpohl.cz/dashboard" />
         <meta name="robots" content="noindex,follow" />
         <meta property="og:title" content="Dashboard – OpenRouter Monitor" />
         <meta property="og:description" content="Interaktivní dashboard s náklady, tokeny, modely a anomáliemi z OpenRouteru. Filtry, export, AI agent." />
-        <meta property="og:url" content="https://tokeny.pohl.uk/dashboard" />
+        <meta property="og:url" content="https://tokeny.martinpohl.cz/dashboard" />
       </Helmet>
       {/* Header */}
       <header className="border-b border-white/[0.06] px-4 md:px-6 py-3 glass">

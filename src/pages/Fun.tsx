@@ -55,10 +55,10 @@ export default function Fun() {
       <Helmet>
         <title>AI Zábava – generátor vtipů a obrázků | OpenRouter Monitor</title>
         <meta name="description" content="Generuj české AI vtipy a unikátní obrázky pomocí Gemini. Zdarma, bez registrace." />
-        <link rel="canonical" href="https://tokeny.pohl.uk/fun" />
+        <link rel="canonical" href="https://tokeny.martinpohl.cz/fun" />
         <meta property="og:title" content="AI Zábava – vtipy a obrázky generované AI" />
         <meta property="og:description" content="Generátor českých vtipů a obrázků poháněný Gemini." />
-        <meta property="og:url" content="https://tokeny.pohl.uk/fun" />
+        <meta property="og:url" content="https://tokeny.martinpohl.cz/fun" />
       </Helmet>
       <div className="max-w-2xl mx-auto space-y-8">
         {/* Header */}
