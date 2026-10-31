@@ -42,7 +42,7 @@ export default function GptApiCost() {
           "@type": "Article",
           headline: "GPT API Cost 2026 — Full OpenAI Pricing Breakdown",
           description: "Per-token pricing for GPT-5, GPT-4o and mini variants with monthly cost examples.",
-          author: { "@type": "Person", name: "Martin Pohl", url: "https://martin.pohl.uk" },
+          author: { "@type": "Person", name: "Martin Pohl", url: "https://martinpohl.cz" },
           datePublished: "2026-05-19",
           url: "https://tokeny.pohl.uk/gpt-api-cost",
         })}</script>

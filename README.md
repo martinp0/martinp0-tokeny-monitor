@@ -242,7 +242,7 @@ MIT — dělej si s tím co chceš. Pokud ti to pomáhá, [kup mi kafe ☕](http
 ---
 
 <p align="center">
-  Crafted by <a href="https://martin.pohl.uk">Martin Pohl</a> ·
+  Crafted by <a href="https://martinpohl.cz">Martin Pohl</a> ·
   <a href="https://tokeny.pohl.uk">Live App</a> ·
   <a href="https://buymeacoffee.com/martinpohlp">Support ☕</a>
 </p>

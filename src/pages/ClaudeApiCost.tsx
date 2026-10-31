@@ -30,7 +30,7 @@ export default function ClaudeApiCost() {
           "@type": "Article",
           headline: "Claude API Cost 2026 — Full Pricing Breakdown",
           description: "Per-token pricing for Claude Haiku, Sonnet and Opus with monthly cost examples.",
-          author: { "@type": "Person", name: "Martin Pohl", url: "https://martin.pohl.uk" },
+          author: { "@type": "Person", name: "Martin Pohl", url: "https://martinpohl.cz" },
           datePublished: "2026-05-18",
           url: "https://tokeny.pohl.uk/claude-api-cost",
         })}</script>
