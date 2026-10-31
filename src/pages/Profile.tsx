@@ -129,8 +129,12 @@ const Profile = () => {
     if (!session) return;
     setDeleting(true);
     try {
-      const { data, error } = await supabase.functions.invoke("delete-account");
-      if (error) throw error;
+      const { data, error } = await supabase.functions.invoke("delete-account", { method: "POST" });
+      if (error) {
+        // Non-2xx: the function's JSON body carries a readable message (e.g. Pro couldn't be canceled).
+        const body = await (error as { context?: Response }).context?.json?.().catch(() => null);
+        throw new Error(body?.error || error.message);
+      }
       if (data?.error) throw new Error(data.error);
       toast.success("Účet smazán");
       await signOut();
@@ -265,7 +269,7 @@ const Profile = () => {
           </CardHeader>
           <CardContent className="space-y-3">
             <p className="text-sm text-muted-foreground">
-              Smazání účtu je nevratné. Všechna tvá data (activity rows, profil, budget alerty, MCP tokeny) budou trvale odstraněna.
+              Smazání účtu je nevratné. Všechna tvá data (activity rows, profil, budget alerty, MCP tokeny) budou trvale odstraněna a případné předplatné Pro se okamžitě ukončí.
             </p>
             <AlertDialog>
               <AlertDialogTrigger asChild>
@@ -278,7 +282,7 @@ const Profile = () => {
                 <AlertDialogHeader>
                   <AlertDialogTitle>Opravdu smazat účet?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    Tato akce je nevratná. Všechna data budou trvale smazána a nebude možné je obnovit.
+                    Tato akce je nevratná. Všechna data budou trvale smazána a nebude možné je obnovit. Předplatné Pro se ukončí hned, bez vrácení peněz za zbytek období.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>

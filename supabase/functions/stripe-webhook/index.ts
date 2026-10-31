@@ -63,6 +63,12 @@ Deno.serve(async (req) => {
         if (error) throw new Error(error.message);
         return data ?? null;
       },
+      userExists: async (userId) => {
+        const { data, error } = await svc.auth.admin.getUserById(userId);
+        if (data?.user) return true;
+        // 404 = deleted user. Any other error: assume it exists so the upsert decides (and Stripe retries on failure).
+        return !(error && (error.status === 404 || /not found/i.test(error.message)));
+      },
       upsert: async (row: SubscriptionRow) => {
         const { error } = await svc
           .from("subscriptions")

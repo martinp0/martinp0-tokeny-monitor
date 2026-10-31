@@ -109,11 +109,11 @@
     "exportButton": "Export data",
     "exporting": "Exporting…",
     "dangerZone": "Danger zone",
-    "deleteDesc": "Account deletion is irreversible. All your data (activity rows, profile, budget alerts, MCP tokens) will be permanently removed.",
+    "deleteDesc": "Account deletion is irreversible. All your data (activity rows, profile, budget alerts, MCP tokens) will be permanently removed, and any Pro subscription is canceled immediately.",
     "deleteAccount": "Delete account",
     "deleting": "Deleting…",
     "confirmDelete": "Really delete account?",
-    "confirmDeleteDesc": "This action is irreversible. All data will be permanently deleted and cannot be recovered.",
+    "confirmDeleteDesc": "This action is irreversible. All data will be permanently deleted and cannot be recovered. Pro is canceled right away, with no refund for the rest of the period.",
     "cancel": "Cancel",
     "confirmYes": "Yes, delete everything"
   },
@@ -234,6 +234,10 @@
         {
           "q": "How do I connect Tokeny to Grok Bot?",
           "a": "Create a token in Settings → MCP server (Pro). In Grok Bot, ask a bot to add a custom MCP server with the URL shown in Settings and the header Authorization: Bearer <token>; enter the token in the masked secret field. Then type @tokeny in the chat and ask about your spend. It works the same way as Cursor or Claude."
+        },
+        {
+          "q": "What happens to my Pro subscription if I delete my account?",
+          "a": "Deleting your account cancels Pro in Stripe immediately, so you won't be charged again. The rest of the paid period is not refunded automatically. Invoices stay with Stripe as accounting law requires. To cancel Pro but keep your account, use subscription management in Settings."
         }
       ]
     },

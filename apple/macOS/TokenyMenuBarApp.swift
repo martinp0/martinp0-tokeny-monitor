@@ -265,7 +265,7 @@ struct MacSettingsView: View {
             }
         } message: {
             Text(
-                "This permanently deletes your account, provider keys and usage history. If you have Pro, cancel the subscription on the web first."
+                "This permanently deletes your account, provider keys and usage history. Any Pro subscription is canceled immediately, with no refund for the rest of the period."
             )
         }
     }
