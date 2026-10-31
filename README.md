@@ -3,7 +3,7 @@
 [![Live](https://img.shields.io/badge/live-tokeny.pohl.uk-8b5cf6?style=flat-square)](https://tokeny.martinpohl.cz)
 [![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE)
 [![Docker](https://img.shields.io/badge/docker-ready-2496ED?style=flat-square&logo=docker)](Dockerfile)
-[![Buy Me a Coffee](https://img.shields.io/badge/☕-Buy_Me_a_Coffee-FFDD00?style=flat-square)](https://buymeacoffee.com/martinpohlp)
+[![Buy Me a Coffee](https://img.shields.io/badge/☕-Buy_Me_a_Coffee-FFDD00?style=flat-square)](https://buymeacoffee.com/martinp0)
 
 > Open-source dashboard pro sledování nákladů na AI tokeny napříč OpenRouterem, Anthropic Admin API a OpenAI Admin API. CZK & USD, automatický sync, budget alerty, MCP server a AI agent — vše v jednom.
 
@@ -11,7 +11,7 @@
   <a href="https://tokeny.martinpohl.cz"><strong>🚀 Live demo</strong></a> ·
   <a href="#-fork--self-host"><strong>Self-host</strong></a> ·
   <a href="#-changelog"><strong>Changelog</strong></a> ·
-  <a href="https://buymeacoffee.com/martinpohlp"><strong>Support ☕</strong></a>
+  <a href="https://buymeacoffee.com/martinp0"><strong>Support ☕</strong></a>
 </p>
 
 ---
@@ -49,7 +49,7 @@ AI API účty umí nenápadně růst. Tokeny ti ukáže, **které modely, provid
 Tokeny je open-source a free to use. Pokud ti ušetří peníze, čas nebo debugování faktur za AI modely, můžeš vývoj podpořit:
 
 <p align="center">
-  <a href="https://buymeacoffee.com/martinpohlp">
+  <a href="https://buymeacoffee.com/martinp0">
     <img src="https://img.shields.io/badge/Buy%20me%20a%20coffee-Support%20Tokeny%20Monitor-FFDD00?style=for-the-badge&logo=buymeacoffee&logoColor=000" alt="Buy Me a Coffee">
   </a>
 </p>
@@ -190,12 +190,12 @@ bun run build
 
 ## 📄 License
 
-MIT — dělej si s tím co chceš. Pokud ti to pomáhá, [kup mi kafe ☕](https://buymeacoffee.com/martinpohlp).
+MIT — dělej si s tím co chceš. Pokud ti to pomáhá, [kup mi kafe ☕](https://buymeacoffee.com/martinp0).
 
 ---
 
 <p align="center">
   Crafted by <a href="https://martinpohl.cz">Martin Pohl</a> ·
   <a href="https://tokeny.martinpohl.cz">Live App</a> ·
-  <a href="https://buymeacoffee.com/martinpohlp">Support ☕</a>
+  <a href="https://buymeacoffee.com/martinp0">Support ☕</a>
 </p>
