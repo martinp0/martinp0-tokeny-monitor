@@ -16,8 +16,8 @@ export function LanguageSwitcher({ size = "sm", className }: { size?: "sm" | "de
       variant="ghost"
       size={size}
       onClick={toggle}
-      className={cn("h-11 min-h-11 min-w-11 gap-1.5 px-3 text-sm text-muted-foreground hover:text-foreground", className)}
-      aria-label={t("lang.switchLabel")}
+      className={cn("gap-1.5 tabular-nums text-xs text-muted-foreground hover:text-foreground", className)}
+      title="Switch language"
     >
       <Globe className="h-3.5 w-3.5" />
       {t("lang.switch")}

@@ -22,7 +22,8 @@ i18n
     },
     react: { useSuspense: false },
     detection: {
-      order: ["localStorage", "htmlTag"],
+      order: ["querystring", "localStorage", "htmlTag"],
+      lookupQuerystring: "lang",
       lookupLocalStorage: "tokeny_lang",
       caches: isBrowser ? ["localStorage"] : [],
     },

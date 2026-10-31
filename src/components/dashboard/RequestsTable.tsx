@@ -18,7 +18,7 @@ function DetailRow({ label, value, color }: { label: string; value: string | num
   return (
     <div className="flex justify-between items-start gap-3 py-1.5 border-b border-border/30 last:border-0 min-w-0">
       <span className="text-xs text-muted-foreground shrink-0">{label}</span>
-      <span className={`text-xs font-mono text-right break-all min-w-0 ${color || "text-foreground"}`}>{value}</span>
+      <span className={`text-xs tabular-nums text-right break-all min-w-0 ${color || "text-foreground"}`}>{value}</span>
     </div>
   );
 }
@@ -31,26 +31,26 @@ function RequestDetailModal({ row, open, onClose }: { row: ActivityRow | null; o
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="bg-card border-border w-[calc(100vw-1.5rem)] max-w-lg max-h-[85vh] overflow-y-auto overflow-x-hidden">
         <DialogHeader>
-          <DialogTitle className="text-sm font-mono text-foreground break-words">
+          <DialogTitle className="text-sm tabular-nums text-foreground break-words">
             <span title={row.model_permaslug}>{shortModel(row.model_permaslug, 32)}</span>
           </DialogTitle>
-          <p className="text-xs text-muted-foreground font-mono break-all">{row.generation_id}</p>
+          <p className="text-xs text-muted-foreground tabular-nums break-all">{row.generation_id}</p>
         </DialogHeader>
 
         <div className="space-y-4 mt-2">
           {/* Timing */}
           <div>
-            <h4 className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Timing</h4>
+            <h4 className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Timing</h4>
             <div className="bg-secondary/50 rounded-md px-3 py-1">
               <DetailRow label="Created At" value={row.created_at} />
-              <DetailRow label="Generation Time" value={`${fmtNum(row.generation_time_ms, currency)} ms`} color="text-chart-3" />
-              <DetailRow label="Time to First Token" value={`${fmtNum(row.time_to_first_token_ms, currency)} ms`} color="text-chart-4" />
+              <DetailRow label="Generation Time" value={`${fmtNum(row.generation_time_ms, currency)} ms`} color="text-foreground" />
+              <DetailRow label="Time to First Token" value={`${fmtNum(row.time_to_first_token_ms, currency)} ms`} color="text-foreground" />
             </div>
           </div>
 
           {/* Model & Provider */}
           <div>
-            <h4 className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Model & Provider</h4>
+            <h4 className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Model & Provider</h4>
             <div className="bg-secondary/50 rounded-md px-3 py-1">
               <DetailRow label="Model" value={row.model_permaslug} />
               <DetailRow label="Provider" value={row.provider_name} />
@@ -62,9 +62,9 @@ function RequestDetailModal({ row, open, onClose }: { row: ActivityRow | null; o
 
           {/* Costs */}
           <div>
-            <h4 className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Costs</h4>
+            <h4 className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Costs</h4>
             <div className="bg-secondary/50 rounded-md px-3 py-1">
-              <DetailRow label="Celkové náklady" value={fmtCost(row.cost_total, 6, currency, exchangeRate)} color="text-chart-1" />
+              <DetailRow label="Celkové náklady" value={fmtCost(row.cost_total, 6, currency, exchangeRate)} color="text-foreground" />
               <DetailRow label="Web Search" value={fmtCost(row.cost_web_search, 6, currency, exchangeRate)} />
               <DetailRow label="Cache" value={fmtCost(row.cost_cache, 6, currency, exchangeRate)} />
               <DetailRow label="File Processing" value={fmtCost(row.cost_file_processing, 6, currency, exchangeRate)} />
@@ -74,18 +74,18 @@ function RequestDetailModal({ row, open, onClose }: { row: ActivityRow | null; o
 
           {/* Tokens */}
           <div>
-            <h4 className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Tokens</h4>
+            <h4 className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Tokens</h4>
             <div className="bg-secondary/50 rounded-md px-3 py-1">
-              <DetailRow label="Prompt" value={fmtNum(row.tokens_prompt, currency)} color="text-chart-2" />
-              <DetailRow label="Completion" value={fmtNum(row.tokens_completion, currency)} color="text-primary" />
-              <DetailRow label="Reasoning" value={fmtNum(row.tokens_reasoning, currency)} color="text-chart-4" />
-              <DetailRow label="Cached" value={fmtNum(row.tokens_cached, currency)} color="text-chart-3" />
+              <DetailRow label="Prompt" value={fmtNum(row.tokens_prompt, currency)} color="text-foreground" />
+              <DetailRow label="Completion" value={fmtNum(row.tokens_completion, currency)} color="text-foreground" />
+              <DetailRow label="Reasoning" value={fmtNum(row.tokens_reasoning, currency)} color="text-foreground" />
+              <DetailRow label="Cached" value={fmtNum(row.tokens_cached, currency)} color="text-foreground" />
             </div>
           </div>
 
           {/* Status */}
           <div>
-            <h4 className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Status</h4>
+            <h4 className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Status</h4>
             <div className="bg-secondary/50 rounded-md px-3 py-1">
               <DetailRow label="Finish Reason" value={row.finish_reason_normalized} />
               <DetailRow label="Finish Reason (raw)" value={row.finish_reason_raw || "—"} />
@@ -143,14 +143,14 @@ export function RequestsTable({ data }: Props) {
       <Card className="bg-card border-border/50">
         <CardHeader className="pb-2">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-            <CardTitle className="text-sm text-muted-foreground uppercase tracking-wider">Request Log</CardTitle>
+            <CardTitle className="text-[15px] font-semibold tracking-tight text-foreground">Request Log</CardTitle>
             <div className="relative w-full sm:w-64">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search model, provider..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-8 h-9 bg-secondary border-border text-sm font-mono"
+                className="pl-8 h-9 bg-secondary border-border text-sm tabular-nums"
               />
             </div>
           </div>
@@ -162,32 +162,32 @@ export function RequestsTable({ data }: Props) {
               <button
                 key={row.generation_id}
                 onClick={() => setSelectedRow(row)}
-                className="w-full min-w-0 text-left bg-secondary/40 hover:bg-secondary/70 border border-border/30 rounded-md p-3 font-mono text-xs space-y-1.5"
+                className="w-full min-w-0 text-left bg-secondary/40 hover:bg-secondary/70 border border-border/30 rounded-md p-3 tabular-nums text-xs space-y-1.5"
               >
                 <div className="flex items-center justify-between gap-2 min-w-0">
                   <span className="text-foreground truncate min-w-0" title={row.model_permaslug}>
                     {shortModel(row.model_permaslug, 22)}
                   </span>
-                  <span className="text-chart-1 shrink-0">{fmtCost(row.cost_total, 4, currency, exchangeRate)}</span>
+                  <span className="font-medium text-foreground shrink-0">{fmtCost(row.cost_total, 4, currency, exchangeRate)}</span>
                 </div>
-                <div className="flex items-center justify-between gap-2 text-[10px] text-muted-foreground min-w-0">
+                <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground min-w-0">
                   <span className="truncate min-w-0">{row.provider_name} · {row.created_at.substring(11, 19)}</span>
                   <span className={`px-1.5 py-0.5 rounded uppercase font-bold ${
-                    row.finish_reason_normalized === "stop" ? "bg-primary/20 text-primary" :
-                    row.finish_reason_normalized === "length" ? "bg-chart-3/20 text-chart-3" :
-                    "bg-chart-4/20 text-chart-4"
+                    row.finish_reason_normalized === "stop" ? "bg-success/15 text-success" :
+                    row.finish_reason_normalized === "length" ? "bg-warning/15 text-warning" :
+                    "bg-muted text-muted-foreground"
                   }`}>
                     {row.finish_reason_normalized}
                   </span>
                 </div>
-                <div className="flex items-center justify-between text-[10px]">
-                  <span className="text-chart-2">{fmtNum(row.tokens_prompt + row.tokens_completion, currency)} tok</span>
-                  <span className="text-chart-3">{fmtNum(row.generation_time_ms, currency)} ms</span>
+                <div className="flex items-center justify-between text-xs">
+                  <span>{fmtNum(row.tokens_prompt + row.tokens_completion, currency)} tok</span>
+                  <span>{fmtNum(row.generation_time_ms, currency)} ms</span>
                 </div>
               </button>
             ))}
             {filtered.length > 100 && (
-              <p className="text-[10px] text-center text-muted-foreground pt-2">
+              <p className="text-xs text-center text-muted-foreground pt-2">
                 Zobrazeno 100 z {filtered.length} – pro víc použij desktop
               </p>
             )}
@@ -212,19 +212,19 @@ export function RequestsTable({ data }: Props) {
                   <TableRow
                     key={row.generation_id}
                     onClick={() => setSelectedRow(row)}
-                    className="border-border/30 hover:bg-secondary/50 font-mono text-xs cursor-pointer"
+                    className="border-border/30 hover:bg-secondary/50 tabular-nums text-xs cursor-pointer"
                   >
                     <TableCell className="text-muted-foreground">{row.created_at.substring(11, 19)}</TableCell>
                     <TableCell className="text-foreground max-w-[200px] truncate" title={row.model_permaslug}>{shortModel(row.model_permaslug, 24)}</TableCell>
                     <TableCell className="text-muted-foreground">{row.provider_name}</TableCell>
-                    <TableCell className="text-right text-chart-1">{fmtCost(row.cost_total, 4, currency, exchangeRate)}</TableCell>
-                    <TableCell className="text-right text-chart-2">{fmtNum(row.tokens_prompt + row.tokens_completion, currency)}</TableCell>
-                    <TableCell className="text-right text-chart-3">{fmtNum(row.generation_time_ms, currency)}</TableCell>
+                    <TableCell className="text-right font-medium">{fmtCost(row.cost_total, 4, currency, exchangeRate)}</TableCell>
+                    <TableCell className="text-right text-muted-foreground">{fmtNum(row.tokens_prompt + row.tokens_completion, currency)}</TableCell>
+                    <TableCell className="text-right text-muted-foreground">{fmtNum(row.generation_time_ms, currency)}</TableCell>
                     <TableCell>
-                      <span className={`px-1.5 py-0.5 rounded text-[10px] uppercase font-bold ${
-                        row.finish_reason_normalized === "stop" ? "bg-primary/20 text-primary" :
-                        row.finish_reason_normalized === "length" ? "bg-chart-3/20 text-chart-3" :
-                        "bg-chart-4/20 text-chart-4"
+                      <span className={`px-1.5 py-0.5 rounded text-xs uppercase font-bold ${
+                        row.finish_reason_normalized === "stop" ? "bg-success/15 text-success" :
+                        row.finish_reason_normalized === "length" ? "bg-warning/15 text-warning" :
+                        "bg-muted text-muted-foreground"
                       }`}>
                         {row.finish_reason_normalized}
                       </span>

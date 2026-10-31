@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { api, isProRequiredError } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,19 +24,17 @@ export function ShareDashboardButton() {
   async function createShare() {
     if (!session) return;
     setCreating(true);
-    const { data, error } = await supabase
-      .from("shared_dashboards")
-      .insert({ user_id: session.user.id, label: label || "Sdílený dashboard" } as any)
-      .select("share_token")
-      .single();
-
-    if (error) {
-      toast.error(error.message);
+    let token: string;
+    try {
+      const { share } = await api<{ share: { share_token: string } }>("/shares", { body: { label: label || "Sdílený dashboard" } });
+      token = share.share_token;
+    } catch (e) {
+      toast.error(isProRequiredError(e) ? "Sdílení dashboardu je součástí Tokeny Pro." : e instanceof Error ? e.message : String(e));
       setCreating(false);
       return;
     }
 
-    const url = `${window.location.origin}/shared/${data.share_token}`;
+    const url = `${window.location.origin}/shared/${token}`;
     setShareUrl(url);
     setCreating(false);
   }
@@ -54,15 +52,15 @@ export function ShareDashboardButton() {
         <Button
           variant="outline"
           size="sm"
-          className="gap-1.5 border-border hover:bg-secondary hover:text-foreground font-mono text-xs"
+          className="gap-1.5 border-border hover:bg-secondary hover:text-foreground tabular-nums text-xs"
         >
           <Share2 className="h-3.5 w-3.5" />
           Sdílet
         </Button>
       </DialogTrigger>
-      <DialogContent className="glass border-white/[0.08] max-w-md">
+      <DialogContent className="glass border-border max-w-md">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 gradient-text">
+          <DialogTitle className="flex items-center gap-2">
             <Share2 className="h-5 w-5" />
             Sdílet dashboard
           </DialogTitle>
@@ -78,7 +76,7 @@ export function ShareDashboardButton() {
                 value={label}
                 onChange={(e) => setLabel(e.target.value)}
                 placeholder="Např. Květen 2026"
-                className="mt-1 font-mono"
+                className="mt-1 tabular-nums"
               />
             </div>
             <Button onClick={createShare} disabled={creating} className="w-full gap-2">
@@ -89,7 +87,7 @@ export function ShareDashboardButton() {
         ) : (
           <div className="space-y-4">
             <div className="rounded-lg bg-accent/10 border border-accent/30 p-3 space-y-2">
-              <div className="text-xs font-semibold text-accent">Odkaz vytvořen!</div>
+              <div className="text-xs font-semibold text-primary">Odkaz vytvořen!</div>
               <div className="flex items-center gap-2">
                 <code className="text-xs font-mono flex-1 break-all">{shareUrl}</code>
                 <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0" onClick={copyUrl}>
@@ -98,7 +96,7 @@ export function ShareDashboardButton() {
               </div>
             </div>
             <a href={shareUrl} target="_blank" rel="noopener noreferrer">
-              <Button variant="outline" className="w-full gap-2 font-mono text-xs">
+              <Button variant="outline" className="w-full gap-2 tabular-nums text-xs">
                 <ExternalLink className="h-3.5 w-3.5" />
                 Otevřít v novém okně
               </Button>

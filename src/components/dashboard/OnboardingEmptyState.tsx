@@ -5,13 +5,15 @@ import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 
 interface Props {
-  onUpload: (text: string, name: string) => Promise<void> | void;
+  /** Imports the CSV and reports progress 0..1; reports success/failure itself (see useDashboardData.importFile). */
+  onUpload: (file: File, onProgress: (fraction: number) => void) => Promise<unknown> | void;
 }
 
 export function OnboardingEmptyState({ onUpload }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState(0);
 
   const handleFile = useCallback(async (file: File) => {
     if (!file.name.toLowerCase().endsWith(".csv")) {
@@ -19,25 +21,16 @@ export function OnboardingEmptyState({ onUpload }: Props) {
       return;
     }
     setUploading(true);
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      const text = e.target?.result as string;
-      if (text) {
-        try {
-          await onUpload(text, file.name);
-          toast.success("Data úspěšně nahrána!");
-        } catch (err) {
-          toast.error("Nahrávání selhalo");
-          console.error(err);
-        }
-      }
+    setProgress(0);
+    try {
+      await onUpload(file, setProgress);
+    } catch (err) {
+      toast.error("Nahrávání selhalo");
+      console.error(err);
+    } finally {
       setUploading(false);
-    };
-    reader.onerror = () => {
-      toast.error("Soubor se nepodařilo přečíst");
-      setUploading(false);
-    };
-    reader.readAsText(file);
+      setProgress(0);
+    }
   }, [onUpload]);
 
   const onDrop = useCallback((e: React.DragEvent) => {
@@ -50,15 +43,15 @@ export function OnboardingEmptyState({ onUpload }: Props) {
   return (
     <div className="max-w-4xl mx-auto px-4 py-12">
       <div className="text-center mb-8 space-y-3">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-mono text-primary">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs tabular-nums text-primary">
           <Sparkles className="h-3 w-3" />
-          Vítejte v OpenRouter Monitoru
+          Vítejte v Tokenech
         </div>
-        <h2 className="text-3xl md:text-4xl font-bold gradient-text tracking-tight">
+        <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
           Nahrajte první CSV a začněte
         </h2>
         <p className="text-muted-foreground max-w-xl mx-auto">
-          Pro zobrazení dashboardu potřebujeme váš export z OpenRouteru. Stačí pár kliknutí.
+          Pro zobrazení dashboardu potřebujeme váš export z OpenRouteru, nebo export využití z Cursoru či Grok Botu. Stačí pár kliknutí.
         </p>
       </div>
 
@@ -82,7 +75,7 @@ export function OnboardingEmptyState({ onUpload }: Props) {
           }}
         />
         <div className="flex flex-col items-center text-center gap-4">
-          <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg">
+          <div className="h-16 w-16 rounded-2xl bg-primary-fill flex items-center justify-center shadow-lg">
             <Upload className="h-7 w-7 text-white" />
           </div>
           <div>
@@ -93,10 +86,10 @@ export function OnboardingEmptyState({ onUpload }: Props) {
             size="lg"
             onClick={() => inputRef.current?.click()}
             disabled={uploading}
-            className="gap-2 font-mono"
+            className="gap-2 tabular-nums"
           >
             <FileSpreadsheet className="h-4 w-4" />
-            {uploading ? "Nahrávám…" : "Vybrat CSV soubor"}
+            {uploading ? `Nahrávám… ${Math.round(progress * 100)} %` : "Vybrat CSV soubor"}
           </Button>
         </div>
       </Card>
@@ -105,7 +98,7 @@ export function OnboardingEmptyState({ onUpload }: Props) {
       <div className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="p-5 glass">
           <div className="flex items-start gap-3">
-            <div className="h-8 w-8 rounded-full bg-primary/15 text-primary flex items-center justify-center text-sm font-bold font-mono">1</div>
+            <div className="h-8 w-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-bold tabular-nums">1</div>
             <div className="space-y-2">
               <h3 className="font-semibold text-sm">Otevřete OpenRouter</h3>
               <p className="text-xs text-muted-foreground">Přihlaste se a jděte do sekce Activity.</p>
@@ -113,7 +106,7 @@ export function OnboardingEmptyState({ onUpload }: Props) {
                 href="https://openrouter.ai/activity"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-xs text-primary hover:underline font-mono"
+                className="inline-flex items-center gap-1 text-xs text-primary hover:underline tabular-nums"
               >
                 openrouter.ai/activity <ExternalLink className="h-3 w-3" />
               </a>
@@ -123,7 +116,7 @@ export function OnboardingEmptyState({ onUpload }: Props) {
 
         <Card className="p-5 glass">
           <div className="flex items-start gap-3">
-            <div className="h-8 w-8 rounded-full bg-primary/15 text-primary flex items-center justify-center text-sm font-bold font-mono">2</div>
+            <div className="h-8 w-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-bold tabular-nums">2</div>
             <div className="space-y-2">
               <h3 className="font-semibold text-sm">Stáhněte CSV export</h3>
               <p className="text-xs text-muted-foreground">Klikněte na tlačítko „Export CSV“ a uložte soubor do počítače.</p>
@@ -133,7 +126,7 @@ export function OnboardingEmptyState({ onUpload }: Props) {
 
         <Card className="p-5 glass">
           <div className="flex items-start gap-3">
-            <div className="h-8 w-8 rounded-full bg-primary/15 text-primary flex items-center justify-center text-sm font-bold font-mono">3</div>
+            <div className="h-8 w-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-bold tabular-nums">3</div>
             <div className="space-y-2">
               <h3 className="font-semibold text-sm">Nahrajte soubor</h3>
               <p className="text-xs text-muted-foreground">Přetáhněte CSV výše. Dashboard se automaticky vygeneruje.</p>
@@ -144,7 +137,7 @@ export function OnboardingEmptyState({ onUpload }: Props) {
 
       {/* What you get */}
       <div className="mt-8">
-        <p className="text-xs font-mono text-muted-foreground text-center mb-4 uppercase tracking-wider">
+        <p className="text-xs tabular-nums text-muted-foreground text-center mb-4 uppercase tracking-wider">
           Co získáte po nahrání
         </p>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -162,7 +155,7 @@ export function OnboardingEmptyState({ onUpload }: Props) {
         </div>
       </div>
 
-      <p className="text-xs text-center text-muted-foreground mt-8 font-mono">
+      <p className="text-xs text-center text-muted-foreground mt-8 tabular-nums">
         Vaše data zůstávají soukromá – jsou uložena ve vašem účtu a chráněna RLS politikami.
       </p>
     </div>

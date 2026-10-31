@@ -5,9 +5,11 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { CurrencyProvider } from "@/hooks/useCurrency";
 import { useAuth } from "@/hooks/useAuth";
 import { HelmetProvider } from "react-helmet-async";
+import { ThemeProvider } from "next-themes";
 import Landing from "./pages/Landing.tsx";
 
 const Auth = lazy(() => import("./pages/Auth.tsx"));
+const AuthCallback = lazy(() => import("./pages/AuthCallback.tsx"));
 const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword.tsx"));
 const Fun = lazy(() => import("./pages/Fun.tsx"));
@@ -28,6 +30,7 @@ const BlogMonitoringAiCosts = lazy(() => import("./pages/BlogMonitoringAiCosts.t
 const BlogMultiProvider = lazy(() => import("./pages/BlogMultiProvider.tsx"));
 const BlogGrokTokens = lazy(() => import("./pages/BlogGrokTokens.tsx"));
 const BlogAiAgentCosts = lazy(() => import("./pages/BlogAiAgentCosts.tsx"));
+const Privacy = lazy(() => import("./pages/Privacy.tsx"));
 
 const Toaster = lazy(() => import("@/components/ui/toaster").then((m) => ({ default: m.Toaster })));
 const Sonner = lazy(() => import("@/components/ui/sonner").then((m) => ({ default: m.Toaster })));
@@ -37,7 +40,7 @@ const queryClient = new QueryClient();
 function RouteFallback() {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center">
-      <div className="text-muted-foreground font-mono text-sm">Načítání...</div>
+      <div className="h-6 w-6 rounded-full border-2 border-muted-foreground/30 border-t-primary animate-spin" role="status" aria-label="Načítání" />
     </div>
   );
 }
@@ -98,6 +101,7 @@ export function AppRoutes() {
     <Routes>
       <Route path="/" element={<Landing />} />
       <Route path="/auth" element={<AuthRoute><Auth /></AuthRoute>} />
+      <Route path="/auth/callback" element={<AuthCallback />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/fun" element={<Fun />} />
       <Route path="/dashboard" element={<ProtectedRoute><Index /></ProtectedRoute>} />
@@ -116,6 +120,7 @@ export function AppRoutes() {
       <Route path="/blog/multi-provider-monitoring" element={<BlogMultiProvider />} />
       <Route path="/blog/grok-token-optimization" element={<BlogGrokTokens />} />
       <Route path="/blog/kolik-stoji-ai-agenti" element={<BlogAiAgentCosts />} />
+      <Route path="/privacy" element={<Privacy />} />
       <Route path="/shared/:token" element={<SharedDashboard />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
@@ -125,14 +130,16 @@ export function AppRoutes() {
 /** Providers that must sit inside the router (currency reads the location). */
 export function AppProviders({ children }: { children: ReactNode }) {
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <CurrencyProvider>
-          <ClientToasters />
-          <Suspense fallback={<RouteFallback />}>{children}</Suspense>
-        </CurrencyProvider>
-      </TooltipProvider>
-    </QueryClientProvider>
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange storageKey="tokeny_theme">
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <CurrencyProvider>
+            <ClientToasters />
+            <Suspense fallback={<RouteFallback />}>{children}</Suspense>
+          </CurrencyProvider>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </ThemeProvider>
   );
 }
 

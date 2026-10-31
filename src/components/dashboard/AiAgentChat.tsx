@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Sparkles, Send, X, Loader2, Bot, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
+import { api } from "@/lib/api";
 import { toast } from "sonner";
 
 export interface AgentAction {
@@ -46,11 +46,9 @@ export function AiAgentChat({ onAction }: Props) {
     setLoading(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke("chat-agent", {
+      const data = await api<{ reply?: string; ui_actions?: AgentAction[] }>("/chat-agent", {
         body: { messages: newMsgs.map((m) => ({ role: m.role, content: m.content })) },
       });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
 
       setMessages((prev) => [...prev, { role: "assistant", content: data.reply || "(prázdná odpověď)" }]);
 
@@ -70,7 +68,7 @@ export function AiAgentChat({ onAction }: Props) {
       {!open && (
         <button
           onClick={() => setOpen(true)}
-          className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full bg-gradient-to-br from-primary to-accent shadow-lg glow-md hover:scale-110 transition-transform flex items-center justify-center"
+          className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full bg-primary-fill shadow-lg hover:scale-110 transition-transform flex items-center justify-center"
           aria-label="Otevřít AI asistenta"
         >
           <Sparkles className="h-6 w-6 text-white" />
@@ -78,15 +76,15 @@ export function AiAgentChat({ onAction }: Props) {
       )}
 
       {open && (
-        <div className="fixed bottom-6 right-6 z-50 w-[380px] max-w-[calc(100vw-2rem)] h-[560px] max-h-[calc(100vh-3rem)] flex flex-col rounded-2xl glass border border-white/10 shadow-2xl glow-md animate-fade-in">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06]">
+        <div className="fixed bottom-6 right-6 z-50 w-[380px] max-w-[calc(100vw-2rem)] h-[560px] max-h-[calc(100vh-3rem)] flex flex-col rounded-3xl glass-panel animate-fade-in">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-border">
             <div className="flex items-center gap-2">
-              <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+              <div className="h-7 w-7 rounded-lg bg-primary-fill flex items-center justify-center">
                 <Sparkles className="h-3.5 w-3.5 text-white" />
               </div>
               <div>
                 <div className="text-sm font-semibold">AI Asistent</div>
-                <div className="text-[10px] text-muted-foreground font-mono">Powered by Lovable AI</div>
+                <div className="text-xs text-muted-foreground tabular-nums">Claude (Anthropic)</div>
               </div>
             </div>
             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setOpen(false)}>
@@ -97,17 +95,17 @@ export function AiAgentChat({ onAction }: Props) {
           <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
             {messages.map((m, i) => (
               <div key={i} className={`flex gap-2 ${m.role === "user" ? "flex-row-reverse" : ""}`}>
-                <div className={`h-7 w-7 shrink-0 rounded-lg flex items-center justify-center ${m.role === "user" ? "bg-secondary" : "bg-gradient-to-br from-primary/30 to-accent/30"}`}>
+                <div className={`h-7 w-7 shrink-0 rounded-lg flex items-center justify-center ${m.role === "user" ? "bg-secondary" : "bg-primary/10"}`}>
                   {m.role === "user" ? <User className="h-3.5 w-3.5" /> : <Bot className="h-3.5 w-3.5" />}
                 </div>
-                <div className={`max-w-[78%] rounded-2xl px-3 py-2 text-sm whitespace-pre-wrap ${m.role === "user" ? "bg-primary text-primary-foreground" : "bg-secondary/50"}`}>
+                <div className={`max-w-[78%] rounded-2xl px-3 py-2 text-sm whitespace-pre-wrap ${m.role === "user" ? "bg-primary-fill text-white" : "bg-secondary/50"}`}>
                   {m.content}
                 </div>
               </div>
             ))}
             {loading && (
               <div className="flex gap-2 items-center">
-                <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-primary/30 to-accent/30 flex items-center justify-center">
+                <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center">
                   <Bot className="h-3.5 w-3.5" />
                 </div>
                 <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
@@ -121,7 +119,7 @@ export function AiAgentChat({ onAction }: Props) {
                 <button
                   key={s}
                   onClick={() => send(s)}
-                  className="text-[11px] font-mono px-2 py-1 rounded-full bg-secondary/50 hover:bg-secondary border border-white/[0.06] transition-colors"
+                  className="text-[11px] tabular-nums px-2 py-1 rounded-full bg-secondary/50 hover:bg-secondary border border-border transition-colors"
                 >
                   {s}
                 </button>
@@ -134,7 +132,7 @@ export function AiAgentChat({ onAction }: Props) {
               e.preventDefault();
               send(input);
             }}
-            className="p-3 border-t border-white/[0.06] flex gap-2"
+            className="p-3 border-t border-border flex gap-2"
           >
             <input
               value={input}

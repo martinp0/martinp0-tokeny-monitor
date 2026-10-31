@@ -18,12 +18,12 @@ export function GrokPricingTable() {
           <tbody>
             {GROK_MODELS.map((m) => (
               <tr key={m.model} className="border-b border-border/40 last:border-0 hover:bg-muted/30">
-                <td className="px-4 py-3 font-mono font-medium">{m.model}</td>
-                <td className="px-4 py-3 text-right font-mono text-muted-foreground">{m.context}</td>
-                <td className="px-4 py-3 text-right font-mono font-semibold text-primary">{fmtUsd(m.input)}</td>
-                <td className="px-4 py-3 text-right font-mono text-muted-foreground">{fmtUsd(m.cached)}</td>
-                <td className="px-4 py-3 text-right font-mono font-semibold text-primary">{fmtUsd(m.output)}</td>
-                <td className="px-4 py-3 text-right font-mono text-muted-foreground">
+                <td className="px-4 py-3 tabular-nums font-medium">{m.model}</td>
+                <td className="px-4 py-3 text-right tabular-nums text-muted-foreground">{m.context}</td>
+                <td className="px-4 py-3 text-right tabular-nums font-semibold text-primary">{fmtUsd(m.input)}</td>
+                <td className="px-4 py-3 text-right tabular-nums text-muted-foreground">{fmtUsd(m.cached)}</td>
+                <td className="px-4 py-3 text-right tabular-nums font-semibold text-primary">{fmtUsd(m.output)}</td>
+                <td className="px-4 py-3 text-right tabular-nums text-muted-foreground">
                   {fmtUsd(m.longInput)} / {fmtUsd(m.longOutput)}
                 </td>
               </tr>

@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { CHART_SERIES, CHART_GRID, CHART_AXIS, CHART_FONT, chartTooltipStyle } from "@/lib/chart-theme";
 import { fmtNum } from "@/lib/format";
 
 interface Props {
@@ -10,24 +11,23 @@ export function TokensChart({ data }: Props) {
   return (
     <Card className="bg-card border-border/50 min-w-0 max-w-full overflow-hidden">
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm text-muted-foreground uppercase tracking-wider">Tokeny na požadavek</CardTitle>
+        <CardTitle className="text-[15px] font-semibold tracking-tight text-foreground">Tokeny na požadavek</CardTitle>
       </CardHeader>
       <CardContent className="h-[280px] min-w-0">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(232, 25%, 18%)" />
-            <XAxis dataKey="time" stroke="hsl(220, 15%, 55%)" fontSize={11} fontFamily="JetBrains Mono" />
-            <YAxis stroke="hsl(220, 15%, 55%)" fontSize={11} fontFamily="JetBrains Mono" tickFormatter={(v) => v >= 1000 ? `${Math.round(v/1000)}K` : fmtNum(v)} />
+            <CartesianGrid strokeDasharray="0" vertical={false} stroke={CHART_GRID} />
+            <XAxis dataKey="time" stroke={CHART_AXIS} tickLine={false} axisLine={false} fontSize={11} fontFamily={CHART_FONT} />
+            <YAxis stroke={CHART_AXIS} tickLine={false} axisLine={false} fontSize={11} fontFamily={CHART_FONT} tickFormatter={(v) => v >= 1000 ? `${Math.round(v/1000)}K` : fmtNum(v)} />
             <Tooltip
-              contentStyle={{ backgroundColor: "hsl(232, 40%, 12%)", border: "1px solid hsl(232, 25%, 18%)", borderRadius: 8, fontFamily: "JetBrains Mono", fontSize: 12 }}
-              labelStyle={{ color: "hsl(220, 20%, 90%)" }}
+              {...chartTooltipStyle}
               formatter={(value: number) => [fmtNum(value)]}
             />
-            <Legend wrapperStyle={{ fontSize: 11, fontFamily: "JetBrains Mono" }} />
-            <Bar dataKey="tokens_prompt" name="Prompt" stackId="a" fill="hsl(190, 100%, 50%)" />
-            <Bar dataKey="tokens_completion" name="Completion" stackId="a" fill="hsl(160, 100%, 50%)" />
-            <Bar dataKey="tokens_reasoning" name="Reasoning" stackId="a" fill="hsl(280, 100%, 65%)" />
-            <Bar dataKey="tokens_cached" name="Cached" stackId="a" fill="hsl(35, 100%, 55%)" />
+            <Legend wrapperStyle={{ fontSize: 11 }} />
+            <Bar dataKey="tokens_prompt" name="Prompt" stackId="a" fill={CHART_SERIES[1]} />
+            <Bar dataKey="tokens_completion" name="Completion" stackId="a" fill={CHART_SERIES[0]} />
+            <Bar dataKey="tokens_reasoning" name="Reasoning" stackId="a" fill={CHART_SERIES[2]} />
+            <Bar dataKey="tokens_cached" name="Cached" stackId="a" fill={CHART_SERIES[3]} />
           </BarChart>
         </ResponsiveContainer>
       </CardContent>

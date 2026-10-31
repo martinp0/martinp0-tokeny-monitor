@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowRight, BookOpen, Calculator, Coffee, FileText, Github, Sparkles, TrendingDown, Zap } from "lucide-react";
+import { PublicHeader } from "@/components/PublicHeader";
 
 // Indicative USD prices per 1M tokens (input / output). Approximate, for estimation.
 const MODELS: { id: string; label: string; provider: string; inPrice: number; outPrice: number }[] = [
@@ -59,7 +60,7 @@ export default function LlmCostCalculator() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Helmet>
-        <title>LLM Cost Calculator — GPT, Claude, Gemini API Pricing | Tokeny Monitor</title>
+        <title>LLM Cost Calculator — GPT, Claude, Gemini API Pricing | Tokeny</title>
         <meta
           name="description"
           content="Free LLM cost calculator. Estimate monthly API spend for GPT-5, Claude, Gemini, Llama and DeepSeek. Compare token pricing across providers in USD & CZK."
@@ -110,26 +111,14 @@ export default function LlmCostCalculator() {
       </Helmet>
 
       {/* Header */}
-      <header className="border-b border-border/40 backdrop-blur-sm sticky top-0 z-50 bg-background/80">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link to="/" className="font-display font-bold text-lg gradient-text">Tokeny Monitor</Link>
-          <div className="flex items-center gap-2">
-            <Button asChild variant="ghost" size="sm">
-              <Link to="/">Domů</Link>
-            </Button>
-            <Button asChild size="sm">
-              <Link to="/auth">Začít zdarma <ArrowRight className="ml-1 h-4 w-4" /></Link>
-            </Button>
-          </div>
-        </div>
-      </header>
+      <PublicHeader />
 
       {/* Hero */}
       <section className="container mx-auto px-4 pt-16 pb-12 text-center max-w-4xl">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-mono mb-6">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs tabular-nums mb-6">
           <Sparkles className="h-3 w-3" /> Free · No signup · Updated 2026
         </div>
-        <h1 className="text-4xl md:text-6xl font-display font-bold tracking-tight mb-6">
+        <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
           LLM Cost Calculator
         </h1>
         <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
@@ -150,7 +139,7 @@ export default function LlmCostCalculator() {
 
       {/* Calculator */}
       <section id="calculator" className="container mx-auto px-4 py-12">
-        <div className="grid lg:grid-cols-2 gap-6 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-6xl mx-auto [&>*]:min-w-0">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -197,13 +186,13 @@ export default function LlmCostCalculator() {
                 </div>
               </div>
 
-              <div className="text-xs text-muted-foreground font-mono pt-2 border-t border-border/40">
+              <div className="text-xs text-muted-foreground tabular-nums pt-2 border-t border-border/40">
                 {model.label}: ${model.inPrice}/1M input · ${model.outPrice}/1M output
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-primary/5 to-accent/5 border-primary/20">
+          <Card className="bg-primary/5 border-primary/20">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Zap className="h-5 w-5 text-primary" /> Odhad nákladů
@@ -211,18 +200,18 @@ export default function LlmCostCalculator() {
             </CardHeader>
             <CardContent className="space-y-6">
               <div>
-                <div className="text-xs text-muted-foreground mb-1 font-mono uppercase">Měsíčně</div>
-                <div className="text-5xl font-display font-bold gradient-text">{fmtUsd(monthlyUsd)}</div>
+                <div className="text-xs text-muted-foreground mb-1 tabular-nums uppercase">Měsíčně</div>
+                <div className="text-5xl font-bold">{fmtUsd(monthlyUsd)}</div>
                 <div className="text-lg text-muted-foreground mt-1">≈ {fmtCzk(monthlyCzk)}</div>
               </div>
 
               <div className="grid grid-cols-2 gap-4 pt-4 border-t border-border/40">
                 <div>
-                  <div className="text-xs text-muted-foreground font-mono uppercase">Za request</div>
+                  <div className="text-xs text-muted-foreground tabular-nums uppercase">Za request</div>
                   <div className="text-xl font-semibold">{fmtUsd(perReqUsd)}</div>
                 </div>
                 <div>
-                  <div className="text-xs text-muted-foreground font-mono uppercase">Ročně</div>
+                  <div className="text-xs text-muted-foreground tabular-nums uppercase">Ročně</div>
                   <div className="text-xl font-semibold">{fmtUsd(monthlyUsd * 12)}</div>
                 </div>
               </div>
@@ -248,7 +237,7 @@ export default function LlmCostCalculator() {
 
       {/* Comparison */}
       <section className="container mx-auto px-4 py-12 max-w-6xl">
-        <h2 className="text-2xl md:text-3xl font-display font-bold mb-2 flex items-center gap-2">
+        <h2 className="text-2xl md:text-3xl font-bold mb-2 flex items-center gap-2">
           <TrendingDown className="h-7 w-7 text-primary" /> Porovnání modelů
         </h2>
         <p className="text-muted-foreground mb-6">
@@ -262,7 +251,7 @@ export default function LlmCostCalculator() {
                 const ratio = cheapest > 0 ? m.monthly / cheapest : 1;
                 return (
                   <div key={m.id} className="flex items-center gap-4 px-4 py-3">
-                    <div className="text-xs font-mono text-muted-foreground w-6">#{i + 1}</div>
+                    <div className="text-xs tabular-nums text-muted-foreground w-6">#{i + 1}</div>
                     <div className="flex-1 min-w-0">
                       <div className="font-medium truncate">{m.label}</div>
                       <div className="text-xs text-muted-foreground">{m.provider}</div>
@@ -270,7 +259,7 @@ export default function LlmCostCalculator() {
                     <div className="hidden sm:block w-32">
                       <div className="h-2 bg-muted rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-gradient-to-r from-primary to-accent"
+                          className="h-full bg-primary"
                           style={{ width: `${Math.min(100, (ratio / Math.max(1, breakdown[breakdown.length - 1].monthly / cheapest)) * 100)}%` }}
                         />
                       </div>
@@ -289,7 +278,7 @@ export default function LlmCostCalculator() {
 
       {/* FAQ */}
       <section className="container mx-auto px-4 py-12 max-w-3xl">
-        <h2 className="text-2xl md:text-3xl font-display font-bold mb-6">FAQ</h2>
+        <h2 className="text-2xl md:text-3xl font-bold mb-6">FAQ</h2>
         <div className="space-y-4">
           <Card><CardContent className="p-5">
             <h3 className="font-semibold mb-2">Jak kalkulačka počítá náklady?</h3>
@@ -306,7 +295,7 @@ export default function LlmCostCalculator() {
           <Card><CardContent className="p-5">
             <h3 className="font-semibold mb-2">Jak zjistím skutečné náklady, ne jen odhad?</h3>
             <p className="text-sm text-muted-foreground">
-              Nahraj CSV export z OpenRouter, nebo připoj OpenAI/Anthropic přes API klíč. Tokeny Monitor ti ukáže reálné náklady den po dni.
+              Nahraj CSV export z OpenRouter, nebo připoj OpenAI/Anthropic přes API klíč. Tokeny ti ukáže reálné náklady den po dni.
             </p>
           </CardContent></Card>
         </div>
@@ -314,7 +303,7 @@ export default function LlmCostCalculator() {
 
       {/* Related guides */}
       <section className="container mx-auto px-4 py-12 max-w-5xl">
-        <h2 className="text-2xl md:text-3xl font-display font-bold mb-6">Podrobné ceníky a návody</h2>
+        <h2 className="text-2xl md:text-3xl font-bold mb-6">Podrobné ceníky a návody</h2>
         <div className="grid md:grid-cols-3 gap-4">
           <Card className="group hover:border-primary/50 transition-colors">
             <CardContent className="p-5">
@@ -389,18 +378,18 @@ export default function LlmCostCalculator() {
 
       {/* CTA */}
       <section className="container mx-auto px-4 py-16 text-center max-w-2xl">
-        <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
-          Od odhadu k <span className="gradient-text">reálným číslům</span>
+        <h2 className="text-3xl md:text-4xl font-bold mb-4">
+          Od odhadu k <span className="text-primary">reálným číslům</span>
         </h2>
         <p className="text-muted-foreground mb-8">
-          Kalkulačka ukáže, kolik bys mohl/a utratit. Tokeny Monitor ukáže, kolik utrácíš doopravdy — den po dni, model po modelu.
+          Kalkulačka ukáže, kolik bys mohl/a utratit. Tokeny ukáže, kolik utrácíš doopravdy — den po dni, model po modelu.
         </p>
         <div className="flex flex-wrap justify-center gap-3">
           <Button asChild size="lg">
             <Link to="/auth">Začít zdarma <ArrowRight className="ml-2 h-4 w-4" /></Link>
           </Button>
           <Button asChild size="lg" variant="outline">
-            <a href="https://github.com/martinp0/martinp0-tokeny-monitor" target="_blank" rel="noopener noreferrer">
+            <a href="https://github.com/martinp0/tokeny-monitor" target="_blank" rel="noopener noreferrer">
               <Github className="mr-2 h-4 w-4" /> GitHub
             </a>
           </Button>
@@ -409,7 +398,7 @@ export default function LlmCostCalculator() {
 
       <footer className="border-t border-border/40 py-8 text-center text-sm text-muted-foreground">
         <p>Ceny jsou orientační, odpovídají publikovaným sazbám providerů ke květnu 2026.</p>
-        <p className="mt-1">© {new Date().getFullYear()} <Link to="/" className="hover:text-foreground">Tokeny Monitor</Link></p>
+        <p className="mt-1">© {new Date().getFullYear()} <Link to="/" className="hover:text-foreground">Tokeny</Link></p>
       </footer>
     </div>
   );

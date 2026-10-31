@@ -5,6 +5,7 @@ import { useCurrency } from "@/hooks/useCurrency";
 import { fmtCost } from "@/lib/format";
 import { TrendingUp } from "lucide-react";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, ReferenceLine } from "recharts";
+import { CHART_SERIES, chartTooltipStyle } from "@/lib/chart-theme";
 
 interface Props {
   data: ActivityRow[];
@@ -61,7 +62,7 @@ export function CostForecast({ data }: Props) {
   const fmt = (usd: number) => fmtCost(usd, 2, currency, exchangeRate);
 
   return (
-    <Card className="glass border-white/[0.06]">
+    <Card className="glass border-border">
       <CardHeader className="pb-3">
         <CardTitle className="text-base font-semibold flex items-center gap-2">
           <TrendingUp className="h-4 w-4 text-primary" />
@@ -71,29 +72,29 @@ export function CostForecast({ data }: Props) {
       <CardContent>
         <div className="grid grid-cols-3 gap-2 mb-3 text-center">
           <div>
-            <div className="text-[10px] text-muted-foreground font-mono uppercase">Utraceno</div>
-            <div className="text-sm font-mono font-semibold mt-1">{fmt(monthSpent)}</div>
+            <div className="text-xs text-muted-foreground tabular-nums uppercase">Utraceno</div>
+            <div className="text-sm tabular-nums font-semibold mt-1">{fmt(monthSpent)}</div>
           </div>
           <div>
-            <div className="text-[10px] text-muted-foreground font-mono uppercase">Predikce konec</div>
-            <div className="text-sm font-mono font-semibold mt-1 text-primary">{fmt(projected)}</div>
+            <div className="text-xs text-muted-foreground tabular-nums uppercase">Predikce konec</div>
+            <div className="text-sm tabular-nums font-semibold mt-1 text-primary">{fmt(projected)}</div>
           </div>
           <div>
-            <div className="text-[10px] text-muted-foreground font-mono uppercase">Den</div>
-            <div className="text-sm font-mono font-semibold mt-1">{daysPassed}/{daysInMonth}</div>
+            <div className="text-xs text-muted-foreground tabular-nums uppercase">Den</div>
+            <div className="text-sm tabular-nums font-semibold mt-1">{daysPassed}/{daysInMonth}</div>
           </div>
         </div>
 
         <ResponsiveContainer width="100%" height={180}>
           <LineChart data={chart} margin={{ left: 0, right: 8, top: 5, bottom: 0 }}>
-            <XAxis dataKey="day" tick={{ fontSize: 10, fontFamily: "JetBrains Mono", fill: "hsl(var(--muted-foreground))" }} />
-            <YAxis tick={{ fontSize: 10, fontFamily: "JetBrains Mono", fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v) => fmt(v)} width={60} />
+            <XAxis dataKey="day" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
+            <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v) => fmt(v)} width={60} />
             <Tooltip
-              contentStyle={{ background: "hsl(var(--popover))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 11, fontFamily: "JetBrains Mono" }}
-              formatter={(v: any) => fmt(Number(v))}
+              {...chartTooltipStyle}
+              formatter={(v: number | string) => fmt(Number(v))}
             />
-            <Line type="monotone" dataKey="actual" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
-            <Line type="monotone" dataKey="projected" stroke="hsl(var(--accent))" strokeWidth={2} strokeDasharray="4 4" dot={false} />
+            <Line type="monotone" dataKey="actual" stroke={CHART_SERIES[0]} strokeWidth={2} dot={false} />
+            <Line type="monotone" dataKey="projected" stroke={CHART_SERIES[1]} strokeWidth={2} strokeDasharray="4 4" dot={false} />
             <ReferenceLine x={daysPassed} stroke="hsl(var(--muted-foreground))" strokeDasharray="2 2" />
           </LineChart>
         </ResponsiveContainer>

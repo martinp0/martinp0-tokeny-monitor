@@ -1,6 +1,9 @@
 import Papa from "papaparse";
 
-export type ProviderSource = "openrouter" | "anthropic" | "openai";
+export type ProviderSource = "openrouter" | "anthropic" | "openai" | "cursor" | "grok-bot";
+
+/** Plan-covered vs over-plan usage (Cursor / Grok Bot exports). Absent for other providers. */
+export type BillingType = "included" | "on_demand" | "credits";
 
 export interface ActivityRow {
   generation_id: string;
@@ -28,6 +31,9 @@ export interface ActivityRow {
   api_key_name: string;
   provider_source: ProviderSource;
   request_count: number;
+  /** Cache-write input tokens (part of tokens_prompt). 0 when the provider doesn't report it. */
+  tokens_cache_write?: number;
+  billing_type?: BillingType | null;
 }
 
 const toNum = (v: string | undefined) => {
@@ -36,15 +42,33 @@ const toNum = (v: string | undefined) => {
   return isNaN(n) ? 0 : n;
 };
 
+/**
+ * Parse an OpenRouter activity CSV export.
+ *
+ * Rows without generation_id or created_at are dropped (they cannot be stored: generation_id is
+ * part of the unique key). Duplicate generation_ids within one file are collapsed (last wins),
+ * because a single upsert statement must not hit the same conflict key twice.
+ */
 export function parseCSV(text: string): ActivityRow[] {
   const result = Papa.parse(text, {
     header: true,
     skipEmptyLines: true,
+    transformHeader: (h) => h.trim(),
   });
 
-  return (result.data as Record<string, string>[]).map((row) => ({
-    generation_id: row.generation_id || "",
-    created_at: row.created_at || "",
+  const rows = (result.data as Record<string, string>[])
+    .filter((row) => (row.generation_id ?? "").trim() !== "" && (row.created_at ?? "").trim() !== "")
+    .map((row) => mapRow(row));
+
+  const byId = new Map<string, ActivityRow>();
+  for (const r of rows) byId.set(r.generation_id, r);
+  return byId.size === rows.length ? rows : [...byId.values()];
+}
+
+function mapRow(row: Record<string, string>): ActivityRow {
+  return {
+    generation_id: row.generation_id.trim(),
+    created_at: row.created_at.trim(),
     cost_total: toNum(row.cost_total),
     cost_web_search: toNum(row.cost_web_search),
     cost_cache: toNum(row.cost_cache),
@@ -68,5 +92,5 @@ export function parseCSV(text: string): ActivityRow[] {
     api_key_name: row.api_key_name || "",
     provider_source: "openrouter",
     request_count: 1,
-  }));
+  };
 }

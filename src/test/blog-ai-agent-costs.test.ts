@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { DAILY_USD } from "@/components/blog/daily-spend-data";
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { PUBLIC_ROUTES } from "../../scripts/public-routes.mjs";
 
 describe("blog: kolik stojí AI agenti", () => {
   it("daily chart aggregates add up to the article's totals", () => {
@@ -16,9 +15,7 @@ describe("blog: kolik stojí AI agenti", () => {
     expect(Math.round(top.grokBot + top.cursor)).toBe(258);
   });
 
-  it("is listed in the sitemap on the main domain", () => {
-    const sitemap = readFileSync(resolve(__dirname, "../../public/sitemap.xml"), "utf8");
-    expect(sitemap).toContain("https://tokeny.martinpohl.cz/blog/kolik-stoji-ai-agenti");
-    expect(sitemap).not.toMatch(/tokeny\.pohl\.uk/);
+  it("is in the prerender / sitemap routes", () => {
+    expect(PUBLIC_ROUTES.some((r: { path: string }) => r.path === "/blog/kolik-stoji-ai-agenti")).toBe(true);
   });
 });

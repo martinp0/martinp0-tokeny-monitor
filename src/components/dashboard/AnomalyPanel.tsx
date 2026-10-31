@@ -32,7 +32,7 @@ export function AnomalyPanel({ data }: Props) {
   const fmt = (usd: number) => fmtCost(usd, 2, currency, exchangeRate);
 
   return (
-    <Card className="glass border-white/[0.06]">
+    <Card className="glass border-border">
       <CardHeader className="pb-3">
         <CardTitle className="text-base font-semibold flex items-center gap-2">
           <AlertTriangle className="h-4 w-4 text-destructive" />
@@ -40,12 +40,12 @@ export function AnomalyPanel({ data }: Props) {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="text-[11px] text-muted-foreground font-mono mb-3">
+        <div className="text-[11px] text-muted-foreground tabular-nums mb-3">
           Průměr/den: {fmt(mean)} · σ: {fmt(std)}
         </div>
         {anomalies.length === 0 ? (
           <div className="flex items-center gap-2 text-sm text-muted-foreground py-2">
-            <CheckCircle2 className="h-4 w-4 text-accent" />
+            <CheckCircle2 className="h-4 w-4 text-primary" />
             Žádné anomálie – výdaje jsou stabilní.
           </div>
         ) : (
@@ -53,10 +53,10 @@ export function AnomalyPanel({ data }: Props) {
             {anomalies.slice(0, 5).map((a) => (
               <div key={a.day} className="flex items-center justify-between rounded-lg bg-destructive/10 border border-destructive/20 px-3 py-2">
                 <div>
-                  <div className="text-xs font-mono">{a.day}</div>
-                  <div className="text-[10px] text-muted-foreground">{a.ratio.toFixed(1)}× nad průměrem</div>
+                  <div className="text-xs tabular-nums">{a.day}</div>
+                  <div className="text-xs text-muted-foreground">{a.ratio.toFixed(1)}× nad průměrem</div>
                 </div>
-                <div className="text-sm font-mono font-semibold text-destructive">{fmt(a.cost)}</div>
+                <div className="text-sm tabular-nums font-semibold text-destructive">{fmt(a.cost)}</div>
               </div>
             ))}
           </div>

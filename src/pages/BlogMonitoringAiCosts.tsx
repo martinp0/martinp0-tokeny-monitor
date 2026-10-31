@@ -73,7 +73,7 @@ export default function BlogMonitoringAiCosts() {
         Postup, který funguje pro malý/střední tým:
       </p>
       <ol>
-        <li>Connect OpenAI/Anthropic/OpenRouter do <Link to="/auth">Tokeny Monitoru</Link></li>
+        <li>Connect OpenAI/Anthropic/OpenRouter do <Link to="/auth">Tokenech</Link></li>
         <li>Nastav měsíční budget alert (email na 80 %)</li>
         <li>Týdně 5 minut review: cost per request, model mix, top 5 nejdražších requestů</li>
         <li>Spočítej si očekávané náklady na nové featury v <Link to="/llm-cost-calculator">kalkulačce</Link> před nasazením</li>

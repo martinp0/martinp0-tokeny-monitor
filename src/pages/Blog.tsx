@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, BookOpen, Calendar } from "lucide-react";
+import { PublicHeader } from "@/components/PublicHeader";
 
 const POSTS = [
   {
@@ -67,31 +68,23 @@ export default function Blog() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Helmet>
-        <title>Blog — AI cost saving, prompt engineering & token optimization | Tokeny Monitor</title>
+        <title>Blog — AI cost saving, prompt engineering & token optimization | Tokeny</title>
         <meta name="description" content="Praktické články o snižování nákladů na LLM, optimalizaci promptů a práci s token window. Návody, příklady, čísla." />
         <link rel="canonical" href="https://tokeny.martinpohl.cz/blog" />
-        <meta property="og:title" content="Tokeny Monitor Blog — AI cost & prompt optimization" />
+        <meta property="og:title" content="Tokeny Blog — AI cost & prompt optimization" />
         <meta property="og:description" content="Návody a tipy jak ušetřit na AI API a psát lepší prompty." />
         <meta property="og:url" content="https://tokeny.martinpohl.cz/blog" />
         <meta property="og:type" content="website" />
       </Helmet>
 
-      <header className="border-b border-border/40 backdrop-blur-sm sticky top-0 z-50 bg-background/80">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link to="/" className="font-display font-bold text-lg gradient-text">Tokeny Monitor</Link>
-          <div className="flex items-center gap-2">
-            <Button asChild variant="ghost" size="sm"><Link to="/llm-cost-calculator">Kalkulačka</Link></Button>
-            <Button asChild size="sm"><Link to="/auth">Začít zdarma <ArrowRight className="ml-1 h-4 w-4" /></Link></Button>
-          </div>
-        </div>
-      </header>
+      <PublicHeader />
 
       <section className="container mx-auto px-4 pt-16 pb-10 max-w-4xl">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-mono mb-6">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs tabular-nums mb-6">
           <BookOpen className="h-3 w-3" /> Blog
         </div>
-        <h1 className="text-4xl md:text-5xl font-display font-bold tracking-tight mb-4">
-          <span className="gradient-text">AI cost saving</span> & prompt optimization
+        <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
+          <span className="text-primary">AI cost saving</span> & prompt optimization
         </h1>
         <p className="text-lg text-muted-foreground max-w-2xl">
           Praktické články o tom, jak snížit náklady na LLM API, psát efektivnější prompty a chytře pracovat s token window.
@@ -104,11 +97,11 @@ export default function Blog() {
             <Link to={`/blog/${p.slug}`} key={p.slug} className="block group">
               <Card className="transition-colors hover:border-primary/50">
                 <CardContent className="p-6">
-                  <div className="flex items-center gap-3 text-xs font-mono text-muted-foreground mb-3">
+                  <div className="flex items-center gap-3 text-xs tabular-nums text-muted-foreground mb-3">
                     <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary">{p.tag}</span>
                     <span className="flex items-center gap-1"><Calendar className="h-3 w-3" /> {p.date}</span>
                   </div>
-                  <h2 className="text-xl md:text-2xl font-display font-bold mb-2 group-hover:text-primary transition-colors">
+                  <h2 className="text-xl md:text-2xl font-bold mb-2 group-hover:text-primary transition-colors">
                     {p.title}
                   </h2>
                   <p className="text-muted-foreground">{p.excerpt}</p>
@@ -123,7 +116,7 @@ export default function Blog() {
       </section>
 
       <section className="container mx-auto px-4 pb-16 max-w-4xl">
-        <h2 className="text-xl font-display font-bold mb-4">Nástroje a ceníky</h2>
+        <h2 className="text-xl font-bold mb-4">Nástroje a ceníky</h2>
         <div className="grid sm:grid-cols-3 gap-4">
           <Link to="/llm-cost-calculator" className="block group">
             <Card className="transition-colors hover:border-primary/50">
@@ -153,7 +146,7 @@ export default function Blog() {
       </section>
 
       <footer className="border-t border-border/40 py-8 text-center text-sm text-muted-foreground">
-        © {new Date().getFullYear()} <Link to="/" className="hover:text-foreground">Tokeny Monitor</Link>
+        © {new Date().getFullYear()} <Link to="/" className="hover:text-foreground">Tokeny</Link>
       </footer>
     </div>
   );

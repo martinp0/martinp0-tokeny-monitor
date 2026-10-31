@@ -1,78 +1,98 @@
 import AppIntents
-#if canImport(WidgetKit) && !os(macOS)
-import WidgetKit
-#endif
+import Foundation
+import TokenyCore
 
-/// „Kolik jsem dnes protokenoval?“ ze Zkratek, Spotlightu, tlačítka Akce nebo Siri (v podporovaném
-/// jazyce; čeština zatím ne). Na Macu i iPhonu, bez otevření appky.
-struct UsageTodayIntent: AppIntent {
-    static var title: LocalizedStringResource = "Útrata za AI dnes"
-    static var description = IntentDescription("Řekne dnešní a měsíční útratu za AI tokeny, odhad na konec měsíce a čerpání rozpočtu.")
-    static var openAppWhenRun = false
+/// "Kolik jsem dnes utratil za AI?" from Shortcuts, Spotlight, the Action button or Siri.
+/// Runs inside the app process (no UI), so it shares the signed-in session with the app.
+struct SpendTodayIntent: AppIntent {
+    static let title: LocalizedStringResource = "How much did I spend on AI today?"
+    static let description = IntentDescription("Tells you today's and this month's AI spend and how much of your budget is used.")
 
+    @MainActor
     func perform() async throws -> some IntentResult & ReturnsValue<String> & ProvidesDialog {
-        let summary: UsageSummary
-        do {
-            summary = try await TokenyAPI.refresh()
-            #if canImport(WidgetKit) && !os(macOS)
-            WidgetCenter.shared.reloadAllTimelines()
-            #endif
-        } catch {
-            guard let cached = TokenySettings.lastSummary else { throw error }
-            summary = cached
-        }
-        let text = Self.text(summary, currency: TokenySettings.currency)
-        return .result(value: text, dialog: "\(text)")
-    }
-
-    static func text(_ s: UsageSummary, currency: Currency) -> String {
-        let rate = Fmt.rate(s)
-        let c: (Double) -> String = { Fmt.cost($0, currency, rate: rate) }
-        var parts = [
-            "Dnes \(c(s.today.cost_usd)) (\(Fmt.num(s.today.tokens)) tokenů)",
-            "tento měsíc \(c(s.month.cost_usd))",
-            "odhad \(c(s.forecast_month_usd))",
-        ]
-        if let f = s.budgetFraction { parts.append("rozpočet \(Int((f * 100).rounded())) %") }
-        return parts.joined(separator: ", ") + "."
+        let model = AppModel.shared
+        guard model.auth.isSignedIn else { throw TokenyIntentError.signedOut }
+        await model.refresh()
+        guard let summary = model.summary else { throw TokenyIntentError.noData }
+        let text = SpendSentence.make(summary, currency: model.currency)
+        return .result(value: text, dialog: IntentDialog(stringLiteral: text))
     }
 }
 
-/// Jen ověří, jestli měsíční útrata nepřekročila práh rozpočtu (vrací Bool pro automatizace).
+/// True while this month's spend is under the budget alert threshold. For automations.
 struct BudgetCheckIntent: AppIntent {
-    static var title: LocalizedStringResource = "Je rozpočet na AI v pořádku?"
-    static var description = IntentDescription("Vrátí Ano, když je měsíční útrata pod prahem rozpočtu. Hodí se do automatizací ve Zkratkách.")
-    static var openAppWhenRun = false
+    static let title: LocalizedStringResource = "Is my AI budget OK?"
+    static let description = IntentDescription("Returns true while this month's AI spend is below your budget alert threshold.")
 
+    @MainActor
     func perform() async throws -> some IntentResult & ReturnsValue<Bool> & ProvidesDialog {
-        let s = (try? await TokenyAPI.refresh()) ?? TokenySettings.lastSummary
-        guard let s else { throw TokenyAPI.APIError.notConfigured }
-        let ok = !s.overThreshold
-        let pct = s.budgetFraction.map { "\(Int(($0 * 100).rounded())) %" } ?? "bez rozpočtu"
-        let message: String = ok ? "V pořádku, vyčerpáno \(pct)." : "Pozor, vyčerpáno \(pct)."
-        return .result(value: ok, dialog: "\(message)")
+        let model = AppModel.shared
+        guard model.auth.isSignedIn else { throw TokenyIntentError.signedOut }
+        await model.refresh()
+        guard let summary = model.summary else { throw TokenyIntentError.noData }
+        let status = summary.budgetStatus
+        let message: String
+        switch status.level {
+        case .none:
+            message = String(localized: "You haven't set a monthly budget. Set one on the web.")
+        case .ok:
+            message = String(localized: "All good, \(Fmt.percent(status.percent ?? 0)) of your budget used.")
+        case .warning, .over:
+            message = String(localized: "Careful, \(Fmt.percent(status.percent ?? 0)) of your budget used.")
+        }
+        return .result(value: status.level <= .ok, dialog: IntentDialog(stringLiteral: message))
+    }
+}
+
+enum TokenyIntentError: Error, CustomLocalizedStringResourceConvertible {
+    case signedOut, noData
+
+    var localizedStringResource: LocalizedStringResource {
+        switch self {
+        case .signedOut: "Open Tokeny and sign in first."
+        case .noData: "Couldn't load your spend. Try again in a moment."
+        }
+    }
+}
+
+enum SpendSentence {
+    static func make(_ s: UsageSummary, currency: Currency) -> String {
+        let rate = s.usdToCZK
+        let today = Fmt.money(s.today.costUSD, currency, rate: rate)
+        let month = Fmt.money(s.month.costUSD, currency, rate: rate)
+        var text = String(localized: "Today \(today), this month \(month).")
+        if let forecast = s.forecastMonthUSD {
+            text += " " + String(localized: "Forecast for the month \(Fmt.money(forecast, currency, rate: rate)).")
+        }
+        if let percent = s.budgetStatus.percent {
+            text += " " + String(localized: "Budget \(Fmt.percent(percent)) used.")
+        }
+        return text
     }
 }
 
 struct TokenyShortcuts: AppShortcutsProvider {
     static var appShortcuts: [AppShortcut] {
         AppShortcut(
-            intent: UsageTodayIntent(),
+            intent: SpendTodayIntent(),
             phrases: [
-                "How much did I spend today in \(.applicationName)",
-                "\(.applicationName) usage",
+                "How much did I spend on AI today in \(.applicationName)",
+                "\(.applicationName) spend today",
                 "Check \(.applicationName)",
             ],
-            shortTitle: "Útrata dnes",
+            shortTitle: "Spend today",
             systemImageName: "chart.bar.fill"
         )
         AppShortcut(
             intent: BudgetCheckIntent(),
-            phrases: ["Is my AI budget OK in \(.applicationName)"],
-            shortTitle: "Rozpočet",
+            phrases: [
+                "Is my AI budget OK in \(.applicationName)",
+                "\(.applicationName) budget",
+            ],
+            shortTitle: "Budget",
             systemImageName: "gauge.with.dots.needle.67percent"
         )
     }
 
-    static var shortcutTileColor: ShortcutTileColor = .purple
+    static let shortcutTileColor: ShortcutTileColor = .blue
 }

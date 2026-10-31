@@ -1,34 +1,22 @@
 {
   "sourceLanguage": "en",
   "strings": {
-    "How much did I spend today in ${applicationName}": {
+    "${applicationName} budget": {
       "localizations": {
         "cs": {
           "stringUnit": {
             "state": "translated",
-            "value": "Kolik jsem dnes utratil v ${applicationName}"
-          }
-        },
-        "sk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Koľko som dnes minul v ${applicationName}"
+            "value": "Rozpočet v ${applicationName}"
           }
         }
       }
     },
-    "${applicationName} usage": {
+    "${applicationName} spend today": {
       "localizations": {
         "cs": {
           "stringUnit": {
             "state": "translated",
-            "value": "Spotřeba v ${applicationName}"
-          }
-        },
-        "sk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Spotreba v ${applicationName}"
+            "value": "Útrata v ${applicationName} dnes"
           }
         }
       }
@@ -40,11 +28,15 @@
             "state": "translated",
             "value": "Zkontroluj ${applicationName}"
           }
-        },
-        "sk": {
+        }
+      }
+    },
+    "How much did I spend on AI today in ${applicationName}": {
+      "localizations": {
+        "cs": {
           "stringUnit": {
             "state": "translated",
-            "value": "Skontroluj ${applicationName}"
+            "value": "Kolik jsem dnes utratil za AI v ${applicationName}"
           }
         }
       }
@@ -54,13 +46,7 @@
         "cs": {
           "stringUnit": {
             "state": "translated",
-            "value": "Je rozpočet na AI v pořádku v ${applicationName}"
-          }
-        },
-        "sk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Je rozpočet na AI v poriadku v ${applicationName}"
+            "value": "Je rozpočet na AI v ${applicationName} v pořádku"
           }
         }
       }

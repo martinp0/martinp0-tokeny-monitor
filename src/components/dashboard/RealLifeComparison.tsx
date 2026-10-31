@@ -93,13 +93,13 @@ export function RealLifeComparison({ totalCostCzk }: Props) {
     <Card className="bg-card border-border/50">
       <CardContent className="p-5">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-semibold text-foreground font-mono flex items-center gap-2">
+          <h3 className="text-sm font-semibold text-foreground tabular-nums flex items-center gap-2">
             <span>🛒</span> Za tvoje AI tokeny bys koupil/a:
           </h3>
           <Button
             variant="ghost"
             size="sm"
-            className="h-7 px-2 text-xs font-mono gap-1"
+            className="h-7 px-2 text-xs tabular-nums gap-1"
             onClick={() => setShowForm(!showForm)}
           >
             <Plus className="h-3 w-3" />
@@ -113,14 +113,14 @@ export function RealLifeComparison({ totalCostCzk }: Props) {
               placeholder="Emoji"
               value={newEmoji}
               onChange={(e) => setNewEmoji(e.target.value.slice(0, 2))}
-              className="w-16 h-8 text-center bg-secondary border-border font-mono text-sm"
+              className="w-16 h-8 text-center bg-secondary border-border tabular-nums text-sm"
             />
             <Input
               placeholder="Název položky"
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
               maxLength={50}
-              className="flex-1 min-w-[120px] h-8 bg-secondary border-border font-mono text-sm"
+              className="flex-1 min-w-[120px] h-8 bg-secondary border-border tabular-nums text-sm"
             />
             <Input
               type="number"
@@ -129,9 +129,9 @@ export function RealLifeComparison({ totalCostCzk }: Props) {
               onChange={(e) => setNewPrice(e.target.value)}
               min={1}
               max={1000000}
-              className="w-24 h-8 bg-secondary border-border font-mono text-sm"
+              className="w-24 h-8 bg-secondary border-border tabular-nums text-sm"
             />
-            <Button size="sm" className="h-8 text-xs font-mono" onClick={handleAdd}>
+            <Button size="sm" className="h-8 text-xs tabular-nums" onClick={handleAdd}>
               Přidat
             </Button>
           </div>
@@ -157,7 +157,7 @@ export function RealLifeComparison({ totalCostCzk }: Props) {
                 </button>
               )}
               <div className="text-2xl mb-1">{item.emoji}</div>
-              <div className="text-primary font-mono text-sm font-bold">
+              <div className="text-primary tabular-nums text-sm font-bold">
                 {item.count >= 10
                   ? Math.floor(item.count).toLocaleString("cs-CZ")
                   : item.count.toLocaleString("cs-CZ", {
@@ -166,10 +166,10 @@ export function RealLifeComparison({ totalCostCzk }: Props) {
                     })}
                 ×
               </div>
-              <div className="text-muted-foreground text-xs font-mono mt-0.5 leading-tight">
+              <div className="text-muted-foreground text-xs tabular-nums mt-0.5 leading-tight">
                 {item.name}
               </div>
-              <div className="text-muted-foreground/50 text-[10px] font-mono">
+              <div className="text-muted-foreground/50 text-xs tabular-nums">
                 {item.priceCzk} Kč
               </div>
             </div>

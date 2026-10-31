@@ -65,7 +65,7 @@ export default function ShareButtons({ url, title }: ShareButtonsProps) {
 
   return (
     <div className="flex items-center gap-2 flex-wrap">
-      <span className="text-xs font-mono text-muted-foreground mr-1">Sdílet:</span>
+      <span className="text-xs tabular-nums text-muted-foreground mr-1">Sdílet:</span>
       {links.map((l) => (
         <Button
           key={l.name}

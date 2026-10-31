@@ -1,5 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { DollarSign, Activity, Clock, Hash } from "lucide-react";
+import { Coins, Activity, Clock, Hash } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { fmtCost, fmtNum, fmtNumShort } from "@/lib/format";
 import { useCurrency } from "@/hooks/useCurrency";
 
@@ -12,30 +13,32 @@ interface KpiCardsProps {
 
 export function KpiCards({ totalCost, totalRequests, totalTokens, avgGenTime }: KpiCardsProps) {
   const { currency, exchangeRate } = useCurrency();
+  const { t } = useTranslation();
   const values = { cost: totalCost, requests: totalRequests, avgTime: avgGenTime, tokens: totalTokens };
 
   const kpis = [
-    { key: "cost" as const, label: "Celkové náklady", emoji: "💸", icon: DollarSign, format: (v: number) => fmtCost(v, 0, currency, exchangeRate), color: "text-chart-1", glow: "from-[hsl(270,95%,65%)]" },
-    { key: "requests" as const, label: "Požadavky", emoji: "⚡", icon: Activity, format: (v: number) => fmtNum(v, currency), color: "text-chart-2", glow: "from-[hsl(175,85%,55%)]" },
-    { key: "avgTime" as const, label: "Prům. odpověď", emoji: "⏱️", icon: Clock, format: (v: number) => `${(v / 1000).toFixed(1)}s`, color: "text-chart-3", glow: "from-[hsl(45,100%,60%)]" },
-    { key: "tokens" as const, label: "Celkem tokenů", emoji: "🔥", icon: Hash, format: (v: number) => fmtNumShort(v, currency), color: "text-chart-4", glow: "from-[hsl(320,90%,65%)]" },
+    { key: "cost" as const, icon: Coins, format: (v: number) => fmtCost(v, 0, currency, exchangeRate) },
+    { key: "requests" as const, icon: Activity, format: (v: number) => fmtNum(v, currency) },
+    { key: "avgTime" as const, icon: Clock, format: (v: number) => `${(v / 1000).toFixed(1)} s` },
+    { key: "tokens" as const, icon: Hash, format: (v: number) => fmtNumShort(v, currency) },
   ];
 
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 min-w-0">
-      {kpis.map(({ key, label, emoji, icon: Icon, format, color, glow }, index) => (
+      {kpis.map(({ key, icon: Icon, format }, index) => (
         <Card
           key={key}
-          className="glass glass-hover group cursor-default animate-fade-in opacity-0 overflow-hidden relative"
-          style={{ animationDelay: `${index * 80}ms`, animationFillMode: "forwards" }}
+          className="animate-fade-in overflow-hidden"
+          style={{ animationDelay: `${index * 60}ms`, animationFillMode: "backwards" }}
         >
-          <div className={`absolute inset-0 bg-gradient-to-br ${glow} to-transparent opacity-0 group-hover:opacity-[0.06] transition-opacity duration-500`} />
-          <CardContent className="p-4 relative">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wider leading-tight min-w-0">{label}</span>
-              <span className="text-lg group-hover:animate-float">{emoji}</span>
+          <CardContent className="p-4 sm:p-5">
+            <div className="flex items-center gap-2 mb-3 text-muted-foreground">
+              <Icon className="h-4 w-4 shrink-0" aria-hidden />
+              <span className="text-[13px] font-medium leading-tight min-w-0">{t(`kpi.${key}`)}</span>
             </div>
-            <p className={`text-xl sm:text-2xl font-mono font-bold leading-none break-words ${color}`}>{format(values[key])}</p>
+            <p className="text-2xl sm:text-[28px] tabular-nums font-semibold tracking-tight leading-none break-words">
+              {format(values[key])}
+            </p>
           </CardContent>
         </Card>
       ))}

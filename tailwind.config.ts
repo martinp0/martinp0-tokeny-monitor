@@ -1,4 +1,6 @@
 import type { Config } from "tailwindcss";
+import tailwindAnimate from "tailwindcss-animate";
+import typography from "@tailwindcss/typography";
 
 export default {
   darkMode: ["class"],
@@ -14,8 +16,19 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["Inter", "Inter Fallback", "ui-sans-serif", "system-ui", "sans-serif"],
-        mono: ["JetBrains Mono", "monospace"],
+        sans: [
+          "-apple-system",
+          "BlinkMacSystemFont",
+          '"SF Pro Text"',
+          '"SF Pro Display"',
+          "system-ui",
+          '"Segoe UI"',
+          "Roboto",
+          '"Helvetica Neue"',
+          "Arial",
+          "sans-serif",
+        ],
+        mono: ["ui-monospace", '"SF Mono"', "SFMono-Regular", "Menlo", "Consolas", "monospace"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -23,7 +36,10 @@ export default {
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
+        success: "hsl(var(--success) / <alpha-value>)",
+        warning: "hsl(var(--warning) / <alpha-value>)",
         primary: {
+          fill: "hsl(var(--primary-fill) / <alpha-value>)",
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
         },
@@ -71,6 +87,8 @@ export default {
         },
       },
       borderRadius: {
+        "2xl": "calc(var(--radius) + 6px)",
+        "3xl": "calc(var(--radius) + 14px)",
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
@@ -92,9 +110,9 @@ export default {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        "fade-in": "fade-in 0.5s ease-out",
+        "fade-in": "fade-in 0.5s cubic-bezier(0.22, 1, 0.36, 1)",
       },
     },
   },
-  plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography")],
+  plugins: [tailwindAnimate, typography],
 } satisfies Config;

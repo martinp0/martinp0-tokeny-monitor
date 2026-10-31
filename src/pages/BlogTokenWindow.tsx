@@ -82,7 +82,7 @@ export default function BlogTokenWindow() {
 
       <h2>Praxe: měř input tokeny per request</h2>
       <p>
-        V <Link to="/auth">Tokeny Monitoru</Link> sleduj <em>avg input tokens per request</em> v čase.
+        V <Link to="/auth">Tokenech</Link> sleduj <em>avg input tokens per request</em> v čase.
         Pokud roste, máš v kontextu balast. Spočítej si dopad cenovky v{" "}
         <Link to="/llm-cost-calculator">LLM cost calculator</Link>.
       </p>

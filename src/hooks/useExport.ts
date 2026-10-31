@@ -1,6 +1,4 @@
 import { useCallback, useRef } from "react";
-import { toPng } from "html-to-image";
-import jsPDF from "jspdf";
 import { type ActivityRow } from "@/lib/csv-parser";
 import { fmtCost, fmtNum } from "@/lib/format";
 import { useCurrency } from "@/hooks/useCurrency";
@@ -13,12 +11,13 @@ export function useExport(dashboardRef: React.RefObject<HTMLElement | null>) {
     if (!dashboardRef.current || exporting.current) return;
     exporting.current = true;
     try {
+      const { toPng } = await import("html-to-image");
       const dataUrl = await toPng(dashboardRef.current, {
-        backgroundColor: "#0f0f23",
+        backgroundColor: getComputedStyle(document.body).backgroundColor || "#ffffff",
         pixelRatio: 2,
       });
       const link = document.createElement("a");
-      link.download = `openrouter-dashboard-${new Date().toISOString().slice(0, 10)}.png`;
+      link.download = `tokeny-dashboard-${new Date().toISOString().slice(0, 10)}.png`;
       link.href = dataUrl;
       link.click();
     } finally {
@@ -26,7 +25,8 @@ export function useExport(dashboardRef: React.RefObject<HTMLElement | null>) {
     }
   }, [dashboardRef]);
 
-  const exportPDF = useCallback((data: ActivityRow[], totalCost: number, totalRequests: number, totalTokens: number, avgGenTime: number) => {
+  const exportPDF = useCallback(async (data: ActivityRow[], totalCost: number, totalRequests: number, totalTokens: number, avgGenTime: number) => {
+    const { default: jsPDF } = await import("jspdf");
     const doc = new jsPDF({ orientation: "landscape" });
     const w = doc.internal.pageSize.getWidth();
     const m = 15;
@@ -34,7 +34,7 @@ export function useExport(dashboardRef: React.RefObject<HTMLElement | null>) {
 
     doc.setFontSize(20);
     doc.setTextColor(0, 230, 128);
-    doc.text("OpenRouter Monitor — Report", m, y);
+    doc.text("Tokeny — Report", m, y);
     y += 6;
     doc.setFontSize(9);
     doc.setTextColor(150);

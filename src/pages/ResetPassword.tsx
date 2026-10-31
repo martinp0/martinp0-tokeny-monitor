@@ -1,31 +1,23 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { supabase } from "@/integrations/supabase/client";
+import { authClient, authErrorMessage } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Activity } from "lucide-react";
+import { Activity, KeyRound } from "lucide-react";
 import { toast } from "sonner";
 
+/** Password reset with the 6-digit code Neon Auth e-mails (requested on /auth → "Zapomněl/a jsi heslo?"). */
 export default function ResetPassword() {
+  const [params] = useSearchParams();
+  const [email, setEmail] = useState(params.get("email") ?? "");
+  const [code, setCode] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [ready, setReady] = useState(false);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const hash = window.location.hash;
-    if (hash.includes("type=recovery")) {
-      setReady(true);
-    }
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "PASSWORD_RECOVERY") setReady(true);
-    });
-    return () => subscription.unsubscribe();
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,98 +25,75 @@ export default function ResetPassword() {
       toast.error("Hesla se neshodují");
       return;
     }
-    if (password.length < 6) {
-      toast.error("Heslo musí mít alespoň 6 znaků");
+    if (password.length < 8) {
+      toast.error("Heslo musí mít alespoň 8 znaků");
       return;
     }
     setLoading(true);
     try {
-      const { error } = await supabase.auth.updateUser({ password });
-      if (error) throw error;
-      toast.success("Heslo bylo úspěšně změněno");
-      navigate("/");
-    } catch {
-      toast.error("Heslo se nepodařilo změnit. Zkuste to znovu.");
+      await authClient.resetPassword(email.trim(), code.trim(), password);
+      toast.success("Heslo bylo změněno, přihlas se novým heslem");
+      navigate("/auth");
+    } catch (error) {
+      toast.error(authErrorMessage(error));
     } finally {
       setLoading(false);
     }
   };
 
-  const head = (
-    <Helmet>
-      <title>Obnovení hesla – OpenRouter Monitor</title>
-      <meta name="description" content="Nastavte si nové heslo k vašemu účtu OpenRouter Monitor." />
-      <link rel="canonical" href="https://tokeny.martinpohl.cz/reset-password" />
-      <meta name="robots" content="noindex,nofollow" />
-    </Helmet>
-  );
-
-  if (!ready) {
-    return (
-      <main className="min-h-screen bg-background flex items-center justify-center px-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))]">
-        {head}
-        <Card className="w-full max-w-md bg-card border-border">
-          <CardContent className="p-8 text-center">
-            <h1 className="text-lg font-semibold text-foreground mb-2">Obnovení hesla</h1>
-            <p className="text-muted-foreground text-sm">
-              Odkaz pro obnovení hesla je neplatný nebo vypršel.
-            </p>
-            <Button onClick={() => navigate("/auth")} variant="outline" className="mt-4 min-h-11">
-              Zpět na přihlášení
-            </Button>
-          </CardContent>
-        </Card>
-      </main>
-    );
-  }
+  const resend = async () => {
+    if (!email.trim()) return toast.error("Zadej e-mail");
+    try {
+      await authClient.requestPasswordReset(email.trim());
+      toast.success("Nový kód je na cestě 📬");
+    } catch (error) {
+      toast.error(authErrorMessage(error));
+    }
+  };
 
   return (
-    <main className="min-h-screen bg-background flex items-center justify-center px-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))]">
-      {head}
-      <Card className="w-full max-w-md bg-card border-border">
+    <main className="min-h-screen bg-background flex items-center justify-center p-4">
+      <Helmet>
+        <title>Reset hesla – Tokeny</title>
+        <meta name="description" content="Nastavte si nové heslo k vašemu účtu Tokeny." />
+        <link rel="canonical" href="https://tokeny.martinpohl.cz/reset-password" />
+        <meta name="robots" content="noindex,nofollow" />
+      </Helmet>
+      <Card className="w-full max-w-md glass border-border">
         <CardHeader className="text-center">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center">
-              <Activity className="h-5 w-5 text-primary-foreground" />
-            </div>
-            <span className="text-xl font-semibold text-foreground">OpenRouter Monitor</span>
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <Activity className="h-8 w-8 text-primary" />
+            <span className="text-xl font-bold text-foreground">Tokeny</span>
           </div>
           <h1 className="text-lg font-semibold text-foreground">Nové heslo</h1>
           <CardTitle className="sr-only">Nové heslo</CardTitle>
+          <p className="text-sm text-muted-foreground">Zadej kód, který ti přišel e-mailem, a nové heslo.</p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-1.5">
+            <div className="space-y-1">
+              <Label htmlFor="reset-email" className="sr-only">E-mail</Label>
+              <Input id="reset-email" type="email" placeholder="E-mail" value={email} onChange={(e) => setEmail(e.target.value)} required className="bg-muted/60 border-border tabular-nums" />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="reset-code" className="sr-only">Kód z e-mailu</Label>
+              <Input id="reset-code" inputMode="numeric" autoComplete="one-time-code" placeholder="Kód z e-mailu" value={code} onChange={(e) => setCode(e.target.value)} required className="bg-muted/60 border-border tabular-nums tracking-widest" />
+            </div>
+            <div className="space-y-1">
               <Label htmlFor="reset-password" className="sr-only">Nové heslo</Label>
-              <Input
-                id="reset-password"
-                type="password"
-                autoComplete="new-password"
-                placeholder="Nové heslo"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={6}
-                className="h-11 bg-background"
-              />
+              <Input id="reset-password" type="password" autoComplete="new-password" placeholder="Nové heslo" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={8} className="bg-muted/60 border-border tabular-nums" />
             </div>
-            <div className="space-y-1.5">
+            <div className="space-y-1">
               <Label htmlFor="reset-password-confirm" className="sr-only">Potvrdit heslo</Label>
-              <Input
-                id="reset-password-confirm"
-                type="password"
-                autoComplete="new-password"
-                placeholder="Potvrdit heslo"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-                minLength={6}
-                className="h-11 bg-background"
-              />
+              <Input id="reset-password-confirm" type="password" autoComplete="new-password" placeholder="Potvrdit heslo" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required minLength={8} className="bg-muted/60 border-border tabular-nums" />
             </div>
-            <Button type="submit" disabled={loading} className="w-full min-h-11">
-              {loading ? "Odesílání…" : "Nastavit nové heslo"}
+            <Button type="submit" disabled={loading} className="w-full gap-2 tabular-nums">
+              <KeyRound className="h-4 w-4" />
+              {loading ? "Načítání..." : "Nastavit nové heslo"}
             </Button>
+            <button type="button" onClick={resend} className="block w-full text-sm text-muted-foreground hover:text-foreground transition-colors">
+              Poslat kód znovu
+            </button>
           </form>
         </CardContent>
       </Card>

@@ -3,518 +3,314 @@ import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { LandingDemoGate } from "@/components/landing/LandingDemoGate";
+import { PricingSection } from "@/components/landing/PricingSection";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import {
   Activity,
   ArrowRight,
   BarChart3,
-  Upload,
-  DollarSign,
-  Zap,
-  Shield,
-  Sparkles,
-  LineChart,
-  Globe,
-  CheckCircle2,
-  Smartphone,
-  ExternalLink,
+  Bell,
+  Coffee,
   Github,
+  Lock,
+  Plug,
+  Coins,
+  Smartphone,
+  TrendingUp,
+  MessagesSquare,
 } from "lucide-react";
 import { useCurrency } from "@/hooks/useCurrency";
-import { csCopy } from "@/lib/cs-typography";
+import { SITE_URL } from "@/config/site";
+import { maybeSignedIn } from "@/lib/auth-client";
 
-const hit = "inline-flex items-center justify-center min-h-[44px] min-w-[44px] px-2 transition-colors hover:text-foreground";
-
-function readStoredSession() {
-  try {
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (!key || !key.startsWith("sb-") || !key.includes("auth-token")) continue;
-      const raw = localStorage.getItem(key);
-      if (!raw) continue;
-      const parsed = JSON.parse(raw);
-      if (parsed?.access_token || parsed?.currentSession?.access_token) return true;
-    }
-  } catch {
-    /* ignore broken storage */
-  }
-  return false;
-}
 
 const FEATURES = [
-  {
-    icon: DollarSign,
-    title: "Náklady v CZK i USD",
-    desc: "Přepínej měnu jedním klikem. Aktuální kurz ČNB se stahuje automaticky.",
-  },
-  {
-    icon: BarChart3,
-    title: "Detailní grafy",
-    desc: "Spotřeba tokenů, výkon modelů, latence, providery – vše na jednom místě.",
-  },
-  {
-    icon: Upload,
-    title: "Import z CSV",
-    desc: "Stáhni si activity export z OpenRouter a nahraj ho jedním tažením myši.",
-  },
-  {
-    icon: Zap,
-    title: "Real-life srovnání",
-    desc: "Kolik espress, piv nebo pizz by se za tvoje API náklady dalo koupit?",
-  },
-  {
-    icon: Shield,
-    title: "Bezpečné a privátní",
-    desc: "Tvoje data zůstávají v šifrovaném cloudu, viditelná jen tobě.",
-  },
-  {
-    icon: Smartphone,
-    title: "Funguje všude",
-    desc: "Web, mobil, tablet i jako nativní app pro iOS a Android.",
-  },
-];
+  { key: "currency", icon: Coins },
+  { key: "charts", icon: BarChart3 },
+  { key: "providers", icon: Plug },
+  { key: "alerts", icon: Bell },
+  { key: "anomalies", icon: TrendingUp },
+  { key: "mcp", icon: MessagesSquare },
+  { key: "privacy", icon: Lock },
+  { key: "everywhere", icon: Smartphone },
+] as const;
 
-const FAQS = [
-  {
-    q: "Jak importuju CSV z OpenRouteru?",
-    a: "Přihlas se na openrouter.ai, otevři stránku Activity a klikni na Export → CSV. Stažený soubor pak v Tokeny Monitoru přetáhneš do uploaderu na dashboardu (nebo klikneš a vybereš). Parser automaticky rozpozná všechny sloupce — modely, providery, tokeny, latenci i cenu v USD. Můžeš nahrávat opakovaně, duplicity se přeskakují podle ID requestu.",
-  },
-  {
-    q: "Proč není automatická synchronizace s OpenRouter API?",
-    a: "OpenRouter zatím nenabízí veřejné API pro historii activity — dostupný je jen real-time generation endpoint. Jakmile veřejné API spustí, doplníme auto-sync. Do té doby je CSV import nejspolehlivější cesta a trvá ~10 vteřin.",
-  },
-  {
-    q: "Jak převádíte tokeny a USD na CZK?",
-    a: "Náklady přicházejí v USD (tak je vrací OpenRouter). V dashboardu si jedním klikem přepneš zobrazení mezi USD a CZK. Kurz tahá automatický CRON job z oficiálního API České národní banky (denně), takže máš vždy aktuální oficiální devizový kurz. Konverze se počítá per-request, ne paušálně, aby seděla na den, kdy request proběhl.",
-  },
-  {
-    q: "Jak funguje zabezpečení dat?",
-    a: "Tvoje data leží v šifrované databázi (Postgres + AES-256 at rest, TLS in transit). Každý řádek má vazbu na tvoje user_id a Row-Level Security politiky garantují, že vidíš a upravuješ jen vlastní data — i kdyby někdo získal API klíč, RLS to zablokuje na úrovni databáze. Zápisy do databáze jdou výhradně přes ověřené Edge Functions s service-role klíčem, nikdy přímo z prohlížeče.",
-  },
-  {
-    q: "Stojí to něco? Je tam nějaký freemium / limit?",
-    a: "Aktuálně zdarma. Žádná kreditka, žádný trial. Cílem je být užitečný nástroj pro indie devs a malé týmy — pokud v budoucnu přijde placený tier (např. týmové sdílení, pokročilé alerty), free plan zůstane.",
-  },
-  {
-    q: "Co to je MCP server a k čemu mi je?",
-    a: "MCP (Model Context Protocol) je standard od Anthropicu, kterým si AI klient (Claude Desktop, Cursor, Zed…) může připojit externí nástroje. Tokeny Monitor exposuje MCP endpoint s nástroji jako get_total_cost, get_top_models nebo delete_request. V /settings si vygeneruješ token, vložíš do konfigurace klienta a můžeš se Claudea ptát „kolik jsem utratil za Sonnet minulý týden?“ přímo v chatu.",
-  },
-];
-
-const features = FEATURES.map((item) => ({ ...item, title: csCopy(item.title), desc: csCopy(item.desc) }));
-const faqs = FAQS.map((item) => ({ q: csCopy(item.q), a: csCopy(item.a) }));
-const steps = [
-  { n: "01", t: csCopy("Vytvoř si účet"), d: csCopy("Registrace přes e-mail nebo Google. Trvá to 10 vteřin.") },
-  { n: "02", t: csCopy("Nahraj CSV"), d: csCopy("Stáhni activity export z openrouter.ai/activity a nahraj.") },
-  { n: "03", t: csCopy("Sleduj a optimalizuj"), d: csCopy("Filtry podle modelů, datumů a providerů. Export do PNG/PDF.") },
-];
+type FaqItem = { q: string; a: string };
 
 export default function Landing() {
-  const { t, i18n } = useTranslation();
-  const copy = (value: string) => (i18n.language?.startsWith("en") ? value : csCopy(value));
-  const label = (key: string) => copy(t(key));
+  const { t } = useTranslation();
   const { currency, toggle: toggleCurrency } = useCurrency();
   const [hasSession, setHasSession] = useState(false);
 
   useEffect(() => {
-    setHasSession(readStoredSession());
-
-    // Email confirmation / magic links land on "/" with tokens in the URL.
-    // Load the auth client immediately so it can store the session before
-    // the user navigates away and the tokens are lost.
-    const { hash, search } = window.location;
-    const hasAuthParams =
-      /(?:^|[#&])(access_token|refresh_token|error_description)=/.test(hash) ||
-      /[?&](code|token_hash|error_description)=/.test(search);
-    if (!hasAuthParams) return;
-
-    let cancelled = false;
-    let unsubscribe = () => {};
-    import("@/integrations/supabase/client").then(({ supabase }) => {
-      if (cancelled) return;
-      const { data } = supabase.auth.onAuthStateChange((_event, session) => {
-        if (!cancelled) setHasSession(!!session);
-      });
-      unsubscribe = () => data.subscription.unsubscribe();
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        if (!cancelled) setHasSession(!!session);
-      });
-    });
-    return () => {
-      cancelled = true;
-      unsubscribe();
-    };
+    // Optimistic CTA: the hint is set by the auth client; /dashboard re-checks the real session.
+    setHasSession(maybeSignedIn());
   }, []);
 
   const ctaHref = hasSession ? "/dashboard" : "/auth";
-  const ctaLabel = hasSession ? label("nav.openDashboard") : label("nav.startFree");
+  const ctaLabel = hasSession ? t("nav.openDashboard") : t("landing.hero.primary");
+  const faq = t("landing.faq.items", { returnObjects: true }) as FaqItem[];
+  const faqList = Array.isArray(faq) ? faq : [];
 
   return (
-    <div className="min-h-screen max-w-full bg-background bg-mesh text-foreground">
+    <div className="min-h-screen max-w-full bg-background text-foreground">
       <Helmet>
-        <title>OpenRouter Monitor – Přehled nákladů a spotřeby AI tokenů</title>
-        <meta name="description" content="Sledujte náklady, spotřebu tokenů a výkon modelů na OpenRouter. Dashboard pro analýzu API volání v reálném čase s podporou CZK a USD." />
-        <link rel="canonical" href="https://tokeny.martinpohl.cz/" />
-        <meta property="og:title" content="OpenRouter Monitor – Přehled nákladů a tokenů" />
-        <meta property="og:description" content="Sledujte náklady, spotřebu tokenů a výkon AI modelů na OpenRouter v reálném čase." />
-        <meta property="og:url" content="https://tokeny.martinpohl.cz/" />
+        <title>{t("landing.metaTitle")}</title>
+        <meta name="description" content={t("landing.metaDesc")} />
+        <link rel="canonical" href={`${SITE_URL}/`} />
+        <meta property="og:title" content={t("landing.metaTitle")} />
+        <meta property="og:description" content={t("landing.metaDesc")} />
+        <meta property="og:url" content={`${SITE_URL}/`} />
+        <link rel="alternate" hrefLang="cs" href={`${SITE_URL}/`} />
+        <link rel="alternate" hrefLang="en" href={`${SITE_URL}/?lang=en`} />
+        <link rel="alternate" hrefLang="x-default" href={`${SITE_URL}/`} />
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "SoftwareApplication",
+          name: "Tokeny",
+          url: `${SITE_URL}/`,
+          applicationCategory: "BusinessApplication",
+          operatingSystem: "Web",
+          description: t("landing.metaDesc"),
+          offers: { "@type": "Offer", price: "0", priceCurrency: "CZK" },
+          author: { "@type": "Person", name: "Martin Pohl", url: "https://martinpohl.cz" },
+        })}</script>
         <script type="application/ld+json">{JSON.stringify({
           "@context": "https://schema.org",
           "@type": "FAQPage",
-          mainEntity: [
-            { "@type": "Question", name: "Jak importuju CSV z OpenRouteru?", acceptedAnswer: { "@type": "Answer", text: "Přihlas se na openrouter.ai, otevři stránku Activity a klikni na Export → CSV. Stažený soubor pak v Tokeny Monitoru přetáhneš do uploaderu na dashboardu. Parser automaticky rozpozná modely, providery, tokeny, latenci i cenu v USD. Duplicity se přeskakují podle ID requestu." } },
-            { "@type": "Question", name: "Proč není automatická synchronizace s OpenRouter API?", acceptedAnswer: { "@type": "Answer", text: "OpenRouter zatím nenabízí veřejné API pro historii activity — dostupný je jen real-time generation endpoint. Jakmile veřejné API spustí, doplníme auto-sync. Do té doby je CSV import nejspolehlivější cesta." } },
-            { "@type": "Question", name: "Jak převádíte tokeny a USD na CZK?", acceptedAnswer: { "@type": "Answer", text: "Náklady přicházejí v USD. V dashboardu přepneš zobrazení mezi USD a CZK jedním klikem. Kurz tahá automatický CRON job z oficiálního API České národní banky denně, takže máš vždy aktuální oficiální devizový kurz. Konverze se počítá per-request podle dne, kdy request proběhl." } },
-            { "@type": "Question", name: "Jak funguje zabezpečení dat?", acceptedAnswer: { "@type": "Answer", text: "Data leží v šifrované Postgres databázi (AES-256 at rest, TLS in transit). Každý řádek má vazbu na user_id a Row-Level Security politiky garantují, že vidíš jen vlastní data. Zápisy jdou výhradně přes ověřené Edge Functions s service-role klíčem, nikdy přímo z prohlížeče." } },
-            { "@type": "Question", name: "Stojí to něco?", acceptedAnswer: { "@type": "Answer", text: "Aktuálně zdarma. Žádná kreditka, žádný trial." } },
-            { "@type": "Question", name: "Co to je MCP server a k čemu mi je?", acceptedAnswer: { "@type": "Answer", text: "MCP (Model Context Protocol) je standard od Anthropicu, kterým si AI klient (Claude Desktop, Cursor, Zed) připojí externí nástroje. V /settings vygeneruješ token a vložíš do konfigurace klienta." } },
-          ],
-        })}</script>
-        <script type="application/ld+json">{JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "HowTo",
-          name: "Jak importovat náklady z OpenRouter do Tokeny Monitoru",
-          description: "Postup, jak stáhnout CSV export z OpenRouter Activity a nahrát ho do dashboardu.",
-          totalTime: "PT2M",
-          inLanguage: "cs",
-          step: [
-            { "@type": "HowToStep", position: 1, name: "Otevři OpenRouter Activity", text: "Přihlas se na openrouter.ai a otevři stránku Activity.", url: "https://openrouter.ai/activity" },
-            { "@type": "HowToStep", position: 2, name: "Stáhni CSV", text: "Klikni na Export → CSV." },
-            { "@type": "HowToStep", position: 3, name: "Nahraj CSV do dashboardu", text: "Přetáhni soubor do uploaderu na dashboardu.", url: "https://tokeny.martinpohl.cz/" },
-          ],
+          mainEntity: faqList.map((f) => ({
+            "@type": "Question",
+            name: f.q,
+            acceptedAnswer: { "@type": "Answer", text: f.a },
+          })),
         })}</script>
       </Helmet>
-      {/* Nav */}
-      <header
-        className="sticky top-0 z-50 border-b border-white/[0.06] glass"
-        style={{
-          paddingTop: "env(safe-area-inset-top)",
-          paddingLeft: "env(safe-area-inset-left)",
-          paddingRight: "env(safe-area-inset-right)",
-        }}
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-1 flex items-center justify-between gap-2 min-w-0">
-          <Link to="/" className="flex items-center gap-2 sm:gap-3 min-w-0 min-h-11" aria-label="OpenRouter Monitor">
-            <div className="h-8 w-8 shrink-0 rounded-lg bg-primary flex items-center justify-center">
-              <Activity className="h-4 w-4 text-primary-foreground" />
-            </div>
-            <span className="text-sm sm:text-lg font-semibold tracking-tight truncate">OpenRouter Monitor</span>
+
+      <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-full focus:bg-card focus:px-4 focus:py-2">
+        {t("landing.nav.skip")}
+      </a>
+
+      <header className="sticky top-0 z-50 glass-bar pt-safe">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-2 min-w-0">
+          <Link to="/" className="tap-target flex items-center gap-2 min-w-0" aria-label="Tokeny">
+            <span className="h-7 w-7 shrink-0 rounded-lg bg-primary-fill flex items-center justify-center">
+              <Activity className="h-4 w-4 text-white" aria-hidden />
+            </span>
+            <span className="text-[17px] font-semibold tracking-tight">Tokeny</span>
           </Link>
-          <nav className="hidden md:flex items-center gap-6 text-sm text-muted-foreground">
-            <a href="#features" className={hit}>{label("nav.features")}</a>
-            <a href="#demo" className={hit}>{label("nav.demo")}</a>
-            <a href="#how" className={hit}>{label("nav.howItWorks")}</a>
-            <a href="#faq" className={hit}>{label("nav.faq")}</a>
+          <nav aria-label="Primary" className="hidden md:flex items-center gap-1 text-sm text-muted-foreground">
+            {(["features", "demo", "pricing", "faq"] as const).map((k) => (
+              <a key={k} href={`#${k}`} className="tap-target inline-flex items-center px-3 rounded-full hover:text-foreground transition-colors">
+                {t(`landing.nav.${k}`)}
+              </a>
+            ))}
           </nav>
-          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
-            <LanguageSwitcher className="px-2 sm:px-3" />
-            <Link
-              to={ctaHref}
-              aria-label={hasSession ? label("nav.openDashboard") : label("nav.login")}
-              className="inline-flex items-center min-h-11 px-3 text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              {hasSession ? label("nav.openDashboard") : label("nav.login")}
-            </Link>
+          <div className="flex items-center gap-0.5 shrink-0">
+            <ThemeToggle />
+            <LanguageSwitcher className="px-2" />
+            {!hasSession && (
+              <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
+                <Link to="/auth">{t("nav.login")}</Link>
+              </Button>
+            )}
+            <Button asChild size="sm" className="ml-1">
+              <Link to={ctaHref}>{hasSession ? t("nav.openDashboard") : t("nav.startFree")}</Link>
+            </Button>
           </div>
         </div>
       </header>
 
-      <main>
-      {/* Hero */}
-      <section className="relative px-4 sm:px-6 pt-20 pb-16 max-w-7xl mx-auto text-center">
-        <div className="inline-flex max-w-full items-center gap-2 px-3 py-1 rounded-full glass border-white/[0.08] text-xs text-muted-foreground mb-8 animate-fade-in">
-          <Sparkles className="h-3 w-3 text-primary" />
-          {csCopy("Přehled nákladů AI tokenů v reálném čase")}
-        </div>
-        <h1 className="text-5xl md:text-7xl font-semibold tracking-tight leading-[1.05] mb-6">
-          {csCopy("Zjisti, kolik tě")} <br className="hidden md:block" />
-          {csCopy("opravdu stojí")} <span className="text-primary">AI</span>
-        </h1>
-        <p className="max-w-2xl mx-auto text-lg md:text-xl text-muted-foreground mb-10">
-          {csCopy("Krásný dashboard pro tvoji OpenRouter aktivitu. Sleduj spotřebu, optimalizuj modely a převáděj náklady do")}{" "}
-          <span className="text-foreground">{csCopy("CZK i USD")}</span>.
-        </p>
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-4">
-          <Button asChild size="lg" className="min-h-11 w-full sm:w-auto">
-            <Link to={ctaHref}>
-              {ctaLabel}
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          </Button>
-          <Button asChild size="lg" variant="outline" className="min-h-11 w-full sm:w-auto gap-2 bg-transparent">
-            <a href="#demo">
-              <LineChart className="h-4 w-4" />
-              {csCopy("Vyzkoušet demo")}
-            </a>
-          </Button>
-        </div>
-        <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-accent" />Zdarma</span>
-          <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-accent" />Bez instalace</span>
-          <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-accent" />CZ rozhraní</span>
-        </div>
-      </section>
-
-      {/* Features */}
-      <section id="features" className="px-4 sm:px-6 py-20 max-w-7xl mx-auto">
-        <div className="text-center mb-14">
-          <h2 className="text-3xl md:text-5xl font-semibold mb-4">
-            {csCopy("Vše, co potřebuješ pro kontrolu AI nákladů")}
-          </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            {csCopy("Žádné tabulky v Excelu. Žádné dohady. Jen čisté grafy a přehledná čísla.")}
+      <main id="main">
+        {/* Hero */}
+        <section className="px-4 sm:px-6 pt-16 pb-12 md:pt-28 md:pb-20 max-w-4xl mx-auto text-center">
+          <p className="eyebrow mb-5 animate-fade-in">{t("landing.hero.eyebrow")}</p>
+          <h1 className="text-[2.75rem] leading-[1.05] sm:text-6xl md:text-7xl font-semibold tracking-[-0.03em] mb-6">
+            {t("landing.hero.title1")}{" "}
+            <br className="hidden sm:block" />
+            <span className="text-muted-foreground">{t("landing.hero.title2")}</span>
+          </h1>
+          <p className="max-w-2xl mx-auto text-lg md:text-xl text-muted-foreground leading-relaxed mb-10">
+            {t("landing.hero.subtitle")}
           </p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {features.map(({ icon: Icon, title, desc }, i) => (
-            <Card
-              key={title}
-              className="glass relative overflow-hidden group animate-fade-in opacity-0"
-              style={{ animationDelay: `${i * 80}ms`, animationFillMode: "forwards" }}
-            >
-              <CardContent className="p-6 relative">
-                <div className="h-10 w-10 rounded-lg bg-primary/15 text-primary flex items-center justify-center mb-4">
-                  <Icon className="h-5 w-5" />
-                </div>
-                <h3 className="text-lg font-bold mb-2">{title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </section>
-
-      {/* Live Demo */}
-      <section id="demo" className="px-4 sm:px-6 py-20 max-w-[1600px] mx-auto">
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/15 text-accent text-xs mb-4">
-            <Activity className="h-3 w-3" />
-            {csCopy("Live demo s ukázkovými daty")}
-          </div>
-          <h2 className="text-3xl md:text-5xl font-bold mb-4">
-            {csCopy("Takhle to vypadá uvnitř")}
-          </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto mb-6">
-            {csCopy("Žádný login, žádná registrace. Hraj si s grafy hned teď.")}
-          </p>
-          <Button
-            variant="outline"
-            onClick={toggleCurrency}
-            className="min-h-11 px-4 bg-transparent"
-          >
-            {csCopy("Přepnout do")} {currency === "CZK" ? "USD ($)" : "CZK (Kč)"}
-          </Button>
-        </div>
-
-        <LandingDemoGate />
-
-        <div className="mt-10 text-center">
-          <p className="text-sm text-muted-foreground mb-4">
-            {csCopy("Líbí se ti to? Nahraj svoje vlastní data a sleduj")}{" "}
-            <span className="text-foreground">{csCopy("opravdové náklady")}</span>.
-          </p>
-          <Button asChild size="lg" variant="outline" className="min-h-11 bg-transparent">
-            <Link to={ctaHref}>
-              {ctaLabel}
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          </Button>
-        </div>
-      </section>
-
-      {/* How it works */}
-      <section id="how" className="px-4 sm:px-6 py-20 max-w-5xl mx-auto">
-        <h2 className="text-3xl md:text-5xl font-bold mb-12 text-center">
-          {csCopy("3 kroky k dokonalému přehledu")}
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {steps.map(({ n, t: stepTitle, d }) => (
-            <Card key={n} className="glass border-white/[0.08]">
-              <CardContent className="p-6">
-                <div className="text-5xl font-mono font-semibold text-primary mb-3">{n}</div>
-                <h3 className="text-lg font-semibold mb-2">{stepTitle}</h3>
-                <p className="text-sm text-muted-foreground">{d}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </section>
-
-      {/* FAQ */}
-      <section id="faq" className="px-4 sm:px-6 py-20 max-w-4xl mx-auto">
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/15 text-primary text-xs mb-4">
-            <Sparkles className="h-3 w-3" />
-            {csCopy("Nejčastější dotazy")}
-          </div>
-          <h2 className="text-3xl md:text-5xl font-bold mb-4">
-            {csCopy("Co lidi nejvíc zajímá")}
-          </h2>
-          <p className="text-muted-foreground">
-            {csCopy("Krátké odpovědi na otázky, které dostávám pořád.")}
-          </p>
-        </div>
-        <Accordion type="single" collapsible className="space-y-3">
-          {faqs.map((item, i) => (
-            <AccordionItem
-              key={i}
-              value={`faq-${i}`}
-              className="border-border rounded-xl px-5"
-            >
-              <AccordionTrigger className="text-left font-semibold hover:no-underline py-3 min-h-11 min-w-0 gap-3">
-                <span className="min-w-0 flex-1">{item.q}</span>
-              </AccordionTrigger>
-              <AccordionContent className="text-sm text-muted-foreground leading-relaxed pb-5">
-                {item.a}
-              </AccordionContent>
-            </AccordionItem>
-          ))}
-        </Accordion>
-      </section>
-
-      {/* Maker — nenápadné propojení s martinpohl.cz */}
-      <section id="maker" className="px-4 sm:px-6 py-16 max-w-5xl mx-auto">
-        <a
-          href="https://martinpohl.cz/?utm_source=tokeny.martinpohl.cz&utm_medium=landing&utm_campaign=maker_card"
-          target="_blank"
-          rel="noopener author"
-          className="block group"
-        >
-          <Card className="glass glass-hover border-white/[0.08] overflow-hidden">
-            <CardContent className="p-8 md:p-10 flex flex-col md:flex-row items-start md:items-center gap-6 md:gap-10">
-              <div className="flex items-center gap-4">
-                <div className="h-14 w-14 rounded-2xl bg-primary flex items-center justify-center text-xl font-semibold text-primary-foreground shrink-0">
-                  MP
-                </div>
-                <div>
-                  <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1">
-                    {csCopy("Indie maker")}
-                  </div>
-                  <div className="text-lg font-bold">Martin Pohl</div>
-                </div>
-              </div>
-              <div className="flex-1">
-                <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
-                  {csCopy("Tokeny Monitor staví")} <span className="text-foreground font-medium">Martin</span>
-                  {" – "}
-                  {csCopy("IT engineer za")} <span className="text-foreground">Apple MDM, Identity & SSO</span>{" "}
-                  {csCopy("rolloutsy a indie web projekty. Mrkni na jeho práci a další experimenty.")}
-                </p>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-accent group-hover:gap-3 transition-all shrink-0">
-                martinpohl.cz
-                <ExternalLink className="h-4 w-4" />
-              </div>
-            </CardContent>
-          </Card>
-        </a>
-      </section>
-
-      {/* Open Source */}
-      <section className="px-4 sm:px-6 py-12 max-w-3xl mx-auto text-center">
-        <div className="glass rounded-2xl border-white/[0.08] p-8 md:p-10 flex flex-col items-center">
-          <div className="h-12 w-12 rounded-full bg-secondary flex items-center justify-center mb-5">
-            <Github className="h-6 w-6 text-white" />
-          </div>
-          <h3 className="text-xl md:text-2xl font-bold mb-3">
-            100 % open-source
-          </h3>
-          <p className="text-sm text-muted-foreground max-w-lg mx-auto mb-6 leading-relaxed">
-            {csCopy("Celý kód je veřejný na GitHubu. Forkni si repo, rozjeď lokálně přes Docker a uprav si dashboard podle sebe. Pull requesty vítány!")}
-          </p>
-          <Button asChild size="lg" variant="outline" className="min-h-11 gap-2 bg-transparent">
-            <a
-              href="https://github.com/martinp0/martinp0-tokeny-monitor"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Github className="h-4 w-4" />
-              {csCopy("Zobrazit na GitHubu")}
-              <ExternalLink className="h-3.5 w-3.5 opacity-60" />
-            </a>
-          </Button>
-        </div>
-      </section>
-
-      {/* Final CTA */}
-      <section className="px-4 sm:px-6 py-24 max-w-4xl mx-auto text-center">
-        <div className="rounded-3xl border border-border bg-card p-6 sm:p-10 md:p-12 relative overflow-hidden">
-          <Globe className="h-12 w-12 text-primary mx-auto mb-6 relative" />
-          <h2 className="text-3xl md:text-5xl font-bold mb-4 relative">
-            {csCopy("Připraven/a převzít kontrolu nad AI náklady?")}
-          </h2>
-          <p className="text-muted-foreground mb-8 relative">
-            {csCopy("Začni během minuty. Žádná kreditka.")}
-          </p>
-          <div className="relative">
-            <Button asChild size="lg" className="min-h-11">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 max-w-sm sm:max-w-none mx-auto">
+            <Button asChild size="lg" className="gap-2">
               <Link to={ctaHref}>
                 {ctaLabel}
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className="h-4 w-4" aria-hidden />
               </Link>
             </Button>
+            <Button asChild size="lg" variant="outline">
+              <a href="#demo">{t("landing.hero.secondary")}</a>
+            </Button>
           </div>
-        </div>
-      </section>
+          <ul className="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
+            {(["trust1", "trust2", "trust3"] as const).map((k) => (
+              <li key={k} className="flex items-center gap-2">
+                <span className="h-1.5 w-1.5 rounded-full bg-success" aria-hidden />
+                {t(`landing.hero.${k}`)}
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        {/* Demo */}
+        <section id="demo" className="scroll-mt-20 px-3 sm:px-6 pb-20 md:pb-28 max-w-6xl mx-auto">
+          <div className="text-center mb-8 px-1">
+            <p className="eyebrow mb-3">{t("landing.demo.eyebrow")}</p>
+            <h2 className="text-3xl md:text-5xl font-semibold tracking-tight mb-4">{t("landing.demo.title")}</h2>
+            <p className="text-muted-foreground text-lg max-w-xl mx-auto mb-6">{t("landing.demo.subtitle")}</p>
+            <Button variant="outline" size="sm" onClick={toggleCurrency}>
+              {t("landing.demo.switchTo", { currency: currency === "CZK" ? "USD ($)" : "CZK (Kč)" })}
+            </Button>
+          </div>
+          <div className="rounded-[28px] bg-card shadow-[0_1px_2px_hsl(0_0%_0%/0.04),0_24px_60px_-20px_hsl(0_0%_0%/0.18)] ring-1 ring-border overflow-hidden">
+            <div className="flex items-center gap-1.5 px-4 h-10 border-b border-border" aria-hidden>
+              <span className="h-3 w-3 rounded-full bg-[#ff5f57]" />
+              <span className="h-3 w-3 rounded-full bg-[#febc2e]" />
+              <span className="h-3 w-3 rounded-full bg-[#28c840]" />
+              <span className="ml-3 text-xs text-muted-foreground truncate">tokeny.martinpohl.cz/dashboard</span>
+            </div>
+            <div className="p-3 sm:p-5 md:p-6 bg-background">
+              <LandingDemoGate />
+            </div>
+          </div>
+        </section>
+
+        {/* Features */}
+        <section id="features" className="scroll-mt-20 px-4 sm:px-6 py-20 md:py-28 bg-card border-y border-border">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-14">
+              <p className="eyebrow mb-3">{t("landing.features.eyebrow")}</p>
+              <h2 className="text-3xl md:text-5xl font-semibold tracking-tight">{t("landing.features.title")}</h2>
+            </div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-10">
+              {FEATURES.map(({ key, icon: Icon }) => (
+                <div key={key}>
+                  <span className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                    <Icon className="h-5 w-5" aria-hidden />
+                  </span>
+                  <h3 className="text-[17px] font-semibold mb-1.5">{t(`landing.features.items.${key}.title`)}</h3>
+                  <p className="text-[15px] text-muted-foreground leading-relaxed">{t(`landing.features.items.${key}.desc`)}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* How it works */}
+        <section id="how" className="scroll-mt-20 px-4 sm:px-6 py-20 md:py-28 max-w-5xl mx-auto">
+          <div className="text-center mb-14">
+            <p className="eyebrow mb-3">{t("landing.how.eyebrow")}</p>
+            <h2 className="text-3xl md:text-5xl font-semibold tracking-tight">{t("landing.how.title")}</h2>
+          </div>
+          <ol className="grid md:grid-cols-3 gap-4 md:gap-6">
+            {([1, 2, 3] as const).map((n) => (
+              <li key={n} className="surface rounded-3xl p-6 md:p-8">
+                <span className="mb-5 inline-flex h-9 w-9 items-center justify-center rounded-full bg-primary-fill text-white text-sm font-semibold tabular-nums">
+                  {n}
+                </span>
+                <h3 className="text-[17px] font-semibold mb-1.5">{t(`landing.how.s${n}t`)}</h3>
+                <p className="text-[15px] text-muted-foreground leading-relaxed">{t(`landing.how.s${n}d`)}</p>
+              </li>
+            ))}
+          </ol>
+        </section>
+
+        <PricingSection ctaHref={ctaHref} signedIn={hasSession} />
+
+        {/* FAQ */}
+        <section id="faq" className="scroll-mt-20 px-4 sm:px-6 py-20 md:py-28 max-w-3xl mx-auto">
+          <div className="text-center mb-10">
+            <p className="eyebrow mb-3">{t("landing.faq.eyebrow")}</p>
+            <h2 className="text-3xl md:text-5xl font-semibold tracking-tight">{t("landing.faq.title")}</h2>
+          </div>
+          <Accordion type="single" collapsible className="surface rounded-3xl px-5 md:px-8">
+            {faqList.map((f, i) => (
+              <AccordionItem key={i} value={`faq-${i}`} className={i === faqList.length - 1 ? "border-b-0" : "border-border"}>
+                <AccordionTrigger className="text-left text-[17px] font-medium hover:no-underline py-5">{f.q}</AccordionTrigger>
+                <AccordionContent className="text-[15px] text-muted-foreground leading-relaxed">{f.a}</AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </section>
+
+        {/* Closing CTA */}
+        <section className="px-4 sm:px-6 pb-24 md:pb-32 max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl md:text-5xl font-semibold tracking-tight mb-4">{t("landing.cta.title")}</h2>
+          <p className="text-muted-foreground text-lg mb-8">{t("landing.cta.subtitle")}</p>
+          <Button asChild size="lg" className="gap-2">
+            <Link to={ctaHref}>
+              {ctaLabel}
+              <ArrowRight className="h-4 w-4" aria-hidden />
+            </Link>
+          </Button>
+        </section>
       </main>
 
-      {/* Footer */}
-      <footer
-        className="border-t border-white/[0.06] pt-6"
-        style={{
-          paddingBottom: "max(1.5rem, env(safe-area-inset-bottom))",
-          paddingLeft: "max(1rem, env(safe-area-inset-left))",
-          paddingRight: "max(1rem, env(safe-area-inset-right))",
-        }}
-      >
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-muted-foreground min-w-0">
-          <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 max-w-full text-center">
-            <Activity className="h-4 w-4" aria-hidden="true" />
-            <span>
-              OpenRouter Monitor · {new Date().getFullYear()} ·{" "}
-              <a
-                href="https://martinpohl.cz/?utm_source=tokeny.martinpohl.cz&utm_medium=footer"
-                target="_blank"
-                rel="noopener author"
-                className={`${hit} text-foreground`}
-              >
-                Martin Pohl
-              </a>
-            </span>
+      <footer className="border-t border-border bg-card pb-safe">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12 grid gap-10 sm:grid-cols-2 md:grid-cols-4 text-sm">
+          <div className="sm:col-span-2 md:col-span-1">
+            <Link to="/" className="inline-flex items-center gap-2 mb-3">
+              <span className="h-7 w-7 rounded-lg bg-primary-fill flex items-center justify-center">
+                <Activity className="h-4 w-4 text-white" aria-hidden />
+              </span>
+              <span className="text-[17px] font-semibold tracking-tight">Tokeny</span>
+            </Link>
+            <p className="text-muted-foreground leading-relaxed max-w-xs">{t("landing.maker.desc")}</p>
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-x-1 gap-y-1 max-w-full md:justify-end">
-            <a
-              href="https://buymeacoffee.com/martinpohlp"
-              target="_blank"
-              rel="noopener noreferrer"
-              className={hit}
-            >
-              {csCopy("Kup mi kafe")}
-            </a>
-            <a
-              href="https://martinpohl.cz/?utm_source=tokeny.martinpohl.cz&utm_medium=footer_nav"
-              target="_blank"
-              rel="noopener author"
-              className={hit}
-            >
-              martinpohl.cz
-            </a>
-            <Link to="/auth" className={hit}>{csCopy("Přihlášení")}</Link>
-            <a
-              href="https://github.com/martinp0/martinp0-tokeny-monitor"
-              target="_blank"
-              rel="noopener noreferrer"
-              className={hit}
-            >
-              GitHub
-            </a>
-            <a href="https://openrouter.ai" target="_blank" rel="noopener noreferrer" className={hit}>OpenRouter</a>
-          </div>
+          <FooterCol title={t("landing.footer.product")}>
+            <FooterLink to="/llm-cost-calculator">{t("landing.footer.calculator")}</FooterLink>
+            <FooterLink href="#pricing">{t("landing.nav.pricing")}</FooterLink>
+            <FooterLink to="/auth">{t("landing.footer.login")}</FooterLink>
+          </FooterCol>
+          <FooterCol title={t("landing.footer.resources")}>
+            <FooterLink to="/claude-api-cost">{t("landing.footer.claude")}</FooterLink>
+            <FooterLink to="/gpt-api-cost">{t("landing.footer.gpt")}</FooterLink>
+            <FooterLink to="/blog">{t("landing.footer.blog")}</FooterLink>
+          </FooterCol>
+          <FooterCol title={t("landing.footer.about")}>
+            <FooterLink href="https://github.com/martinp0/tokeny-monitor" external>
+              <Github className="h-4 w-4" aria-hidden /> GitHub
+            </FooterLink>
+            <FooterLink href="https://martinpohl.cz" external>martinpohl.cz</FooterLink>
+            <FooterLink to="/privacy">{t("landing.footer.privacy")}</FooterLink>
+            <FooterLink href="https://buymeacoffee.com/martinpohlp" external>
+              <Coffee className="h-4 w-4" aria-hidden /> {t("landing.footer.coffee")}
+            </FooterLink>
+          </FooterCol>
+        </div>
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 border-t border-border text-xs text-muted-foreground flex flex-wrap justify-between gap-2">
+          <span>© {new Date().getFullYear()} Tokeny · {t("landing.footer.rights")}</span>
+          <span>MIT License</span>
         </div>
       </footer>
     </div>
+  );
+}
+
+function FooterCol({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <h3 className="font-semibold mb-2">{title}</h3>
+      <ul className="space-y-0.5">{children}</ul>
+    </div>
+  );
+}
+
+function FooterLink({ to, href, external, children }: { to?: string; href?: string; external?: boolean; children: React.ReactNode }) {
+  const cls = "inline-flex items-center gap-2 min-h-[44px] md:min-h-[32px] text-muted-foreground hover:text-foreground transition-colors";
+  return (
+    <li>
+      {to ? (
+        <Link to={to} className={cls}>{children}</Link>
+      ) : (
+        <a href={href} className={cls} {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}>
+          {children}
+        </a>
+      )}
+    </li>
   );
 }

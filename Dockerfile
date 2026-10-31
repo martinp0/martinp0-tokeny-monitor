@@ -1,20 +1,20 @@
-# ── Stage 1: Build ──────────────────────────────────────────
-FROM node:20-alpine AS builder
+# ── Stage 1: Dependencies (bun.lock is the single source of truth) ──
+FROM oven/bun:1 AS deps
+WORKDIR /app
+COPY package.json bun.lock ./
+RUN bun install --frozen-lockfile
 
+# ── Stage 2: Build ──────────────────────────────────────────
+FROM node:22-alpine AS builder
 WORKDIR /app
 
-# Accept build args for env variables
-ARG VITE_SUPABASE_URL
-ARG VITE_SUPABASE_PUBLISHABLE_KEY
-ARG VITE_SUPABASE_PROJECT_ID
-
-COPY package.json bun.lockb* package-lock.json* ./
-RUN npm install --frozen-lockfile 2>/dev/null || npm install
-
+# Static frontend only. The /api backend (server/, api/index.ts) runs as a Vercel Function;
+# point /api/* at it with a reverse proxy if you self-host this image.
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npm run build
 
-# ── Stage 2: Serve ─────────────────────────────────────────
+# ── Stage 3: Serve ─────────────────────────────────────────
 FROM nginx:alpine AS production
 
 # Custom nginx config for SPA routing

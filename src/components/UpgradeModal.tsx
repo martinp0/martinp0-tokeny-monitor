@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { Zap, Check } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Check } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import {
   Dialog,
   DialogContent,
@@ -8,61 +9,104 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { useSubscription } from "@/hooks/useSubscription";
-
-const PRO_FEATURES = [
-  "Neomezené budget alerty",
-  "AI agent chat s historií",
-  "Exporty do CSV a PDF",
-  "Predikce nákladů (AI Forecast)",
-  "Prioritní podpora",
-];
+import {
+  PLAN_FEATURES,
+  PRICING,
+  PRO_CHECKOUT_ENABLED,
+  PRO_TRIAL_DAYS,
+  formatCzk,
+  type BillingInterval,
+} from "@/config/pricing";
 
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** Feature that triggered the modal (ProFeature id), shown in the title. */
+  feature?: string;
+  /** Preselected billing interval (default: yearly). */
+  defaultInterval?: BillingInterval;
 }
 
-export function UpgradeModal({ open, onOpenChange }: Props) {
-  const { startCheckout } = useSubscription();
+export function UpgradeModal({ open, onOpenChange, feature, defaultInterval = "year" }: Props) {
+  const { startCheckout, hasCustomer } = useSubscription();
+  const { t, i18n } = useTranslation();
+  const [interval, setBillingInterval] = useState<BillingInterval>(defaultInterval);
+  useEffect(() => {
+    if (open) setBillingInterval(defaultInterval);
+  }, [open, defaultInterval]);
   const [loading, setLoading] = useState(false);
+  const locale = i18n.language?.startsWith("en") ? "en-GB" : "cs-CZ";
+  const price =
+    interval === "month"
+      ? t("pricing.perMonth", { price: formatCzk(PRICING.pro.monthly, locale) })
+      : t("pricing.perYear", { price: formatCzk(PRICING.pro.yearly, locale) });
+  // Trial only for first-time subscribers (server decides; this is just the copy).
+  const showTrial = PRO_TRIAL_DAYS > 0 && !hasCustomer;
 
   async function handleUpgrade() {
     setLoading(true);
-    await startCheckout();
+    await startCheckout(interval);
     setLoading(false);
   }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="glass border-white/[0.08] max-w-sm">
+      <DialogContent className="max-w-sm">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-lg">
-            <Zap className="h-5 w-5 text-primary" />
-            Upgradovat na Pro
+          <DialogTitle className="text-xl">
+            {feature
+              ? t("pricing.proRequired", { feature: t(`pricing.featureNames.${feature}`, { defaultValue: feature }) })
+              : t("pricing.upgrade")}
           </DialogTitle>
-          <DialogDescription className="text-muted-foreground">
-            Odemkni plný výkon Tokeny monitoru za{" "}
-            <span className="font-mono font-bold text-foreground">$7 / měsíc</span>
-          </DialogDescription>
+          <DialogDescription>{t("pricing.proDesc")}</DialogDescription>
         </DialogHeader>
 
-        <ul className="space-y-2 my-2">
-          {PRO_FEATURES.map((f) => (
-            <li key={f} className="flex items-center gap-2 text-sm">
-              <Check className="h-4 w-4 text-primary shrink-0" />
-              {f}
+        <div role="radiogroup" aria-label={t("pricing.chooseInterval")} className="grid grid-cols-2 gap-2">
+          {(["month", "year"] as const).map((iv) => (
+            <button
+              key={iv}
+              type="button"
+              role="radio"
+              aria-checked={interval === iv}
+              onClick={() => setBillingInterval(iv)}
+              className={cn(
+                "rounded-2xl border p-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                interval === iv ? "border-primary bg-primary/5" : "border-border hover:bg-muted/50",
+              )}
+            >
+              <span className="block text-sm font-medium">{t(iv === "month" ? "pricing.monthly" : "pricing.yearly")}</span>
+              <span className="block tabular-nums font-semibold">
+                {formatCzk(iv === "month" ? PRICING.pro.monthly : PRICING.pro.yearly, locale)}
+              </span>
+              {iv === "year" && <span className="block text-xs font-semibold text-success">{t("pricing.yearlySave")}</span>}
+            </button>
+          ))}
+        </div>
+
+        <ul className="space-y-2.5 my-2">
+          {PLAN_FEATURES.pro.map((f) => (
+            <li key={f} className="flex items-start gap-2.5 text-[15px]">
+              <Check className="h-5 w-5 text-primary shrink-0" aria-hidden />
+              {t(`pricing.features.${f}`)}
             </li>
           ))}
         </ul>
 
-        <Button
-          className="w-full bg-gradient-to-r from-primary to-[hsl(320,90%,65%)] text-white"
-          onClick={handleUpgrade}
-          disabled={loading}
-        >
-          {loading ? "Přesměrovávám…" : "Upgradovat na Pro"}
+        <Button size="lg" className="w-full" onClick={handleUpgrade} disabled={loading || !PRO_CHECKOUT_ENABLED}>
+          {!PRO_CHECKOUT_ENABLED
+            ? t("pricing.soon")
+            : loading
+              ? t("pricing.redirecting")
+              : showTrial
+                ? t("pricing.trialShort", { days: PRO_TRIAL_DAYS })
+                : t("pricing.upgrade")}
         </Button>
+        <p className="text-center text-xs text-muted-foreground">
+          {showTrial ? `${t("pricing.trial", { days: PRO_TRIAL_DAYS, price })}. ` : `${price}. `}
+          {t("pricing.vatNote")}
+        </p>
       </DialogContent>
     </Dialog>
   );
