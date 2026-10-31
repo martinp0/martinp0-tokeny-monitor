@@ -26,6 +26,8 @@ AI API účty umí nenápadně růst. Tokeny ti ukáže, **které modely, provid
 - 🔌 **Multi-provider sync** — OpenRouter, Anthropic Admin API a OpenAI Admin API v jednom pohledu
 - ⏰ **Denní auto-sync** (Pro) — Vercel Cron spouští sync jednou denně v 05:00 UTC (6:00 SEČ / 7:00 SELČ, tedy po pražské půlnoci; rozpočty a odhad počítají dny a měsíce v pražském čase), s per-credential toggle v UI
 - 📁 **CSV import** — rychlý import OpenRouter exportu přes drag & drop
+- 📤 **Exporty** (Pro) — CSV/JSON podle dne, poskytovatele a modelu, tisknutelný měsíční report (Uložit jako PDF v prohlížeči), snímek PNG
+- 🔗 **Sdílené odkazy** (Pro) — dashboard jen pro čtení na `/s/:token` se zvoleným obdobím, poskytovateli a volitelně bez částek; expirace, zrušení, ukládá se jen hash odkazu
 - 💱 **CZK & USD** — automatický kurz z ČNB, přepínání jedním klikem
 - 🚨 **Rozpočet a odhad** (Pro) — měsíční rozpočet v Kč nebo USD (celkem i podle poskytovatele), odhad útraty do konce měsíce s rozpětím a upozornění v aplikaci při 50/80/100 % (kontrola jednou denně, bez e-mailů)
 - ☕ **Real-life srovnání** — kolik káv/piv/pizz odpovídá tvým API nákladům
@@ -128,7 +130,7 @@ docker compose up --build   # statický frontend přes nginx na :8080 (API běž
 ├── src/
 │   ├── components/dashboard/   # Dashboard widgety, grafy, tabulky, provider connections
 │   ├── hooks/                  # Auth, currency, dashboard data, export
-│   ├── pages/                  # Landing, Dashboard, Auth, Settings, Fun, SharedDashboard
+│   ├── pages/                  # Landing, Dashboard, Auth, Settings, Fun, SharedDashboard, Report
 │   ├── lib/                    # CSV parser, formátování, utility
 │   └── lib/api.ts, auth-client.ts  # same-origin /api klient a Neon Auth klient
 ├── api/index.ts                # jediná Vercel Function (Hono app ze server/)

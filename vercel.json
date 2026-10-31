@@ -38,6 +38,14 @@
     {
       "source": "/shared/:token",
       "destination": "/app"
+    },
+    {
+      "source": "/report",
+      "destination": "/app"
+    },
+    {
+      "source": "/s/:token",
+      "destination": "/app"
     }
   ],
   "headers": [
@@ -98,11 +106,28 @@
       ]
     },
     {
-      "source": "/(auth|auth/.*|reset-password|dashboard|settings|profile|fun|shared/.*)",
+      "source": "/(auth|auth/.*|reset-password|dashboard|settings|profile|fun|report)",
       "headers": [
         {
           "key": "X-Robots-Tag",
           "value": "noindex"
+        }
+      ]
+    },
+    {
+      "source": "/(s/.*|shared/.*)",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "no-referrer"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
         }
       ]
     }

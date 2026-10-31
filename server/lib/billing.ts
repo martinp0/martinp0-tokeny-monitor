@@ -246,7 +246,7 @@ export function portalSessionParams(customer: string, returnUrl: string, configu
 }
 
 /** Version of the terms of service at /terms. Bump when the terms change materially. */
-export const TERMS_VERSION = "2026-10-31.4"; // .2: AI on the user's own key; .3: OpenAI/OpenRouter keys, AI in Free; .4: forecast/alerts disclaimer
+export const TERMS_VERSION = "2026-10-31.5"; // .2: AI on the user's own key; .3: OpenAI/OpenRouter keys, AI in Free; .4: forecast/alerts disclaimer; .5: share links
 
 export interface CheckoutConsent {
   terms_version: string;

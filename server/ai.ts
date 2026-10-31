@@ -66,10 +66,10 @@ const tools: ToolDef[] = [
   },
   {
     name: "export_data",
-    description: "Spustí export dashboardu (PNG nebo PDF).",
+    description: "Export (Pro): png = snímek dashboardu, csv = dialog exportu CSV/JSON podle dne/poskytovatele/modelu, pdf = tisknutelný měsíční report (uložit jako PDF v prohlížeči).",
     parameters: {
       type: "object",
-      properties: { format: { type: "string", enum: ["png", "pdf"] } },
+      properties: { format: { type: "string", enum: ["png", "csv", "pdf"] } },
       required: ["format"],
     },
   },

@@ -138,6 +138,27 @@ CREATE TABLE IF NOT EXISTS public.shared_dashboards (
   expires_at  timestamptz
 );
 CREATE INDEX IF NOT EXISTS idx_shared_dashboards_user ON public.shared_dashboards (user_id);
+-- Share links v2: the token is shown once and only its SHA-256 is stored; revocation keeps the row
+-- so the public page can answer 410 instead of 404. `filters` holds the validated scope.
+ALTER TABLE public.shared_dashboards ADD COLUMN IF NOT EXISTS token_hash text;
+ALTER TABLE public.shared_dashboards ADD COLUMN IF NOT EXISTS revoked_at timestamptz;
+ALTER TABLE public.shared_dashboards ADD COLUMN IF NOT EXISTS view_count integer NOT NULL DEFAULT 0;
+ALTER TABLE public.shared_dashboards ADD COLUMN IF NOT EXISTS last_viewed_at timestamptz;
+ALTER TABLE public.shared_dashboards ALTER COLUMN share_token DROP NOT NULL;
+ALTER TABLE public.shared_dashboards ALTER COLUMN share_token DROP DEFAULT;
+UPDATE public.shared_dashboards SET token_hash = encode(sha256(convert_to(share_token, 'UTF8')), 'hex')
+ WHERE token_hash IS NULL AND share_token IS NOT NULL;
+UPDATE public.shared_dashboards SET share_token = NULL WHERE share_token IS NOT NULL AND token_hash IS NOT NULL;
+CREATE UNIQUE INDEX IF NOT EXISTS shared_dashboards_token_hash_key ON public.shared_dashboards (token_hash);
+
+-- Fixed-window rate limits for public endpoints. Keys are HMACs (never raw IPs); rows older than a
+-- day are deleted by the daily cron.
+CREATE TABLE IF NOT EXISTS public.rate_limits (
+  bucket       text NOT NULL,
+  window_start timestamptz NOT NULL,
+  hits         integer NOT NULL DEFAULT 0,
+  PRIMARY KEY (bucket, window_start)
+);
 
 -- ---------------------------------------------------------------- provider credentials
 -- api_key_ciphertext = AES-256-GCM (server env CREDENTIALS_ENCRYPTION_KEY), format "v1:<iv b64>:<ct+tag b64>".
