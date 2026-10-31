@@ -225,7 +225,7 @@
         },
         {
           "q": "Kolik to stojí?",
-          "a": "Základní přehled je zdarma. Tarif Pro (99 Kč měsíčně nebo 990 Kč ročně) připravujeme — přinese automatickou synchronizaci, neomezené alerty, predikci nákladů a AI asistenta. Free tarif zůstane."
+          "a": "Základní přehled je zdarma. Tarif Pro (99 Kč měsíčně nebo 990 Kč ročně) přidává automatickou synchronizaci, neomezené alerty, predikci nákladů a AI asistenta. AI asistent běží na tvém vlastním API klíči Anthropic, takže AI tokeny platíš přímo Anthropicu; v ceně Pro nejsou. Free tarif zůstane."
         },
         {
           "q": "Co je MCP server?",
@@ -302,7 +302,7 @@
       "autoSync": "Automatická synchronizace jednou denně",
       "budgetAlerts": "Rozpočtové alerty v aplikaci",
       "forecast": "Predikce nákladů do konce měsíce",
-      "aiAgent": "AI asistent nad tvými daty",
+      "aiAgent": "AI asistent nad tvými daty (s vlastním klíčem Anthropic)",
       "exports": "Export do PDF a PNG",
       "sharing": "Sdílené dashboardy",
       "mcp": "MCP server a API tokeny pro AI nástroje",

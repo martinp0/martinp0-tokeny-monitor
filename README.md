@@ -29,7 +29,7 @@ AI API účty umí nenápadně růst. Tokeny ti ukáže, **které modely, provid
 - 💱 **CZK & USD** — automatický kurz z ČNB, přepínání jedním klikem
 - 🚨 **Budget alerty** — hlídání měsíčního rozpočtu a prahů pro upozornění
 - ☕ **Real-life srovnání** — kolik káv/piv/pizz odpovídá tvým API nákladům
-- 🤖 **AI agent** — ptej se dashboardu přirozeným jazykem
+- 🤖 **AI agent** — ptej se dashboardu přirozeným jazykem (běží na tvém vlastním API klíči Anthropic, žádný sdílený serverový klíč)
 - 🔗 **MCP server** — připoj Claude Desktop, Cursor nebo Zed a ptej se na náklady přímo v chatu
 - 🔒 **Bezpečné základy** — Neon Auth (Better Auth), serverová izolace dat podle uživatele (testovaná), šifrované API klíče
 - 📱 **Nativní appky (ve vývoji)** — iPhone s widgety, Mac menu bar, Apple Watch s komplikací a Zkratky; přihlášení přes Apple nebo e-mail ([apple/](apple/README.md))
@@ -93,7 +93,6 @@ Frontend sám (`bun dev`, port 8080) běží i bez backendu; přihlášení a da
 | `CREDENTIALS_ENCRYPTION_KEY` | 32 bajtů base64 – šifruje API klíče providerů |
 | `CRON_SECRET` | náhodný řetězec; Vercel Cron ho posílá jako Bearer |
 | `APP_URL` | např. `https://tokeny.martinpohl.cz` |
-| `ANTHROPIC_API_KEY` | volitelné – AI agent a AI zábava |
 | `STRIPE_*` | volitelné – Pro předplatné (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_MONTHLY`, `STRIPE_PRICE_YEARLY`, `STRIPE_PORTAL_CONFIGURATION` (bpc_… Tokeny portal), `STRIPE_TRIAL_DAYS`) |
 
 V Neon Auth přidej svou doménu do **Trusted domains**. Kompletní seznam je v `.env.example`.
@@ -115,7 +114,7 @@ docker compose up --build   # statický frontend přes nginx na :8080 (API běž
 | Data | Neon Postgres (Free), serverová izolace dat v `server/repo.ts` |
 | Backend | Jedna Vercel Function (Hono), Neon Auth (Better Auth), Vercel Cron (denně) |
 | Providers | OpenRouter Activity API, Anthropic Admin API, OpenAI Organization Usage/Costs API |
-| AI | Anthropic API pro chat/fun agent flows |
+| AI | Anthropic API pro chat/fun s klíčem uživatele (BYOK, `ai_keys`, šifrováno AES-256-GCM) |
 | Apple | SwiftUI (iOS/macOS/watchOS 26), WidgetKit, App Intents, XcodeGen + Xcode Cloud |
 | Web app | PWA |
 | Testing | Vitest, Playwright |

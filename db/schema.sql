@@ -152,6 +152,21 @@ CREATE TABLE IF NOT EXISTS public.subscriptions (
 );
 CREATE INDEX IF NOT EXISTS idx_subscriptions_customer ON public.subscriptions (stripe_customer_id);
 
+-- ---------------------------------------------------------------- the user's own AI key (BYOK)
+-- AI features (chat agent, Fun page) call the provider with the caller's own key, never a shared
+-- server key. Encrypted like provider_credentials (server/crypto.ts v1, AAD = user id).
+CREATE TABLE IF NOT EXISTS public.ai_keys (
+  user_id            uuid NOT NULL REFERENCES neon_auth."user"(id) ON DELETE CASCADE,
+  provider           text NOT NULL,
+  api_key_ciphertext text NOT NULL,
+  key_preview        text NOT NULL DEFAULT '••••',
+  last_used_at       timestamptz,
+  created_at         timestamptz NOT NULL DEFAULT now(),
+  updated_at         timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (user_id, provider),
+  CONSTRAINT ai_keys_provider_check CHECK (provider IN ('anthropic'))
+);
+
 -- Same rule as server/lib/plan.ts isProSubscription().
 CREATE OR REPLACE FUNCTION public.is_pro(p_user_id uuid)
 RETURNS boolean LANGUAGE sql STABLE AS $$

@@ -35,6 +35,7 @@ const CS: Copy = {
     "Ceny jsou konečné, provozovatel není plátcem DPH.",
     "Předplatné se automaticky obnovuje, zrušíš ho kdykoli v Nastavení s účinkem ke konci období.",
     "Údaje o nákladech jsou orientační a závisí na API poskytovatelů.",
+    "AI funkce běží na tvém vlastním klíči Anthropic, za AI platíš přímo Anthropicu.",
   ],
   blocks: [
     {
@@ -48,6 +49,7 @@ const CS: Copy = {
       h: "2. Co je Tokeny",
       p: [
         "Tokeny je online služba, která pomocí API klíčů, jež sám připojíš, stahuje od poskytovatelů AI (např. OpenRouter, Anthropic, OpenAI) údaje o využití a nákladech a zobrazuje je v přehledu, grafech, widgetech a dalších funkcích. Jde o digitální službu poskytovanou na dálku; nedodáváme žádné zboží.",
+        "AI funkce (AI asistent v tarifu Pro a AI zábava) volají službu Anthropic s tvým vlastním API klíčem Anthropic, který si uložíš v Nastavení. Poplatky za jejich použití platíš přímo Anthropicu podle jeho ceníku a podmínek; nejsou součástí ceny Pro a Tokeny z nich nic nedostává. Bez vlastního klíče AI funkce nefungují. Tvoje dotazy a souhrny dat potřebné k odpovědi se posílají Anthropicu.",
         "Aktuální rozsah funkcí jednotlivých tarifů je popsán v ceníku na webu. Službu průběžně vyvíjíme, funkce proto můžeme měnit, pokud tím podstatně nezhoršíme to, co sis předplatil.",
       ],
     },
@@ -64,7 +66,7 @@ const CS: Copy = {
       h: "4. Tarify a ceny",
       ul: [
         "Free: zdarma, s omezeními uvedenými v ceníku (např. kratší historie dat).",
-        `Pro: ${MONTHLY} Kč měsíčně nebo ${YEARLY} Kč ročně.`,
+        `Pro: ${MONTHLY} Kč měsíčně nebo ${YEARLY} Kč ročně. Poplatky Anthropicu za AI funkce v ceně nejsou (viz čl. 2).`,
         "Všechny ceny jsou konečné. Provozovatel není plátcem DPH, DPH se proto neúčtuje.",
         PRO_TRIAL_DAYS > 0
           ? `Při prvním předplatném nabízíme zkušební období ${PRO_TRIAL_DAYS} dní zdarma. Pokud předplatné před jeho koncem nezrušíš, první platba proběhne automaticky po skončení zkušebního období.`
@@ -103,6 +105,7 @@ const CS: Copy = {
       ul: [
         "Údaje v Tokeny mají informativní charakter. Pocházejí z API poskytovatelů AI, kteří je mohou zpožďovat, měnit, zaokrouhlovat nebo dočasně neposkytovat; přepočty na koruny používají kurz ČNB a mohou se lišit od částky na tvém výpisu. Závazné jsou vždy faktury a přehledy přímo u poskytovatele.",
         "Tokeny není účetní, daňový ani finanční nástroj a neslouží jako jediný podklad pro rozhodnutí o rozpočtu. Rozpočtové alerty jsou pomůcka, ne záruka, že limit nepřekročíš.",
+        "Odpovědi AI asistenta a AI zábavy generuje model třetí strany a mohou být nepřesné. Za poplatky, které ti Anthropic účtuje za AI požadavky s tvým klíčem, odpovídáš ty; doporučujeme si v Anthropic Console nastavit limit útraty.",
         "Službu se snažíme provozovat nepřetržitě, ale nezaručujeme její stoprocentní dostupnost. Výpadky a změny na straně poskytovatelů AI, hostingu nebo plateb nemůžeme ovlivnit.",
         "Neodpovídáme za škodu vzniklou nesprávností nebo nedostupností údajů od poskytovatelů ani za ušlý zisk, a to v rozsahu, který zákon připouští. Toto omezení se nevztahuje na škodu způsobenou úmyslně nebo z hrubé nedbalosti, na újmu na zdraví ani na práva spotřebitele, která nelze smluvně omezit.",
       ],
@@ -112,6 +115,7 @@ const CS: Copy = {
       ul: [
         "Připojuj jen klíče, ke kterým máš oprávnění. Doporučujeme klíče jen pro čtení nákladů, kde to poskytovatel umožňuje.",
         "Klíče ukládáme zašifrované a používáme je jen ke stažení údajů o využití. Klíč můžeš kdykoli odebrat v aplikaci a zneplatnit u poskytovatele.",
+        "Totéž platí pro tvůj AI klíč Anthropic: ukládáme ho zašifrovaný, zobrazujeme jen poslední 4 znaky a používáme ho jen pro AI požadavky, které sám spustíš. Nikdy ho nepoužijeme pro jiné uživatele.",
         "Za klíče, jejich oprávnění a dodržování podmínek poskytovatelů AI odpovídáš ty. Pokud máš podezření na únik klíče, ihned ho zneplatni u poskytovatele.",
       ],
     },
@@ -167,6 +171,7 @@ const EN: Copy = {
     "Prices are final; the provider is not a VAT payer.",
     "Subscriptions renew automatically; cancel any time in Settings, effective at the end of the period.",
     "Cost data is informational and depends on the providers' APIs.",
+    "AI features run on your own Anthropic key; you pay Anthropic directly for AI.",
   ],
   blocks: [
     {
@@ -180,6 +185,7 @@ const EN: Copy = {
       h: "2. What Tokeny is",
       p: [
         "Tokeny is an online service that uses API keys you connect to fetch usage and cost data from AI providers (such as OpenRouter, Anthropic and OpenAI) and shows it in dashboards, charts, widgets and other features. It is a digital service provided at a distance; no goods are delivered.",
+        "The AI features (the AI assistant in Pro and the Fun page) call Anthropic with your own Anthropic API key, which you save in Settings. You pay Anthropic directly for their use under its prices and terms; this is not included in the Pro price and Tokeny receives nothing from it. Without your own key the AI features do not work. Your questions and the data summaries needed to answer are sent to Anthropic.",
         "The current features of each plan are described in the pricing section of the website. We keep developing the service and may change features, as long as we do not materially reduce what you have paid for.",
       ],
     },
@@ -196,7 +202,7 @@ const EN: Copy = {
       h: "4. Plans and prices",
       ul: [
         "Free: no charge, with the limits shown on the pricing page (for example a shorter data history).",
-        `Pro: CZK ${MONTHLY} a month or CZK ${YEARLY} a year.`,
+        `Pro: CZK ${MONTHLY} a month or CZK ${YEARLY} a year. Anthropic's charges for the AI features are not included (see section 2).`,
         "All prices are final. The provider is not a VAT payer, so no VAT is charged.",
         PRO_TRIAL_DAYS > 0
           ? `Your first subscription comes with a free ${PRO_TRIAL_DAYS}-day trial. Unless you cancel before it ends, the first payment is taken automatically when the trial ends.`
@@ -235,6 +241,7 @@ const EN: Copy = {
       ul: [
         "Data in Tokeny is informational. It comes from the AI providers' APIs, which may delay, change, round or temporarily withhold it; conversions to CZK use the Czech National Bank rate and may differ from your statement. The provider's own invoices and dashboards are always authoritative.",
         "Tokeny is not an accounting, tax or financial tool and should not be the only basis for budget decisions. Budget alerts are an aid, not a guarantee that you will stay within a limit.",
+        "Answers from the AI assistant and the Fun page are generated by a third-party model and may be inaccurate. You are responsible for what Anthropic charges you for AI requests made with your key; we recommend setting a spend limit in the Anthropic Console.",
         "We aim to run the service continuously but do not guarantee 100% availability. We cannot control outages or changes at AI providers, hosting or payment services.",
         "To the extent permitted by law, we are not liable for loss caused by inaccurate or unavailable provider data, or for lost profit. This does not limit liability for intentional harm or gross negligence, harm to health, or consumer rights that cannot be limited by contract.",
       ],
@@ -244,6 +251,7 @@ const EN: Copy = {
       ul: [
         "Only connect keys you are authorised to use. Where the provider allows it, use keys that can only read usage and costs.",
         "We store keys encrypted and use them only to fetch usage data. You can remove a key in the app at any time and revoke it at the provider.",
+        "The same applies to your Anthropic AI key: we store it encrypted, show only its last 4 characters and use it only for AI requests you start yourself. It is never used for other users.",
         "You are responsible for your keys, their permissions and for complying with the AI providers' terms. If you suspect a key has leaked, revoke it at the provider straight away.",
       ],
     },

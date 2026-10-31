@@ -50,6 +50,7 @@ const CS: Copy = {
         "Účet: e-mail, ID uživatele a údaje o přihlášení (přihlášení zajišťuje Neon Auth, heslo ukládá pouze jako hash). Při přihlášení přes Google nebo Apple dostaneme od nich e-mail a identifikátor účtu; u Apple to může být anonymní přeposílací adresa.",
         "Profil: zobrazované jméno a odkaz na avatar, pokud je vyplníte.",
         "API klíče poskytovatelů (OpenRouter, Anthropic, OpenAI), které sami připojíte. Na serveru je ukládáme zašifrované (autentizované šifrování AES-256-GCM s klíčem uloženým mimo databázi). Dešifrují se jen v serverové funkci ve chvíli synchronizace; prohlížeč ani aplikace je nikdy nedostanou, vidíte jen poslední 4 znaky. Doporučujeme připojovat klíče jen s oprávněním ke čtení nákladů, kde to poskytovatel umožňuje.",
+        "Váš vlastní API klíč Anthropic pro AI funkce (AI asistent, AI zábava), pokud ho přidáte. Ukládáme ho zašifrovaný stejným způsobem a vázaný na váš účet, zobrazujeme jen poslední 4 znaky a k tomu čas posledního použití. Klíč nikdy neposíláme do prohlížeče ani aplikace a nezapisujeme ho do záznamů.",
         "Údaje o využití AI, které stáhneme od poskytovatelů pomocí vašich klíčů: čas, model, poskytovatel, počty tokenů, cena, doba generování, název aplikace a název API klíče u poskytovatele. Neukládáme obsah vašich promptů ani odpovědí.",
         "Nastavení: měsíční rozpočet, práh upozornění a případně e-mail pro upozornění.",
         "Tokeny pro MCP server (ukládáme jen jejich hash) a sdílené odkazy na dashboard, pokud je vytvoříte.",
@@ -73,7 +74,8 @@ const CS: Copy = {
         "Neon: databáze a přihlášení (Neon Auth), včetně e-mailů pro ověření účtu a obnovu hesla.",
         "Vercel: hosting webu a serverové funkce.",
         "Stripe: platby předplatného Pro.",
-        "Anthropic: AI asistent v dashboardu (funkce Pro). Odesíláme mu vaše zprávy asistentovi a souhrny vašich nákladů potřebné k odpovědi. Používá se jen tehdy, když asistentovi napíšete.",
+        "Anthropic: AI asistent v dashboardu (funkce Pro) a AI zábava. Voláme ho výhradně s vaším vlastním API klíčem, takže požadavky běží na vašem účtu u Anthropic, podle jeho podmínek a na vaše náklady; žádný sdílený klíč Tokeny nepoužívá. Odesíláme mu vaše zprávy asistentovi a souhrny vašich nákladů potřebné k odpovědi (u AI zábavy jen pevný pokyn bez osobních údajů). Děje se to jen tehdy, když AI funkci sami použijete.",
+        "Pollinations.ai: u AI zábavy váš prohlížeč načte obrázek z pollinations.ai podle textového popisu, který vygeneruje AI. Pollinations tak uvidí vaši IP adresu a tento popis, nic dalšího mu neposíláme.",
         "Google a Apple: jen pokud se přes ně přihlásíte.",
         "OpenRouter, Anthropic a OpenAI: voláme jejich API s vaším klíčem, abychom stáhli vaše náklady. Nic dalšího jim neposíláme.",
         "Aplikace pro Apple Watch dostává data přímo z vašeho iPhonu, ne z našeho serveru.",
@@ -96,7 +98,7 @@ const CS: Copy = {
     {
       h: "7. Zrušení účtu",
       p: [
-        "Účet zrušíte v Nastavení na webu nebo v aplikaci pro iPhone či Mac. Smažeme tím účet, profil, připojené (zašifrované) klíče, údaje o využití, nastavení upozornění, MCP tokeny a sdílené odkazy. Pokud máte předplatné Pro, zrušení účtu ho ve Stripe okamžitě ukončí, bez dalších plateb a bez vrácení peněz za zbývající část období. Faktury a záznamy o platbách zůstávají u Stripe po dobu, kterou vyžadují účetní a daňové předpisy.",
+        "Účet zrušíte v Nastavení na webu nebo v aplikaci pro iPhone či Mac. Smažeme tím účet, profil, připojené (zašifrované) klíče včetně AI klíče, údaje o využití, nastavení upozornění, MCP tokeny a sdílené odkazy. Pokud máte předplatné Pro, zrušení účtu ho ve Stripe okamžitě ukončí, bez dalších plateb a bez vrácení peněz za zbývající část období. Faktury a záznamy o platbách zůstávají u Stripe po dobu, kterou vyžadují účetní a daňové předpisy.",
       ],
     },
     {
@@ -140,6 +142,7 @@ const EN: Copy = {
         "Account: e-mail, user ID and sign-in data (sign-in is handled by Neon Auth, which stores passwords only as a hash). If you sign in with Google or Apple, we receive your e-mail and account identifier from them; with Apple this can be a private relay address.",
         "Profile: display name and avatar link, if you set them.",
         "Provider API keys (OpenRouter, Anthropic, OpenAI) that you connect. They are encrypted at rest on the server (AES-256-GCM authenticated encryption with a key kept outside the database). They are decrypted only inside a server function when a sync runs; the browser and the apps never receive them, you only see the last 4 characters. Where the provider allows it, connect a key that can only read usage and costs.",
+        "Your own Anthropic API key for the AI features (AI assistant, Fun page), if you add one. It is encrypted the same way and bound to your account; we only show its last 4 characters and the time it was last used. The key is never sent to the browser or the apps and never written to logs.",
         "AI usage data we fetch from your providers with your keys: time, model, provider, token counts, cost, generation time, app name and the key's name at the provider. We do not store the content of your prompts or responses.",
         "Settings: monthly budget, alert threshold and, optionally, an e-mail address for alerts.",
         "MCP server tokens (only their hash is stored) and shared dashboard links, if you create them.",
@@ -163,7 +166,8 @@ const EN: Copy = {
         "Neon: database and sign-in (Neon Auth), including account verification and password reset e-mails.",
         "Vercel: website hosting and server functions.",
         "Stripe: Pro subscription payments.",
-        "Anthropic: the AI assistant in the dashboard (a Pro feature). It receives your messages to the assistant and the cost summaries needed to answer. Used only when you write to the assistant.",
+        "Anthropic: the AI assistant in the dashboard (a Pro feature) and the Fun page. We call it only with your own API key, so requests run on your Anthropic account, under its terms and at your cost; Tokeny uses no shared key. It receives your messages to the assistant and the cost summaries needed to answer (for the Fun page only a fixed instruction with no personal data). This happens only when you use an AI feature yourself.",
+        "Pollinations.ai: on the Fun page your browser loads an image from pollinations.ai based on a text description generated by the AI. Pollinations therefore sees your IP address and that description; we send it nothing else.",
         "Google and Apple: only if you sign in with them.",
         "OpenRouter, Anthropic and OpenAI: we call their APIs with your key to fetch your costs. We send them nothing else.",
         "The Apple Watch app gets its data directly from your iPhone, not from our server.",
@@ -186,7 +190,7 @@ const EN: Copy = {
     {
       h: "7. Deleting your account",
       p: [
-        "Delete your account in Settings on the web or in the iPhone or Mac app. This deletes the account, profile, connected (encrypted) keys, usage data, alert settings, MCP tokens and shared links. If you have Pro, deleting the account cancels it in Stripe immediately: no further charges and no refund for the rest of the period. Invoices and payment records stay with Stripe for as long as accounting and tax law requires.",
+        "Delete your account in Settings on the web or in the iPhone or Mac app. This deletes the account, profile, connected (encrypted) keys including the AI key, usage data, alert settings, MCP tokens and shared links. If you have Pro, deleting the account cancels it in Stripe immediately: no further charges and no refund for the rest of the period. Invoices and payment records stay with Stripe for as long as accounting and tax law requires.",
       ],
     },
     {

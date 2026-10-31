@@ -225,7 +225,7 @@
         },
         {
           "q": "How much does it cost?",
-          "a": "The core dashboard is free. A Pro plan (99 CZK per month or 990 CZK per year) is in the works — with automatic sync, unlimited alerts, cost forecasting and an AI assistant. The free plan stays."
+          "a": "The core dashboard is free. The Pro plan (99 CZK per month or 990 CZK per year) adds automatic sync, unlimited alerts, cost forecasting and an AI assistant. The assistant runs on your own Anthropic API key, so you pay Anthropic directly for its tokens; they are not included in Pro. The free plan stays."
         },
         {
           "q": "What is the MCP server?",
@@ -302,7 +302,7 @@
       "autoSync": "Daily automatic sync",
       "budgetAlerts": "Budget alerts in the app",
       "forecast": "Month-end cost forecast",
-      "aiAgent": "AI assistant over your data",
+      "aiAgent": "AI assistant over your data (bring your own Anthropic key)",
       "exports": "PDF and PNG export",
       "sharing": "Shared dashboards",
       "mcp": "MCP server and API tokens for AI tools",

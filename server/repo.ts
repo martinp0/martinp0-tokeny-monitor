@@ -538,3 +538,62 @@ export async function budgetAlertsForCron(db: Db) {
 export async function markBudgetNotified(db: Db, userId: string) {
   await db.query("update budget_alerts set last_notified_at = now() where user_id = $1", [userId]);
 }
+
+// ------------------------------------------------------------------ the user's own AI key (BYOK)
+const AI_KEY_PUBLIC_COLS = "provider, key_preview, last_used_at, created_at, updated_at";
+
+export interface AiKeyInfo {
+  provider: string;
+  key_preview: string;
+  last_used_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+/** Public metadata only: never the ciphertext, never the key. */
+export async function getAiKeyInfo(db: Db, userId: string, provider = "anthropic"): Promise<AiKeyInfo | null> {
+  const { rows } = await db.query<AiKeyInfo>(
+    `select ${AI_KEY_PUBLIC_COLS} from ai_keys where user_id = $1 and provider = $2`,
+    [userId, provider],
+  );
+  return rows[0] ?? null;
+}
+
+export async function saveAiKey(db: Db, userId: string, provider: string, apiKey: string): Promise<AiKeyInfo> {
+  const key = apiKey.trim();
+  const { rows } = await db.query<AiKeyInfo>(
+    `insert into ai_keys (user_id, provider, api_key_ciphertext, key_preview) values ($1, $2, $3, $4)
+     on conflict (user_id, provider) do update set api_key_ciphertext = excluded.api_key_ciphertext,
+       key_preview = excluded.key_preview, last_used_at = null, updated_at = now()
+     returning ${AI_KEY_PUBLIC_COLS}`,
+    [userId, provider, encryptSecret(key, userId), maskKey(key)],
+  );
+  return rows[0];
+}
+
+export async function deleteAiKey(db: Db, userId: string, provider = "anthropic"): Promise<boolean> {
+  const res = await db.query("delete from ai_keys where user_id = $1 and provider = $2", [userId, provider]);
+  return (res.rowCount ?? 0) > 0;
+}
+
+/**
+ * Decrypted key of the caller, for a server-side provider call only. Returns "undecryptable" when
+ * the stored ciphertext no longer opens (e.g. rotated server key) so the caller can ask for a new key.
+ */
+export async function aiKeyForUser(db: Db, userId: string, provider = "anthropic"): Promise<string | null | "undecryptable"> {
+  const { rows } = await db.query<{ api_key_ciphertext: string }>(
+    "select api_key_ciphertext from ai_keys where user_id = $1 and provider = $2",
+    [userId, provider],
+  );
+  if (!rows[0]) return null;
+  try {
+    return decryptSecret(rows[0].api_key_ciphertext, userId);
+  } catch (e) {
+    if (e instanceof EncryptionKeyError) throw e;
+    return "undecryptable";
+  }
+}
+
+export async function markAiKeyUsed(db: Db, userId: string, provider = "anthropic"): Promise<void> {
+  await db.query("update ai_keys set last_used_at = now() where user_id = $1 and provider = $2", [userId, provider]);
+}
