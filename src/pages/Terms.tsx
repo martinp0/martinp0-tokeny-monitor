@@ -117,6 +117,7 @@ const CS: Copy = {
         "Klíče ukládáme zašifrované a používáme je jen ke stažení údajů o využití. Klíč můžeš kdykoli odebrat v aplikaci a zneplatnit u poskytovatele.",
         "Totéž platí pro tvoje AI klíče (Anthropic, OpenAI, OpenRouter): ukládáme je zašifrované, zobrazujeme jen poslední 4 znaky a používáme je jen pro AI požadavky, které sám spustíš. Nikdy je nepoužijeme pro jiné uživatele.",
         "Za klíče, jejich oprávnění a dodržování podmínek poskytovatelů AI odpovídáš ty. Pokud máš podezření na únik klíče, ihned ho zneplatni u poskytovatele.",
+        "Sdílené odkazy (Pro) zpřístupní souhrn, který pro ně zvolíš, komukoli, kdo odkaz má. Za to, komu odkaz pošleš, odpovídáš ty; kdykoli ho můžeš zrušit v Nastavení. Když předplatné Pro skončí, tvoje odkazy přestanou fungovat.",
       ],
     },
     {
@@ -253,6 +254,7 @@ const EN: Copy = {
         "We store keys encrypted and use them only to fetch usage data. You can remove a key in the app at any time and revoke it at the provider.",
         "The same applies to your AI keys (Anthropic, OpenAI, OpenRouter): we store them encrypted, show only their last 4 characters and use them only for AI requests you start yourself. They are never used for other users.",
         "You are responsible for your keys, their permissions and for complying with the AI providers' terms. If you suspect a key has leaked, revoke it at the provider straight away.",
+        "Share links (Pro) make the summary you choose for them visible to anyone who has the link. You are responsible for who you send a link to; you can revoke it in Settings at any time. When your Pro subscription ends, your links stop working.",
       ],
     },
     {

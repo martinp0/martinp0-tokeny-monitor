@@ -22,7 +22,6 @@ import {
 import { ArrowLeft, User, Lock, Download, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { fetchAllPages } from "@/lib/paginate";
-import { SharedDashboardsManager } from "@/components/dashboard/SharedDashboardsManager";
 
 const Profile = () => {
   const { session, signOut } = useAuth();
@@ -245,9 +244,6 @@ const Profile = () => {
             </Button>
           </CardContent>
         </Card>
-
-        {/* Shared dashboards & OG image management */}
-        <SharedDashboardsManager />
 
         {/* Export */}
         <Card className="glass border-border">

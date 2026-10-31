@@ -11,7 +11,11 @@ import { ALLOWED_PROVIDERS, MissingKeyError, validateAiKeyShape, validateKeyShap
 import { runCredentialSync } from "./lib/sync-runner.js";
 import { deleteAccount } from "./lib/account-deletion.js";
 import { createMcpApp } from "./mcp.js";
-import { buildSvg } from "./og.js";
+import { createHmac } from "node:crypto";
+import { buildExport, buildMonthlyReport, buildSharedPayload, EXPORT_GROUPS, type ExportGroup } from "./usage-export.js";
+import { daysBetween, hashShareToken, MAX_RANGE_DAYS, newShareToken, parseShareInput, scopeFromStored, SHARE_TOKEN_RE, validDay } from "./lib/share-scope.js";
+import { BUDGET_PROVIDERS } from "./lib/budget.js";
+import { localDay } from "./lib/forecast.js";
 import { usageSummary } from "./usage-summary.js";
 import { aiError, chatAgent, funAi, isFunMode, type AiContext } from "./ai.js";
 import { AI_PROVIDERS, PROVIDERS, isAiProvider, isModelId, listProviderModels, verifyProviderKey, type AiProvider } from "./ai-providers.js";
@@ -29,7 +33,18 @@ export interface AppOptions {
   sessionUser?: (req: Request) => Promise<AuthUser | null>;
 }
 
-const MAX_SHARED_ROWS = 50_000;
+/** Public share page: requests per client per 10 minutes (DB-backed fixed window). */
+export const SHARE_RATE_LIMIT = 60;
+const SHARE_RATE_WINDOW_SEC = 600;
+/** Active (not revoked, not expired) links per user. */
+export const MAX_ACTIVE_SHARES = 20;
+
+/** HMAC of the client address: the raw IP is never stored. */
+function clientBucket(c: Context): string {
+  const ip = c.req.header("x-real-ip") || c.req.header("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+  const key = process.env.CREDENTIALS_ENCRYPTION_KEY || "tokeny-dev-rate-limit";
+  return "share:" + createHmac("sha256", key).update(ip).digest("hex").slice(0, 32);
+}
 const MAX_PAGE = 5_000;
 
 export function createApp(opts: AppOptions = {}) {
@@ -77,52 +92,26 @@ export function createApp(opts: AppOptions = {}) {
     return c.json({ rate: rate?.rate ?? 23.5, date: rate?.source_date ?? null });
   });
 
+  // Public read-only share link. No account data, no caching (a revoke must take effect at once).
   app.get("/shared/:token", async (c) => {
-    const token = c.req.param("token");
-    if (!token || token.length < 10) return c.json({ error: "Invalid token" }, 400);
-    const share = await repo.shareByToken(db(), token);
-    if (!share) return c.json({ error: "Share not found" }, 404);
-    if (share.expires_at && new Date(share.expires_at) < new Date()) return c.json({ error: "Share expired" }, 410);
-    const historyFrom = await repo.historyFloor(db(), share.user_id);
-    const rows = await repo.listActivity(db(), share.user_id, { offset: 0, limit: MAX_SHARED_ROWS + 1, from: historyFrom });
-    const truncated = rows.length > MAX_SHARED_ROWS;
-    return c.json({
-      label: share.label,
-      filters: share.filters,
-      owner: (await repo.displayName(db(), share.user_id)) || "Anonym",
-      created_at: share.created_at,
-      rows: truncated ? rows.slice(0, MAX_SHARED_ROWS) : rows,
-      truncated,
-      history_from: historyFrom,
-    });
-  });
-
-  app.get("/og-dashboard", async (c) => {
-    const token = c.req.query("token") ?? "";
-    if (token.length < 10) return c.text("Invalid token", 400);
-    const share = await repo.shareByToken(db(), token);
-    if (!share) return c.text("Not found", 404);
-    if (share.expires_at && new Date(share.expires_at) < new Date()) return c.text("Expired", 410);
-    const byModel = await repo.aggregateActivity(db(), share.user_id, { groupBy: "model", from: await repo.historyFloor(db(), share.user_id) });
-    let totalCost = 0, totalTokens = 0, totalRequests = 0;
-    const modelMap: Record<string, number> = {};
-    for (const r of byModel) {
-      totalCost += Number(r.cost_total || 0);
-      totalTokens += Number(r.tokens_prompt || 0) + Number(r.tokens_completion || 0);
-      totalRequests += Number(r.request_count || 0);
-      modelMap[r.bucket || "unknown"] = (modelMap[r.bucket || "unknown"] || 0) + Number(r.cost_total || 0);
+    c.header("Cache-Control", "no-store");
+    c.header("X-Robots-Tag", "noindex, nofollow");
+    c.header("Referrer-Policy", "no-referrer");
+    const hits = await repo.hitRateLimit(db(), clientBucket(c), SHARE_RATE_WINDOW_SEC);
+    if (hits > SHARE_RATE_LIMIT) {
+      c.header("Retry-After", String(SHARE_RATE_WINDOW_SEC));
+      return c.json({ error: "rate_limited" }, 429);
     }
-    const topModel = (Object.entries(modelMap).sort((a, b) => b[1] - a[1])[0]?.[0] || "").split("/").pop() || "—";
-    const svg = buildSvg({
-      label: share.label || "Sdílený dashboard",
-      owner: (await repo.displayName(db(), share.user_id)) || "Anonym",
-      totalCost, totalRequests, totalTokens, topModel,
-    });
-    return c.body(svg, 200, {
-      "Content-Type": "image/svg+xml; charset=utf-8",
-      "Cache-Control": "public, max-age=300, s-maxage=600",
-      "Access-Control-Allow-Origin": "*",
-    });
+    const token = c.req.param("token");
+    if (!SHARE_TOKEN_RE.test(token)) return c.json({ error: "not_found" }, 404);
+    const share = await repo.shareByTokenHash(db(), hashShareToken(token));
+    if (!share) return c.json({ error: "not_found" }, 404);
+    if (share.revoked_at) return c.json({ error: "revoked" }, 410);
+    if (share.expires_at && new Date(share.expires_at) <= new Date()) return c.json({ error: "expired" }, 410);
+    if (!(await repo.isPro(db(), share.user_id))) return c.json({ error: "inactive" }, 410);
+    const payload = await buildSharedPayload(db(), share.user_id, share, scopeFromStored(share.filters));
+    await repo.markShareViewed(db(), share.id);
+    return c.json(payload);
   });
 
   app.post("/stripe-webhook", async (c) => {
@@ -365,29 +354,60 @@ export function createApp(opts: AppOptions = {}) {
     return ok ? c.json({ success: true }) : c.json({ error: "Token not found" }, 404);
   });
 
-  // shared dashboards (create = Pro) ----------------------------------------------------
+  // shared dashboards (create = Pro; list/revoke always allowed so a lapsed user can clean up) ---
   authed.get("/shares", async (c) => c.json({ shares: await repo.listShares(db(), c.get("user").id) }));
 
   authed.post("/shares", async (c) => {
     const userId = c.get("user").id;
     if (!(await repo.isPro(db(), userId))) return pro("sharing")(c);
-    const b = await c.req.json().catch(() => ({}));
-    const label = typeof b.label === "string" ? b.label.trim().slice(0, 120) || null : null;
-    const filters = b.filters && typeof b.filters === "object" && JSON.stringify(b.filters).length < 4000 ? b.filters : {};
-    let expires: string | null = null;
-    if (typeof b.expires_at === "string" && b.expires_at) {
-      const d = new Date(b.expires_at);
-      if (Number.isNaN(d.getTime())) return c.json({ error: "Invalid expires_at" }, 400);
-      expires = d.toISOString();
-    }
-    return c.json({ share: await repo.createShare(db(), userId, { label, filters, expires_at: expires }) });
+    const parsed = parseShareInput(await c.req.json().catch(() => null));
+    if ("error" in parsed) return c.json({ error: parsed.error }, 400);
+    if ((await repo.countActiveShares(db(), userId)) >= MAX_ACTIVE_SHARES) return c.json({ error: "too_many_shares", max: MAX_ACTIVE_SHARES }, 400);
+    const token = newShareToken();
+    const share = await repo.createShare(db(), userId, { token_hash: hashShareToken(token), ...parsed.value });
+    // the only time the token is ever returned
+    return c.json({ share, token });
   });
 
   authed.delete("/shares/:id", async (c) => {
     const id = c.req.param("id");
     if (!UUID_RE.test(id)) return c.json({ error: "Invalid id" }, 400);
-    const ok = await repo.deleteShare(db(), c.get("user").id, id);
+    const ok = await repo.revokeShare(db(), c.get("user").id, id);
     return ok ? c.json({ success: true }) : c.json({ error: "Share not found" }, 404);
+  });
+
+  // exports + monthly report (Pro) ---------------------------------------------------------
+  authed.get("/export", async (c) => {
+    const userId = c.get("user").id;
+    if (!(await repo.isPro(db(), userId))) return pro("exports")(c);
+    const q = (k: string) => c.req.query(k) ?? "";
+    const today = localDay(new Date());
+    const from = q("from"), to = q("to") || today;
+    if (!validDay(from) || !validDay(to) || from > to) return c.json({ error: "invalid_range" }, 400);
+    if (daysBetween(from, to) > MAX_RANGE_DAYS) return c.json({ error: "range_too_long", max_days: MAX_RANGE_DAYS }, 400);
+    const group = (q("group") || "day") as ExportGroup;
+    if (!EXPORT_GROUPS.includes(group)) return c.json({ error: "invalid_group" }, 400);
+    const format = q("format") || "csv";
+    if (format !== "csv" && format !== "json") return c.json({ error: "invalid_format" }, 400);
+    const currency = q("currency") === "CZK" ? "CZK" : "USD";
+    const providers = q("providers") ? q("providers").split(",").filter(Boolean) : [];
+    if (providers.some((p) => !(BUDGET_PROVIDERS as readonly string[]).includes(p))) return c.json({ error: "invalid_providers" }, 400);
+    const lang = q("lang") === "en" ? "en" : "cs";
+    const out = await buildExport(db(), userId, { from, to, group, currency, providers, lang });
+    const name = `tokeny-${group}-${from}_${to}.${format}`;
+    c.header("Cache-Control", "private, no-store");
+    c.header("Content-Disposition", `attachment; filename="${name}"`);
+    if (format === "json") return c.body(JSON.stringify(out.json, null, 2), 200, { "Content-Type": "application/json; charset=utf-8" });
+    return c.body(out.csv, 200, { "Content-Type": "text/csv; charset=utf-8" });
+  });
+
+  authed.get("/report", async (c) => {
+    const userId = c.get("user").id;
+    if (!(await repo.isPro(db(), userId))) return pro("exports")(c);
+    const month = c.req.query("month") || localDay(new Date()).slice(0, 7);
+    if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(month)) return c.json({ error: "invalid_month" }, 400);
+    c.header("Cache-Control", "private, no-store");
+    return c.json(await buildMonthlyReport(db(), userId, month));
   });
 
   // billing ---------------------------------------------------------------------------

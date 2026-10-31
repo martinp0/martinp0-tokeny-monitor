@@ -21,6 +21,7 @@ import { McpClientGuides } from "@/components/settings/McpClientGuides";
 import { mcpServerUrl } from "@/lib/public-urls";
 import { AiKeySettings } from "@/components/ai/AiKeySettings";
 import { BudgetSettings } from "@/components/settings/BudgetSettings";
+import { ShareLinksSettings } from "@/components/settings/ShareLinksSettings";
 
 interface McpToken {
   id: string;
@@ -222,6 +223,7 @@ const Settings = () => {
         <AiKeySettings />
 
         <BudgetSettings />
+        <ShareLinksSettings />
 
         <Card className="glass border-border">
           <CardHeader>

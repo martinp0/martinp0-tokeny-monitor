@@ -1,5 +1,6 @@
 import { lazy, Suspense, useRef, useCallback, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Helmet } from "react-helmet-async";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { useExport } from "@/hooks/useExport";
@@ -26,8 +27,9 @@ const AiAgentChat = lazy(() =>
   import("@/components/dashboard/AiAgentChat").then((m) => ({ default: m.AiAgentChat })),
 );
 import { ShareDashboardButton } from "@/components/dashboard/ShareDashboardButton";
+import { ExportDialog } from "@/components/export/ExportDialog";
 import { OnboardingEmptyState } from "@/components/dashboard/OnboardingEmptyState";
-import { Activity, Download, Image, FileText, LogOut, Settings as SettingsIcon, User, Menu } from "lucide-react";
+import { Activity, Download, Image, FileText, FileSpreadsheet, LogOut, Settings as SettingsIcon, User, Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { ChangelogModal } from "@/components/ChangelogModal";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -49,15 +51,17 @@ const Index = () => {
     costByModel, costByProvider, timeSeries,
     hasUserData, loading,
   } = useDashboardData();
-  const { exportPNG: rawExportPNG, exportPDF: rawExportPDF } = useExport(dashboardRef);
+  const { t } = useTranslation();
+  const { exportPNG: rawExportPNG } = useExport(dashboardRef);
+  const navigate = useNavigate();
+  const [exportOpen, setExportOpen] = useState(false);
   const { isPro, loading: planLoading } = useSubscription();
   const [upgradeFeature, setUpgradeFeature] = useState<ProFeature | null>(null);
-  // Exports are rendered in the browser, so this UI gate is the only check (documented in the PR).
+  // The PNG snapshot is rendered in the browser (UI gate only); CSV/JSON and the monthly report
+  // come from /api/export and /api/report, which enforce Pro on the server.
   const exportPNG = useCallback(() => (isPro ? rawExportPNG() : setUpgradeFeature("exports")), [isPro, rawExportPNG]);
-  const exportPDF = useCallback(
-    (...args: Parameters<typeof rawExportPDF>) => (isPro ? rawExportPDF(...args) : setUpgradeFeature("exports")),
-    [isPro, rawExportPDF],
-  );
+  const openExport = useCallback(() => (isPro ? setExportOpen(true) : setUpgradeFeature("exports")), [isPro]);
+  const openReport = useCallback(() => (isPro ? navigate("/report") : setUpgradeFeature("exports")), [isPro, navigate]);
   const { currency, toggle: toggleCurrency, setCurrency, exchangeRate, rateDate } = useCurrency();
   const { signOut } = useAuth();
 
@@ -83,9 +87,10 @@ const Index = () => {
       toast.success(`Měna: ${a.args.currency}`);
     } else if (a.name === "export_data") {
       if (a.args.format === "png") exportPNG();
-      else exportPDF(data, totalCost, totalRequests, totalTokens, avgGenTime);
+      else if (a.args.format === "csv") openExport();
+      else openReport();
     }
-  }, [models, setSelectedModel, setDateFilter, setCurrency, exportPNG, exportPDF, data, totalCost, totalRequests, totalTokens, avgGenTime]);
+  }, [models, setSelectedModel, setDateFilter, setCurrency, exportPNG, openExport, openReport]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -142,13 +147,17 @@ const Index = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={openExport} className="gap-2 tabular-nums text-xs cursor-pointer">
+                  <FileSpreadsheet className="h-3.5 w-3.5" />
+                  {t("exportData.menu")}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={openReport} className="gap-2 tabular-nums text-xs cursor-pointer">
+                  <FileText className="h-3.5 w-3.5" />
+                  {t("exportData.menuReport")}
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={exportPNG} className="gap-2 tabular-nums text-xs cursor-pointer">
                   <Image className="h-3.5 w-3.5" />
-                  Export as PNG
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => exportPDF(data, totalCost, totalRequests, totalTokens, avgGenTime)} className="gap-2 tabular-nums text-xs cursor-pointer">
-                  <FileText className="h-3.5 w-3.5" />
-                  Export as PDF
+                  {t("exportData.menuPng")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -217,11 +226,14 @@ const Index = () => {
                   </div>
                   <div className="space-y-2">
                     <p className="text-xs uppercase tracking-wider text-muted-foreground">Export</p>
-                    <Button variant="outline" size="sm" onClick={exportPNG} className="w-full justify-start gap-2 tabular-nums text-xs">
-                      <Image className="h-3.5 w-3.5" /> PNG
+                    <Button variant="outline" size="sm" onClick={openExport} className="w-full justify-start gap-2 tabular-nums text-xs">
+                      <FileSpreadsheet className="h-3.5 w-3.5" /> {t("exportData.menu")}
                     </Button>
-                    <Button variant="outline" size="sm" onClick={() => exportPDF(data, totalCost, totalRequests, totalTokens, avgGenTime)} className="w-full justify-start gap-2 tabular-nums text-xs">
-                      <FileText className="h-3.5 w-3.5" /> PDF
+                    <Button variant="outline" size="sm" onClick={openReport} className="w-full justify-start gap-2 tabular-nums text-xs">
+                      <FileText className="h-3.5 w-3.5" /> {t("exportData.menuReport")}
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={exportPNG} className="w-full justify-start gap-2 tabular-nums text-xs">
+                      <Image className="h-3.5 w-3.5" /> {t("exportData.menuPng")}
                     </Button>
                   </div>
                   <div className="space-y-2">
@@ -303,6 +315,7 @@ const Index = () => {
         onOpenChange={(o) => !o && setUpgradeFeature(null)}
         feature={upgradeFeature ?? undefined}
       />
+      <ExportDialog open={exportOpen} onOpenChange={setExportOpen} range={dateFilter} />
 
       {/* AI assistant: every plan, runs on the user's own key (BYOK). */}
       <Suspense fallback={null}>

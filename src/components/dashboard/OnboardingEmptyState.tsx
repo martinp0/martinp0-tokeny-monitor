@@ -145,7 +145,7 @@ export function OnboardingEmptyState({ onUpload }: Props) {
             { icon: BarChart3, label: "Náklady v čase" },
             { icon: CheckCircle2, label: "Top modely & poskytovatelé" },
             { icon: Sparkles, label: "AI agent & predikce" },
-            { icon: FileSpreadsheet, label: "Export do PDF/PNG" },
+            { icon: FileSpreadsheet, label: "Export CSV/JSON a report do PDF" },
           ].map((item) => (
             <div key={item.label} className="flex items-center gap-2 p-3 rounded-lg bg-secondary/30 border border-border/40">
               <item.icon className="h-4 w-4 text-primary shrink-0" />

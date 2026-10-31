@@ -299,3 +299,13 @@
   }
   .animate-fade-in { opacity: 1 !important; }
 }
+
+/* Printable monthly report (/report): plain paper look, no app chrome. */
+@media print {
+  @page { margin: 14mm; }
+  html, body { background: #fff !important; color: #111 !important; }
+  .report-page { background: #fff !important; color: #111 !important; }
+  .report-page .glass, .report-page .surface { background: #fff !important; box-shadow: none !important; backdrop-filter: none !important; }
+  .report-page .text-muted-foreground { color: #555 !important; }
+  [data-sonner-toaster] { display: none !important; }
+}

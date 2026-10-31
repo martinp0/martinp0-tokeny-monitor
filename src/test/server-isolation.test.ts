@@ -166,17 +166,17 @@ describe("shares, tokens, budget alerts", () => {
   });
   it("B's share is public by token, but invisible and undeletable for A", async () => {
     expect((await call("b", "GET", "/api/me")).json.profile.display_name).toBe("Bob"); // profile is created lazily
-    const s = (await call("b", "POST", "/api/shares", { label: "B board" })).json.share;
+    const created = (await call("b", "POST", "/api/shares", { label: "B board" })).json;
+    const s = created.share;
     expect((await call("a", "GET", "/api/shares")).json.shares).toEqual([]);
     expect((await call("a", "DELETE", `/api/shares/${s.id}`)).status).toBe(404);
-    const pub = await call(null, "GET", `/api/shared/${s.share_token}`);
+    const pub = await call(null, "GET", `/api/shared/${created.token}`);
     expect(pub.status).toBe(200);
-    expect(pub.json.owner).toBe("Bob");
-    expect(pub.json.rows.every((r: any) => r.cost_total === 100 || r.cost_total === 3)).toBe(true);
+    expect(pub.json.owner).toBeUndefined();
+    expect(pub.json.rows).toBeUndefined(); // aggregates only, never raw rows
     expect(JSON.stringify(pub.json)).not.toContain(B);
-    const og = await call(null, "GET", `/api/og-dashboard?token=${s.share_token}`);
-    expect(og.status).toBe(200);
-    expect(og.text).toContain("<svg");
+    expect(JSON.stringify(pub.json)).not.toContain("Bob");
+    expect((await call(null, "GET", "/api/og-dashboard?token=x")).status).not.toBe(200); // OG endpoint removed
     expect((await call(null, "GET", "/api/shared/doesnotexist123")).status).toBe(404);
   });
   it("B's personal token authenticates as B only (MCP + usage-summary)", async () => {

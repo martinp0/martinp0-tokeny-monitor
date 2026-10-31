@@ -432,36 +432,75 @@ export async function userIdByMcpToken(db: Db, token: string): Promise<string | 
 
 // ---------------------------------------------------------------- shared dashboards
 
+const SHARE_PUBLIC_COLS = `id, label, filters as scope, created_at, expires_at, revoked_at, view_count, last_viewed_at`;
+
+/** The owner's links (never the token: only its hash is stored). Revoked ones are hidden. */
 export async function listShares(db: Db, userId: string) {
   const { rows } = await db.query(
-    `select id, share_token, label, filters, created_at, expires_at
-       from shared_dashboards where user_id = $1 order by created_at desc`,
+    `select ${SHARE_PUBLIC_COLS} from shared_dashboards
+      where user_id = $1 and revoked_at is null order by created_at desc`,
     [userId],
   );
   return rows;
 }
 
-export async function createShare(db: Db, userId: string, s: { label: string | null; filters: unknown; expires_at: string | null }) {
+export async function createShare(db: Db, userId: string, s: { token_hash: string; label: string | null; scope: unknown; expires_at: string | null }) {
   const { rows } = await db.query(
-    `insert into shared_dashboards (user_id, label, filters, expires_at) values ($1, $2, $3::jsonb, $4)
-     returning id, share_token, label, filters, created_at, expires_at`,
-    [userId, s.label, JSON.stringify(s.filters ?? {}), s.expires_at],
+    `insert into shared_dashboards (user_id, token_hash, label, filters, expires_at) values ($1, $2, $3, $4::jsonb, $5)
+     returning ${SHARE_PUBLIC_COLS}`,
+    [userId, s.token_hash, s.label, JSON.stringify(s.scope ?? {}), s.expires_at],
   );
   return rows[0];
 }
 
-export async function deleteShare(db: Db, userId: string, id: string): Promise<boolean> {
-  const res = await db.query("delete from shared_dashboards where id = $1 and user_id = $2", [id, userId]);
+export async function countActiveShares(db: Db, userId: string): Promise<number> {
+  const { rows } = await db.query<{ n: number }>(
+    "select count(*)::int as n from shared_dashboards where user_id = $1 and revoked_at is null and (expires_at is null or expires_at > now())",
+    [userId],
+  );
+  return rows[0]?.n ?? 0;
+}
+
+/** Revoke one of the caller's links (kept so the public page can say 410 Gone). */
+export async function revokeShare(db: Db, userId: string, id: string): Promise<boolean> {
+  const res = await db.query(
+    "update shared_dashboards set revoked_at = now(), share_token = null where id = $1 and user_id = $2 and revoked_at is null",
+    [id, userId],
+  );
   return (res.rowCount ?? 0) > 0;
 }
 
-/** Public read of one share by its unguessable token (the token is the capability). */
-export async function shareByToken(db: Db, token: string) {
-  const { rows } = await db.query<{ user_id: string; label: string | null; filters: unknown; created_at: string; expires_at: string | null }>(
-    "select user_id, label, filters, created_at, expires_at from shared_dashboards where share_token = $1",
-    [token],
+/** Public read of one share by the SHA-256 of its token (the token is the capability). */
+export async function shareByTokenHash(db: Db, tokenHash: string) {
+  const { rows } = await db.query<{
+    id: string; user_id: string; label: string | null; filters: unknown; created_at: string; expires_at: string | null; revoked_at: string | null;
+  }>(
+    "select id, user_id, label, filters, created_at, expires_at, revoked_at from shared_dashboards where token_hash = $1",
+    [tokenHash],
   );
   return rows[0] ?? null;
+}
+
+export async function markShareViewed(db: Db, id: string) {
+  await db.query("update shared_dashboards set view_count = view_count + 1, last_viewed_at = now() where id = $1", [id]);
+}
+
+// ---------------------------------------------------------------- rate limits (public endpoints)
+
+/** Fixed window counter; returns the hits in the current window including this one. */
+export async function hitRateLimit(db: Db, bucket: string, windowSec: number, now = new Date()): Promise<number> {
+  const start = new Date(Math.floor(now.getTime() / (windowSec * 1000)) * windowSec * 1000).toISOString();
+  const { rows } = await db.query<{ hits: number }>(
+    `insert into rate_limits (bucket, window_start, hits) values ($1, $2, 1)
+     on conflict (bucket, window_start) do update set hits = rate_limits.hits + 1 returning hits`,
+    [bucket, start],
+  );
+  return rows[0]?.hits ?? 1;
+}
+
+export async function pruneRateLimits(db: Db): Promise<number> {
+  const res = await db.query("delete from rate_limits where window_start < now() - interval '1 day'");
+  return res.rowCount ?? 0;
 }
 
 // ---------------------------------------------------------------- provider credentials

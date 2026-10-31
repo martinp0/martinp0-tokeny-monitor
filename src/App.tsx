@@ -17,6 +17,7 @@ const Index = lazy(() => import("./pages/Index.tsx"));
 const Settings = lazy(() => import("./pages/Settings.tsx"));
 const Profile = lazy(() => import("./pages/Profile.tsx"));
 const SharedDashboard = lazy(() => import("./pages/SharedDashboard.tsx"));
+const Report = lazy(() => import("./pages/Report.tsx"));
 const LlmCostCalculator = lazy(() => import("./pages/LlmCostCalculator.tsx"));
 const ClaudeApiCost = lazy(() => import("./pages/ClaudeApiCost.tsx"));
 const HowToCalculateLlmCost = lazy(() => import("./pages/HowToCalculateLlmCost.tsx"));
@@ -123,6 +124,8 @@ export function AppRoutes() {
       <Route path="/blog/kolik-stoji-ai-agenti" element={<BlogAiAgentCosts />} />
       <Route path="/privacy" element={<Privacy />} />
       <Route path="/terms" element={<Terms />} />
+      <Route path="/report" element={<ProtectedRoute><Report /></ProtectedRoute>} />
+      <Route path="/s/:token" element={<SharedDashboard />} />
       <Route path="/shared/:token" element={<SharedDashboard />} />
       <Route path="*" element={<NotFound />} />
     </Routes>

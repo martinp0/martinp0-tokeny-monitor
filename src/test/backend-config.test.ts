@@ -1,7 +1,8 @@
 import { describe, it, expect } from "vitest";
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import path from "node:path";
-import { mcpServerUrl, ogDashboardUrl } from "@/lib/public-urls";
+import { mcpServerUrl } from "@/lib/public-urls";
+import { shareUrl } from "@/lib/share";
 
 const ROOT = path.resolve(__dirname, "../..");
 const read = (rel: string) => readFileSync(path.join(ROOT, rel), "utf8");
@@ -65,13 +66,13 @@ describe("backend config (Neon + Vercel Functions)", () => {
 });
 
 describe("public URLs on our own domain", () => {
-  it("MCP and OG URLs use tokeny.martinpohl.cz/api", () => {
+  it("MCP and share URLs use tokeny.martinpohl.cz", () => {
     expect(mcpServerUrl()).toBe("https://tokeny.martinpohl.cz/api/mcp");
-    expect(ogDashboardUrl("a b")).toBe("https://tokeny.martinpohl.cz/api/og-dashboard?token=a%20b");
+    expect(shareUrl("abc", "https://tokeny.martinpohl.cz")).toBe("https://tokeny.martinpohl.cz/s/abc");
   });
 
   it("the UI no longer shows Supabase function URLs", () => {
-    for (const f of ["src/pages/Settings.tsx", "src/components/dashboard/SharedDashboardsManager.tsx"]) {
+    for (const f of ["src/pages/Settings.tsx", "src/components/settings/ShareLinksSettings.tsx"]) {
       expect(read(f)).not.toMatch(/functions\/v1\//);
     }
   });

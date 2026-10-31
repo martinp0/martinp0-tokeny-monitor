@@ -3,8 +3,7 @@ import type { Db } from "./db.js";
 import { runCredentialSync } from "./lib/sync-runner.js";
 import {
   budgetAlertsForCron, decryptCredential, dueCredentialsForCron, getExchangeRate, insertBudgetEvents, markBudgetNotified,
-  markCredentialSync, saveExchangeRate,
-} from "./repo.js";
+  markCredentialSync, saveExchangeRate, pruneRateLimits } from "./repo.js";
 import { alertsFor, budgetStatus, FALLBACK_USD_CZK } from "./budget-status.js";
 
 const CNB_URL = "https://www.cnb.cz/cs/financni-trhy/devizovy-trh/kurzy-devizoveho-trhu/kurzy-devizoveho-trhu/denni_kurz.txt";
@@ -81,5 +80,6 @@ export async function runDaily(db: Db) {
   try { out.exchange_rate = await refreshExchangeRate(db); } catch (e) { out.exchange_rate_error = e instanceof Error ? e.message : String(e); }
   try { out.sync = await autoSync(db); } catch (e) { out.sync_error = e instanceof Error ? e.message : String(e); }
   try { out.budget = await checkBudgets(db); } catch (e) { out.budget_error = e instanceof Error ? e.message : String(e); }
+  try { out.rate_limits_pruned = await pruneRateLimits(db); } catch (e) { out.rate_limits_error = e instanceof Error ? e.message : String(e); }
   return out;
 }

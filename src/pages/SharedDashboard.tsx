@@ -1,218 +1,203 @@
-import { useEffect, useState, useMemo } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { KpiCards } from "@/components/dashboard/KpiCards";
-import { CostTimeChart } from "@/components/dashboard/CostTimeChart";
-import { TokensChart } from "@/components/dashboard/TokensChart";
-import { ModelCostChart } from "@/components/dashboard/ModelCostChart";
-import { ProviderChart } from "@/components/dashboard/ProviderChart";
-import { SpeedChart } from "@/components/dashboard/SpeedChart";
-import { RequestsTable } from "@/components/dashboard/RequestsTable";
-import { Activity, ArrowLeft, Eye } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Activity, Clock, Eye, Link2Off, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useCurrency } from "@/hooks/useCurrency";
-import { ogDashboardUrl } from "@/lib/public-urls";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { CHART_AXIS, CHART_FONT, CHART_GRID, CHART_SERIES, chartTooltipStyle } from "@/lib/chart-theme";
+import { fmtCost, fmtCostShort, fmtNum, fmtNumShort } from "@/lib/format";
+import { providerLabel } from "@/lib/budget";
+import type { SharedMetric, SharedPayload } from "@/lib/share";
 
-interface SharedData {
-  label: string;
-  owner: string;
-  created_at: string;
-  rows: any[];
-  filters: any;
-}
+type State =
+  | { kind: "loading" }
+  | { kind: "ok"; data: SharedPayload }
+  | { kind: "error"; status: number; reason: string };
 
+/** Public, read-only view of a share link (/s/:token). Only aggregates; never account data. */
 export default function SharedDashboard() {
   const { token } = useParams<{ token: string }>();
-  const [data, setData] = useState<SharedData | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const { currency, toggle: toggleCurrency, exchangeRate } = useCurrency();
+  const { t, i18n } = useTranslation();
+  const [state, setState] = useState<State>({ kind: "loading" });
+  const en = i18n.language?.startsWith("en");
+  const numCur = en ? "USD" : "CZK"; // only picks the number locale
 
   useEffect(() => {
     if (!token) return;
-
-    // Inject OG meta tags pointing to the dynamic preview endpoint
-    const ogImage = ogDashboardUrl(token);
-    const pageUrl = `${window.location.origin}/shared/${token}`;
-    const tags: Array<[string, string, string]> = [
-      ["property", "og:image", ogImage],
-      ["property", "og:image:width", "1200"],
-      ["property", "og:image:height", "630"],
-      ["property", "og:type", "website"],
-      ["property", "og:url", pageUrl],
-      ["property", "og:title", "Sdílený dashboard – Tokeny"],
-      ["name", "twitter:card", "summary_large_image"],
-      ["name", "twitter:image", ogImage],
-    ];
-    const created: HTMLMetaElement[] = [];
-    tags.forEach(([attr, key, value]) => {
-      const sel = `meta[${attr}="${key}"]`;
-      let el = document.head.querySelector<HTMLMetaElement>(sel);
-      if (!el) {
-        el = document.createElement("meta");
-        el.setAttribute(attr, key);
-        document.head.appendChild(el);
-        created.push(el);
-      }
-      el.setAttribute("content", value);
-    });
-
-    // Public, read-only endpoint (no session needed).
-    fetch(`/api/shared/${encodeURIComponent(token ?? "")}`)
-      .then((r) => r.json())
-      .then((d) => {
-        if (d.error) setError(d.error);
-        else setData(d);
+    const ctl = new AbortController();
+    fetch(`/api/shared/${encodeURIComponent(token)}`, { signal: ctl.signal, credentials: "omit", cache: "no-store" })
+      .then(async (r) => {
+        const body = await r.json().catch(() => null);
+        if (r.ok && body) setState({ kind: "ok", data: body as SharedPayload });
+        else setState({ kind: "error", status: r.status, reason: String(body?.error ?? "") });
       })
-      .catch((e) => setError(e.message))
-      .finally(() => setLoading(false));
-
-    return () => {
-      created.forEach((el) => el.remove());
-    };
+      .catch((e) => { if (e?.name !== "AbortError") setState({ kind: "error", status: 0, reason: "network" }); });
+    return () => ctl.abort();
   }, [token]);
 
-  const processed = useMemo(() => {
-    if (!data?.rows?.length) return null;
-
-    const rows = data.rows;
-    const rate = currency === "CZK" ? exchangeRate : 1;
-
-    const totalCost = rows.reduce((s: number, r: any) => s + (r.cost_total || 0), 0) * rate;
-    const totalRequests = rows.length;
-    const totalTokens = rows.reduce((s: number, r: any) => s + (r.tokens_prompt || 0) + (r.tokens_completion || 0), 0);
-    const avgGenTime = rows.reduce((s: number, r: any) => s + (r.generation_time_ms || 0), 0) / rows.length;
-
-    // Cost by model
-    const modelMap: Record<string, number> = {};
-    rows.forEach((r: any) => {
-      const m = r.model_permaslug || "unknown";
-      modelMap[m] = (modelMap[m] || 0) + (r.cost_total || 0) * rate;
-    });
-    const costByModel = Object.entries(modelMap)
-      .map(([fullModel, cost]) => ({ model: fullModel.split("/").pop() || fullModel, fullModel, cost }))
-      .sort((a, b) => b.cost - a.cost);
-
-    // Cost by provider
-    const provMap: Record<string, { cost: number; count: number }> = {};
-    rows.forEach((r: any) => {
-      const p = r.provider_name || "unknown";
-      if (!provMap[p]) provMap[p] = { cost: 0, count: 0 };
-      provMap[p].cost += (r.cost_total || 0) * rate;
-      provMap[p].count += 1;
-    });
-    const costByProvider = Object.entries(provMap)
-      .map(([provider, v]) => ({ provider, cost: v.cost, requests: v.count }))
-      .sort((a, b) => b.cost - a.cost);
-
-    // Time series
-    const dayMap: Record<string, { cost: number; tp: number; tc: number; tr: number; tca: number; gen: number; ttft: number; count: number }> = {};
-    rows.forEach((r: any) => {
-      const d = (r.created_at || "").slice(0, 10);
-      if (!d) return;
-      if (!dayMap[d]) dayMap[d] = { cost: 0, tp: 0, tc: 0, tr: 0, tca: 0, gen: 0, ttft: 0, count: 0 };
-      dayMap[d].cost += (r.cost_total || 0) * rate;
-      dayMap[d].tp += r.tokens_prompt || 0;
-      dayMap[d].tc += r.tokens_completion || 0;
-      dayMap[d].tr += r.tokens_reasoning || 0;
-      dayMap[d].tca += r.tokens_cached || 0;
-      dayMap[d].gen += r.generation_time_ms || 0;
-      dayMap[d].ttft += r.time_to_first_token_ms || 0;
-      dayMap[d].count += 1;
-    });
-    const timeSeries = Object.entries(dayMap)
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([time, v]) => ({
-        time,
-        cost: v.cost,
-        model: "",
-        tokens_prompt: v.tp,
-        tokens_completion: v.tc,
-        tokens_reasoning: v.tr,
-        tokens_cached: v.tca,
-        generation_time_ms: v.count ? v.gen / v.count : 0,
-        time_to_first_token_ms: v.count ? v.ttft / v.count : 0,
-      }));
-
-    return { totalCost, totalRequests, totalTokens, avgGenTime, costByModel, costByProvider, timeSeries, rows };
-  }, [data, currency, exchangeRate]);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-muted-foreground tabular-nums text-sm">Načítám sdílený dashboard…</div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4">
-        <div className="text-destructive tabular-nums text-sm">{error === "Share not found" ? "Sdílení nenalezeno" : error === "Share expired" ? "Platnost sdílení vypršela" : error}</div>
-        <Link to="/">
-          <Button variant="outline" className="tabular-nums text-xs">Zpět na úvod</Button>
-        </Link>
-      </div>
-    );
-  }
-
-  if (!processed) return null;
-
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background text-foreground">
       <Helmet>
-        <title>{data?.label ? `${data.label} – Sdílený dashboard` : "Sdílený dashboard"} | Tokeny</title>
-        <meta name="description" content={`Sdílený read-only dashboard nákladů na AI tokeny${data?.owner ? ` od ${data.owner}` : ""}.`} />
-        <link rel="canonical" href={`https://tokeny.martinpohl.cz/shared/${token}`} />
-        <meta name="robots" content="noindex,follow" />
-        <meta property="og:url" content={`https://tokeny.martinpohl.cz/shared/${token}`} />
-        <meta property="og:title" content={data?.label ? `${data.label} – Sdílený dashboard` : "Sdílený dashboard"} />
+        <title>{state.kind === "ok" ? `${state.data.label || t("share.untitled")} – Tokeny` : "Tokeny"}</title>
+        <meta name="robots" content="noindex, nofollow" />
+        <meta name="referrer" content="no-referrer" />
       </Helmet>
-      <header className="sticky top-0 z-40 glass-bar pt-safe px-4 sm:px-6 py-2">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link to="/" aria-label="Domů" className="h-8 w-8 rounded-lg bg-primary-fill flex items-center justify-center">
-              <Activity className="h-4 w-4 text-white" />
-            </Link>
-            <h1 className="text-lg font-bold tracking-tight">Sdílený Dashboard</h1>
-            <span className="flex items-center gap-1 text-xs tabular-nums text-muted-foreground bg-secondary/50 px-2 py-0.5 rounded-full">
-              <Eye className="h-3 w-3" /> read-only
-            </span>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="text-xs tabular-nums text-muted-foreground">
-              od {data?.owner}
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={toggleCurrency}
-              className="gap-1.5 border-border hover:bg-secondary hover:text-foreground tabular-nums text-xs min-w-[60px]"
-            >
-              {currency === "CZK" ? "Kč" : "$"}
-            </Button>
+      <header className="glass-bar sticky top-0 z-20">
+        <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between gap-3">
+          <Link to="/" className="flex items-center gap-2 font-semibold tracking-tight">
+            <span className="h-7 w-7 rounded-xl bg-primary/15 grid place-items-center"><Activity className="h-4 w-4 text-primary" aria-hidden /></span>
+            Tokeny
+          </Link>
+          <div className="flex items-center gap-2">
+            <span className="glass-pill px-3 h-7 inline-flex items-center gap-1.5 text-xs text-muted-foreground"><Eye className="h-3.5 w-3.5" aria-hidden />{t("shared.readOnly")}</span>
+            <ThemeToggle />
           </div>
         </div>
       </header>
-
-      <main className="p-6 space-y-4 max-w-[1600px] mx-auto">
-        <KpiCards
-          totalCost={processed.totalCost}
-          totalRequests={processed.totalRequests}
-          totalTokens={processed.totalTokens}
-          avgGenTime={processed.avgGenTime}
-        />
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <CostTimeChart data={processed.timeSeries} />
-          <TokensChart data={processed.timeSeries} />
-        </div>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <ModelCostChart data={processed.costByModel} onModelClick={() => {}} selectedModel={null} />
-          <ProviderChart data={processed.costByProvider} />
-          <SpeedChart data={processed.timeSeries} />
-        </div>
-        <RequestsTable data={processed.rows} />
+      <main className="max-w-5xl mx-auto px-4 py-6 sm:py-10">
+        {state.kind === "loading" && <p className="text-sm text-muted-foreground py-20 text-center">{t("shared.loading")}</p>}
+        {state.kind === "error" && <SharedError status={state.status} reason={state.reason} />}
+        {state.kind === "ok" && <SharedView data={state.data} numCur={numCur} />}
       </main>
+    </div>
+  );
+}
+
+function SharedError({ status, reason }: { status: number; reason: string }) {
+  const { t } = useTranslation();
+  const gone = status === 410;
+  const rate = status === 429;
+  const title = rate ? t("shared.rateTitle") : gone ? t("shared.goneTitle") : t("shared.notFoundTitle");
+  const desc = rate ? t("shared.rateDesc")
+    : gone ? t(reason === "expired" ? "shared.expiredDesc" : reason === "inactive" ? "shared.inactiveDesc" : "shared.revokedDesc")
+    : t("shared.notFoundDesc");
+  const Icon = rate ? Clock : Link2Off;
+  return (
+    <div className="glass-panel rounded-3xl max-w-md mx-auto mt-10 p-8 text-center space-y-3">
+      <div className="mx-auto h-12 w-12 rounded-2xl bg-secondary grid place-items-center"><Icon className="h-6 w-6 text-muted-foreground" aria-hidden /></div>
+      <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
+      <p className="text-sm text-muted-foreground">{desc}</p>
+      <p className="text-xs text-muted-foreground tabular-nums">{status ? `HTTP ${status}` : ""}</p>
+      <Button asChild variant="outline"><Link to="/">{t("shared.home")}</Link></Button>
+    </div>
+  );
+}
+
+function SharedView({ data, numCur }: { data: SharedPayload; numCur: "USD" | "CZK" }) {
+  const { t, i18n } = useTranslation();
+  const amounts = data.show_amounts && data.totals.cost_usd !== undefined;
+  const cur = data.currency;
+  const rate = data.usd_czk ?? 0;
+  const locale = i18n.language?.startsWith("en") ? "en-GB" : "cs-CZ";
+  const day = (s: string) => new Date(`${s}T12:00:00Z`).toLocaleDateString(locale, { day: "numeric", month: "numeric", year: "numeric" });
+  const tokens = data.totals.input_tokens + data.totals.output_tokens;
+  const live = data.period.type !== "range";
+
+  const chart = useMemo(
+    () => data.daily.map((d) => ({ date: d.date.slice(5).split("-").reverse().join("."), value: amounts ? d.cost_usd ?? 0 : d.tokens })),
+    [data.daily, amounts],
+  );
+  const metricLabel = amounts ? t("shared.cost") : t("shared.tokens");
+  const fmtValue = (v: number) => (amounts ? fmtCost(v, 2, cur, rate) : fmtNum(v, numCur));
+  const fmtShort = (v: number) => (amounts ? fmtCostShort(v, cur, rate) : fmtNumShort(v, numCur));
+
+  return (
+    <div className="space-y-5">
+      <section className="space-y-1">
+        <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">{data.label || t("share.untitled")}</h1>
+        <p className="text-sm text-muted-foreground tabular-nums">
+          {t("shared.period", { from: day(data.period.from), to: day(data.period.to) })}
+          {live && <> · {t("shared.periodLive")}</>}
+          {data.providers_filter.length > 0 && <> · {data.providers_filter.map(providerLabel).join(", ")}</>}
+        </p>
+      </section>
+
+      <section className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <Kpi label={t("shared.cost")} value={amounts ? fmtCost(data.totals.cost_usd ?? 0, 2, cur, rate) : "—"} hint={amounts ? undefined : t("share.percentOnly")} />
+        <Kpi label={t("shared.requests")} value={fmtNum(data.totals.requests, numCur)} />
+        <Kpi label={t("shared.tokens")} value={fmtNumShort(tokens, numCur)} />
+        <Kpi label={t("shared.providers")} value={String(data.providers.length)} />
+      </section>
+
+      {!amounts && <p className="glass-panel rounded-2xl px-4 py-3 text-sm text-muted-foreground flex gap-2"><ShieldCheck className="h-4 w-4 shrink-0 mt-0.5 text-primary" aria-hidden />{t("shared.hiddenAmounts")}</p>}
+
+      <section className="glass-panel rounded-3xl p-4 sm:p-5">
+        <h2 className="text-[15px] font-semibold tracking-tight mb-3">{t("shared.daily")} · {metricLabel}</h2>
+        {data.daily.every((d) => d.tokens === 0 && d.requests === 0) ? (
+          <p className="text-sm text-muted-foreground py-10 text-center">{t("shared.empty")}</p>
+        ) : (
+          <div className="h-[260px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={chart}>
+                <defs>
+                  <linearGradient id="sharedGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor={CHART_SERIES[0]} stopOpacity={0.3} />
+                    <stop offset="95%" stopColor={CHART_SERIES[0]} stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid vertical={false} stroke={CHART_GRID} />
+                <XAxis dataKey="date" stroke={CHART_AXIS} tickLine={false} axisLine={false} fontSize={11} fontFamily={CHART_FONT} minTickGap={16} />
+                <YAxis stroke={CHART_AXIS} tickLine={false} axisLine={false} fontSize={11} fontFamily={CHART_FONT} width={56} tickFormatter={fmtShort} />
+                <Tooltip {...chartTooltipStyle} formatter={(v: number) => [fmtValue(v), metricLabel]} />
+                <Area type="monotone" dataKey="value" stroke={CHART_SERIES[0]} fill="url(#sharedGrad)" strokeWidth={2} dot={false} />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+      </section>
+
+      <section className="grid md:grid-cols-2 gap-3">
+        <Breakdown title={t("shared.providers")} rows={data.providers.map((p) => ({ name: providerLabel(p.provider), ...p }))} amounts={amounts} cur={cur} rate={rate} numCur={numCur} />
+        <Breakdown title={t("shared.models")} rows={data.models.map((m) => ({ name: m.model, sub: providerLabel(m.provider), ...m }))} amounts={amounts} cur={cur} rate={rate} numCur={numCur} />
+      </section>
+
+      <footer className="text-xs text-muted-foreground space-y-1 text-center pt-2">
+        {amounts && cur === "CZK" && <p>{t("shared.rateNote", { rate: rate.toFixed(3).replace(".", i18n.language?.startsWith("en") ? "." : ","), date: data.rate_date ? day(data.rate_date) : "—" })}</p>}
+        <p>{t("shared.footer")}</p>
+        <p><Link to="/" className="text-primary hover:underline">{t("shared.cta")}</Link></p>
+      </footer>
+    </div>
+  );
+}
+
+function Kpi({ label, value, hint }: { label: string; value: string; hint?: string }) {
+  return (
+    <div className="glass-panel rounded-3xl p-4">
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className="text-xl sm:text-2xl font-semibold tracking-tight tabular-nums mt-1">{value}</p>
+      {hint && <p className="text-[11px] text-muted-foreground">{hint}</p>}
+    </div>
+  );
+}
+
+function Breakdown({ title, rows, amounts, cur, rate, numCur }: {
+  title: string; rows: Array<SharedMetric & { name: string; sub?: string }>; amounts: boolean; cur: "USD" | "CZK"; rate: number; numCur: "USD" | "CZK";
+}) {
+  const { t } = useTranslation();
+  return (
+    <div className="glass-panel rounded-3xl p-4 sm:p-5">
+      <h2 className="text-[15px] font-semibold tracking-tight mb-3">{title}</h2>
+      {rows.length === 0 ? <p className="text-sm text-muted-foreground">{t("shared.empty")}</p> : (
+        <ul className="space-y-2.5">
+          {rows.map((r, i) => (
+            <li key={`${r.name}-${i}`} className="space-y-1">
+              <div className="flex items-baseline justify-between gap-2 text-sm">
+                <span className="truncate">{r.name}{r.sub && <span className="text-xs text-muted-foreground"> · {r.sub}</span>}</span>
+                <span className="tabular-nums shrink-0 text-muted-foreground">
+                  {amounts && r.cost_usd !== undefined ? <span className="text-foreground font-medium">{fmtCost(r.cost_usd, 2, cur, rate)} · </span> : null}
+                  {r.cost_pct.toLocaleString(numCur === "CZK" ? "cs-CZ" : "en-GB", { maximumFractionDigits: 1 })} %
+                </span>
+              </div>
+              <div className="h-1.5 rounded-full bg-secondary overflow-hidden" role="presentation">
+                <div className="h-full rounded-full" style={{ width: `${Math.min(100, r.cost_pct)}%`, background: CHART_SERIES[i % CHART_SERIES.length] }} />
+              </div>
+              <p className="text-[11px] text-muted-foreground tabular-nums">{fmtNumShort(r.tokens, numCur)} {t("shared.tokens").toLowerCase()} · {fmtNum(r.requests, numCur)} {t("shared.requests").toLowerCase()}</p>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
