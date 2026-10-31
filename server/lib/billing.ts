@@ -236,3 +236,11 @@ export function safeAppUrl(requestOrigin: string | null, allowed: string[], fall
   if (requestOrigin && allowed.includes(requestOrigin.replace(/\/$/, ""))) return requestOrigin.replace(/\/$/, "");
   return fallback.replace(/\/$/, "");
 }
+
+/** Params for billingPortal.sessions.create. `configuration` (env STRIPE_PORTAL_CONFIGURATION) pins the
+ *  Tokeny-branded portal; the Stripe account's default portal belongs to another product. Anything that is
+ *  not a bpc_ id is ignored so a typo falls back to the account default instead of breaking the portal. */
+export function portalSessionParams(customer: string, returnUrl: string, configuration: string | undefined) {
+  const cfg = configuration?.trim();
+  return { customer, return_url: returnUrl, ...(cfg && /^bpc_[A-Za-z0-9]+$/.test(cfg) ? { configuration: cfg } : {}) };
+}
