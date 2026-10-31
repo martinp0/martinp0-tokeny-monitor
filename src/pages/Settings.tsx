@@ -20,6 +20,7 @@ import { ProGate } from "@/components/ProGate";
 import type { BillingInterval } from "@/config/pricing";
 import { McpClientGuides } from "@/components/settings/McpClientGuides";
 import { mcpServerUrl } from "@/lib/public-urls";
+import { AiKeySettings } from "@/components/ai/AiKeySettings";
 
 interface BudgetAlert {
   id: string;
@@ -253,6 +254,8 @@ const Settings = () => {
         <UpgradeModal open={upgradeModalOpen} onOpenChange={setUpgradeModalOpen} defaultInterval={upgradeInterval} />
 
         <ProviderConnections />
+
+        <AiKeySettings />
 
         <Card className="glass border-border">
           <CardHeader>

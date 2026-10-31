@@ -7,13 +7,13 @@ import { getDb } from "./db.js";
 import { bearerToken, proxyAuth, sessionUser, UUID_RE, type AuthUser } from "./auth.js";
 import * as repo from "./repo.js";
 import { canAddProvider, freeHistoryFloor, proRequiredBody, type ProFeature } from "./lib/plan.js";
-import { ALLOWED_PROVIDERS, MissingKeyError, validateKeyShape } from "./lib/credential-keys.js";
+import { ALLOWED_PROVIDERS, MissingKeyError, validateAiKeyShape, validateKeyShape } from "./lib/credential-keys.js";
 import { runCredentialSync } from "./lib/sync-runner.js";
 import { deleteAccount } from "./lib/account-deletion.js";
 import { createMcpApp } from "./mcp.js";
 import { buildSvg } from "./og.js";
 import { usageSummary } from "./usage-summary.js";
-import { chatAgent, funAi } from "./ai.js";
+import { aiError, chatAgent, funAi, isFunMode, verifyAnthropicKey } from "./ai.js";
 import { createCheckout, createPortal, stripeBilling, stripeWebhook, subscriptionStatus } from "./stripe.js";
 import { refreshExchangeRate, runDaily } from "./cron.js";
 import { EncryptionKeyError } from "./crypto.js";
@@ -397,17 +397,51 @@ export function createApp(opts: AppOptions = {}) {
     return c.json({ success: true, subscriptionCanceled: result.billing.canceled.length > 0 });
   });
 
-  // AI -------------------------------------------------------------------------------
+  // AI (bring your own key) -----------------------------------------------------------
+  // The user's own Anthropic key, stored encrypted. Only metadata (masked preview) is ever returned.
+  authed.get("/ai-key", async (c) => c.json({ key: await repo.getAiKeyInfo(db(), c.get("user").id) }));
+
+  authed.put("/ai-key", async (c) => {
+    const userId = c.get("user").id;
+    const b = await c.req.json().catch(() => ({}));
+    const provider = String(b?.provider ?? "anthropic").toLowerCase();
+    const apiKey = typeof b?.api_key === "string" ? b.api_key.trim() : "";
+    const shapeError = validateAiKeyShape(provider, apiKey);
+    if (shapeError) return c.json({ error: shapeError, code: "ai_key_shape" }, 400);
+    const check = await verifyAnthropicKey(apiKey);
+    if (check === "invalid") return c.json({ error: "Anthropic tento klíč odmítl. Zkontroluj, že je platný a aktivní.", code: "ai_key_invalid" }, 400);
+    const key = await repo.saveAiKey(db(), userId, provider, apiKey);
+    return c.json({ key, verified: check === "ok" });
+  });
+
+  authed.delete("/ai-key", async (c) => c.json({ deleted: await repo.deleteAiKey(db(), c.get("user").id) }));
+
+  /** The caller's own key, or the AiResult to return when it is missing / unusable. */
+  const userAiKey = async (userId: string) => {
+    const key = await repo.aiKeyForUser(db(), userId);
+    if (key === null) return { error: aiError("ai_key_missing") };
+    if (key === "undecryptable") return { error: aiError("ai_key_invalid") };
+    return { key };
+  };
+
   authed.post("/chat-agent", async (c) => {
     const userId = c.get("user").id;
     if (!(await repo.isPro(db(), userId))) return pro("ai_agent")(c);
-    const r = await chatAgent(db(), userId, await c.req.json().catch(() => ({})));
+    const k = await userAiKey(userId);
+    if (k.error) return c.json(k.error.body as object, k.error.status as 400);
+    const r = await chatAgent(db(), userId, await c.req.json().catch(() => ({})), k.key);
+    if (r.status === 200) await repo.markAiKeyUsed(db(), userId);
     return c.json(r.body as object, r.status as 200);
   });
 
   authed.post("/fun-ai", async (c) => {
+    const userId = c.get("user").id;
     const b = await c.req.json().catch(() => ({}));
-    const r = await funAi(b?.mode);
+    if (!isFunMode(b?.mode)) return c.json({ error: "Invalid mode" }, 400);
+    const k = await userAiKey(userId);
+    if (k.error) return c.json(k.error.body as object, k.error.status as 400);
+    const r = await funAi(b.mode, k.key);
+    if (r.status === 200) await repo.markAiKeyUsed(db(), userId);
     return c.json(r.body as object, r.status as 200);
   });
 

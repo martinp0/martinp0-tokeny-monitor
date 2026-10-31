@@ -1,5 +1,6 @@
-// AI agent (Pro) and the "Fun" page helpers. Both call Anthropic with the server's ANTHROPIC_API_KEY
-// and return 503 when it isn't configured. Data tools read only the caller's rows (repo.aggregateActivity).
+// AI agent (Pro) and the "Fun" page helpers. Both call Anthropic with the CALLER'S OWN API key
+// (ai_keys, BYOK); there is deliberately no shared server key. The user pays Anthropic directly.
+// Data tools read only the caller's rows (repo.aggregateActivity). Keys are never logged or returned.
 import type { Db } from "./db.js";
 import { aggregateActivity, type AggRow } from "./repo.js";
 
@@ -142,23 +143,73 @@ async function executeTool(name: string, args: any, db: Db, userId: string): Pro
 
 export interface AiResult { status: number; body: unknown }
 
-function anthropicKey(): string | null {
-  return process.env.ANTHROPIC_API_KEY || null;
+export const AI_KEY_HELP_URL = "https://console.anthropic.com/settings/keys";
+
+/** Stable error codes the UI maps to an empty state / message. */
+export type AiErrorCode = "ai_key_missing" | "ai_key_invalid" | "ai_key_no_credit" | "ai_rate_limited" | "ai_unavailable";
+
+const AI_ERRORS: Record<AiErrorCode, { status: number; error: string }> = {
+  ai_key_missing: { status: 428, error: "AI funkce používají tvůj vlastní API klíč Anthropic. Přidej ho v Nastavení." },
+  ai_key_invalid: { status: 422, error: "Anthropic tvůj API klíč odmítl. Zkontroluj ho a ulož znovu v Nastavení." },
+  ai_key_no_credit: { status: 402, error: "Na tvém účtu Anthropic došel kredit. Dobij ho v console.anthropic.com." },
+  ai_rate_limited: { status: 429, error: "Anthropic hlásí limit požadavků, zkus to za chvíli." },
+  ai_unavailable: { status: 502, error: "AI teď neodpovídá, zkus to za chvíli." },
+};
+
+export function aiError(code: AiErrorCode): AiResult {
+  const e = AI_ERRORS[code];
+  return { status: e.status, body: { error: e.error, code, help_url: AI_KEY_HELP_URL } };
 }
 
-async function callAnthropic(key: string, body: unknown): Promise<Response> {
-  return fetch(ANTHROPIC_API, {
-    method: "POST",
-    headers: { "x-api-key": key, "anthropic-version": "2023-06-01", "content-type": "application/json" },
-    body: JSON.stringify(body),
-  });
+/** Map a non-OK Anthropic response to our error (status + parsed body only; never the key). */
+export function classifyAnthropicError(status: number, body: unknown): AiErrorCode {
+  const msg = JSON.stringify(body ?? "").toLowerCase();
+  if (status === 401 || status === 403) return "ai_key_invalid";
+  if (status === 429) return "ai_rate_limited";
+  if ((status === 400 || status === 402) && msg.includes("credit")) return "ai_key_no_credit";
+  return "ai_unavailable";
 }
 
-/** Caller must already be authenticated and Pro. */
+async function callAnthropic(key: string, body: unknown): Promise<{ ok: true; data: any } | { ok: false; code: AiErrorCode }> {
+  let resp: Response;
+  try {
+    resp = await fetch(ANTHROPIC_API, {
+      method: "POST",
+      headers: { "x-api-key": key, "anthropic-version": "2023-06-01", "content-type": "application/json" },
+      body: JSON.stringify(body),
+    });
+  } catch {
+    console.error("Anthropic API unreachable");
+    return { ok: false, code: "ai_unavailable" };
+  }
+  if (!resp.ok) {
+    const errBody = await resp.json().catch(() => null);
+    const code = classifyAnthropicError(resp.status, errBody);
+    console.error("Anthropic API error", resp.status, code);
+    return { ok: false, code };
+  }
+  const data = await resp.json().catch(() => null);
+  if (!data || typeof data !== "object") return { ok: false, code: "ai_unavailable" };
+  return { ok: true, data };
+}
+
+/** Cheap check that a key works (lists models; no tokens are billed). "unknown" = could not tell. */
+export async function verifyAnthropicKey(key: string): Promise<"ok" | "invalid" | "unknown"> {
+  try {
+    const r = await fetch("https://api.anthropic.com/v1/models?limit=1", {
+      headers: { "x-api-key": key, "anthropic-version": "2023-06-01" },
+    });
+    if (r.ok) return "ok";
+    if (r.status === 401 || r.status === 403) return "invalid";
+    return "unknown";
+  } catch {
+    return "unknown";
+  }
+}
+
+/** Caller must already be authenticated and Pro; `key` is the caller's own Anthropic key. */
 // deno-lint-ignore no-explicit-any
-export async function chatAgent(db: Db, userId: string, input: any): Promise<AiResult> {
-  const key = anthropicKey();
-  if (!key) return { status: 503, body: { error: "AI asistent je dočasně nedostupný." } };
+export async function chatAgent(db: Db, userId: string, input: any, key: string): Promise<AiResult> {
   const messages = input?.messages;
   if (!Array.isArray(messages)) return { status: 400, body: { error: "messages must be an array" } };
   if (messages.length === 0 || messages.length > 20) return { status: 400, body: { error: "messages length must be between 1 and 20" } };
@@ -178,12 +229,8 @@ export async function chatAgent(db: Db, userId: string, input: any): Promise<AiR
   const uiActions: Array<{ name: string; args: any }> = [];
   for (let iter = 0; iter < 4; iter++) {
     const resp = await callAnthropic(key, { model: MODEL, max_tokens: 1024, system: SYSTEM_PROMPT, messages: anthropicMessages, tools });
-    if (resp.status === 429) return { status: 429, body: { error: "Rate limit, zkus to za chvíli." } };
-    if (!resp.ok) {
-      console.error("Anthropic API error", resp.status);
-      return { status: 502, body: { error: "AI asistent teď neodpovídá." } };
-    }
-    const data = await resp.json();
+    if (resp.ok === false) return aiError(resp.code);
+    const data = resp.data;
     const content = data.content ?? [];
     anthropicMessages.push({ role: "assistant", content });
     if (data.stop_reason !== "tool_use") {
@@ -203,11 +250,11 @@ export async function chatAgent(db: Db, userId: string, input: any): Promise<AiR
   return { status: 200, body: { reply: "Příliš mnoho kroků, zkus zjednodušit dotaz.", ui_actions: uiActions } };
 }
 
-/** "Fun" page: a joke or a cartoon prompt + Pollinations image URL. Requires a signed-in caller. */
-export async function funAi(mode: unknown): Promise<AiResult> {
-  if (mode !== "joke" && mode !== "image") return { status: 400, body: { error: "Invalid mode" } };
-  const key = anthropicKey();
-  if (!key) return { status: 503, body: { error: "AI funkce jsou dočasně nedostupné." } };
+/** Validates the Fun mode before any key lookup. */
+export const isFunMode = (mode: unknown): mode is "joke" | "image" => mode === "joke" || mode === "image";
+
+/** "Fun" page: a joke or a cartoon prompt + Pollinations image URL, with the caller's own key. */
+export async function funAi(mode: "joke" | "image", key: string): Promise<AiResult> {
   if (mode === "joke") {
     const r = await callAnthropic(key, {
       model: MODEL,
@@ -215,9 +262,8 @@ export async function funAi(mode: unknown): Promise<AiResult> {
       system: "Jsi vtipný český komik. Generuj originální, krátké vtipy v češtině. Můžeš dělat vtipy o programování, AI, technologiích, nebo obecné vtipy. Buď kreativní a překvapivý. Vrať POUZE vtip, nic jiného. Žádné uvozovky, žádné komentáře.",
       messages: [{ role: "user", content: "Vygeneruj jeden krátký vtip." }],
     });
-    if (r.status === 429) return { status: 429, body: { error: "Příliš mnoho požadavků, zkus to za chvíli." } };
-    if (!r.ok) return { status: 502, body: { error: "AI teď neodpovídá." } };
-    const data = await r.json();
+    if (r.ok === false) return aiError(r.code);
+    const data = r.data;
     return { status: 200, body: { joke: data.content?.[0]?.text || "Žádný vtip se nenašel 😢" } };
   }
   const r = await callAnthropic(key, {
@@ -226,11 +272,8 @@ export async function funAi(mode: unknown): Promise<AiResult> {
     system: "Generate a short, vivid English image prompt (max 20 words) for a funny, absurd cartoon scene. Be creative and surprising. Reply with ONLY the prompt, no quotes, no explanation.",
     messages: [{ role: "user", content: "Generate one funny image prompt." }],
   });
-  let prompt = "a cat coding on a laptop while drinking coffee";
-  if (r.ok) {
-    const pd = await r.json();
-    prompt = pd.content?.[0]?.text?.trim() || prompt;
-  }
+  if (r.ok === false) return aiError(r.code);
+  const prompt = r.data.content?.[0]?.text?.trim() || "a cat coding on a laptop while drinking coffee";
   const image = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?nologo=true&model=flux&width=512&height=512`;
   return { status: 200, body: { image, text: prompt } };
 }

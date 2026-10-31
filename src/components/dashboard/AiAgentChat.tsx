@@ -2,6 +2,8 @@ import { useState, useRef, useEffect } from "react";
 import { Sparkles, Send, X, Loader2, Bot, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
+import { aiKeyProblem, type AiKeyInfo, type AiKeyProblem } from "@/lib/ai-key";
+import { AiKeyEmptyState } from "@/components/ai/AiKeyEmptyState";
 import { toast } from "sonner";
 
 export interface AgentAction {
@@ -33,6 +35,17 @@ export function AiAgentChat({ onAction }: Props) {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  // The assistant runs on the user's own Anthropic key; without one we show the empty state.
+  const [keyProblem, setKeyProblem] = useState<AiKeyProblem | null>(null);
+  const [keyChecked, setKeyChecked] = useState(false);
+
+  useEffect(() => {
+    if (!open || keyChecked) return;
+    setKeyChecked(true);
+    api<{ key: AiKeyInfo | null }>("/ai-key")
+      .then((r) => setKeyProblem(r.key ? null : "missing"))
+      .catch(() => {});
+  }, [open, keyChecked]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -56,6 +69,12 @@ export function AiAgentChat({ onAction }: Props) {
         onAction(a);
       }
     } catch (e: any) {
+      const problem = aiKeyProblem(e);
+      if (problem) {
+        setKeyProblem(problem);
+        setMessages((prev) => prev.slice(0, -1));
+        return;
+      }
       toast.error(e.message ?? "Chyba AI agenta");
       setMessages((prev) => [...prev, { role: "assistant", content: "Hmm, něco se pokazilo. Zkus to znova." }]);
     } finally {
@@ -84,7 +103,7 @@ export function AiAgentChat({ onAction }: Props) {
               </div>
               <div>
                 <div className="text-sm font-semibold">AI Asistent</div>
-                <div className="text-xs text-muted-foreground tabular-nums">Claude (Anthropic)</div>
+                <div className="text-xs text-muted-foreground tabular-nums">Claude (Anthropic) · tvůj klíč</div>
               </div>
             </div>
             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setOpen(false)}>
@@ -92,6 +111,12 @@ export function AiAgentChat({ onAction }: Props) {
             </Button>
           </div>
 
+          {keyProblem ? (
+            <div className="flex-1 overflow-y-auto px-4 py-6 flex items-center">
+              <AiKeyEmptyState problem={keyProblem} className="w-full" />
+            </div>
+          ) : (
+          <>
           <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
             {messages.map((m, i) => (
               <div key={i} className={`flex gap-2 ${m.role === "user" ? "flex-row-reverse" : ""}`}>
@@ -145,6 +170,8 @@ export function AiAgentChat({ onAction }: Props) {
               <Send className="h-4 w-4" />
             </Button>
           </form>
+          </>
+          )}
         </div>
       )}
     </>

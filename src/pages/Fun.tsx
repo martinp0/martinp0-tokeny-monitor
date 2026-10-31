@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { api, ApiError } from "@/lib/api";
 import { Button } from "@/components/ui/button";
@@ -6,6 +6,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Activity, Laugh, Image, Loader2, ArrowLeft, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
+import { aiKeyProblem, type AiKeyInfo, type AiKeyProblem } from "@/lib/ai-key";
+import { AiKeyEmptyState } from "@/components/ai/AiKeyEmptyState";
 
 type FunResult = { joke?: string; image?: string; text?: string };
 
@@ -19,6 +21,13 @@ export default function Fun() {
   const [image, setImage] = useState<string | null>(null);
   const [loadingJoke, setLoadingJoke] = useState(false);
   const [loadingImage, setLoadingImage] = useState(false);
+  // Runs on the user's own Anthropic key (BYOK); null = fine or not known yet.
+  const [keyProblem, setKeyProblem] = useState<AiKeyProblem | null>(null);
+  useEffect(() => {
+    api<{ key: AiKeyInfo | null }>("/ai-key")
+      .then((r) => setKeyProblem(r.key ? null : "missing"))
+      .catch(() => {}); // signed out: the buttons explain that on click
+  }, []);
 
   const generateJoke = async () => {
     setLoadingJoke(true);
@@ -26,7 +35,9 @@ export default function Fun() {
       const data = await api<FunResult>("/fun-ai", { body: { mode: "joke" } });
       setJoke(data.joke ?? null);
     } catch (e) {
-      toast.error(funError(e, "Nepodařilo se vygenerovat vtip"));
+      const problem = aiKeyProblem(e);
+      if (problem) setKeyProblem(problem);
+      else toast.error(funError(e, "Nepodařilo se vygenerovat vtip"));
     } finally {
       setLoadingJoke(false);
     }
@@ -43,7 +54,9 @@ export default function Fun() {
         toast.info(data?.text || "Obrázek se nepodařilo vygenerovat, zkus to znovu!");
       }
     } catch (e) {
-      toast.error(funError(e, "Nepodařilo se vygenerovat obrázek"));
+      const problem = aiKeyProblem(e);
+      if (problem) setKeyProblem(problem);
+      else toast.error(funError(e, "Nepodařilo se vygenerovat obrázek"));
     } finally {
       setLoadingImage(false);
     }
@@ -53,10 +66,10 @@ export default function Fun() {
     <main className="min-h-screen bg-background p-4 md:p-8">
       <Helmet>
         <title>AI Zábava – generátor vtipů a obrázků | Tokeny</title>
-        <meta name="description" content="Generuj české AI vtipy a unikátní obrázky pomocí Gemini. Zdarma, bez registrace." />
+        <meta name="description" content="Generuj české AI vtipy a obrázky pomocí Claude s vlastním API klíčem Anthropic." />
         <link rel="canonical" href="https://tokeny.martinpohl.cz/fun" />
         <meta property="og:title" content="AI Zábava – vtipy a obrázky generované AI" />
-        <meta property="og:description" content="Generátor českých vtipů a obrázků poháněný Gemini." />
+        <meta property="og:description" content="Generátor českých vtipů a obrázků poháněný Claude (tvůj vlastní klíč Anthropic)." />
         <meta property="og:url" content="https://tokeny.martinpohl.cz/fun" />
       </Helmet>
       <div className="max-w-2xl mx-auto space-y-8">
@@ -77,6 +90,8 @@ export default function Fun() {
           </div>
         </div>
 
+        {keyProblem && <AiKeyEmptyState problem={keyProblem} />}
+
         {/* Joke Section */}
         <Card className="glass animate-fade-in" style={{ animationDelay: "100ms", animationFillMode: "forwards" }}>
           <CardContent className="p-6 space-y-4">
@@ -95,7 +110,7 @@ export default function Fun() {
 
             <Button
               onClick={generateJoke}
-              disabled={loadingJoke}
+              disabled={loadingJoke || keyProblem === "missing"}
               className="gap-2 tabular-nums hover:opacity-90 border-0"
             >
               {loadingJoke ? (
@@ -139,7 +154,7 @@ export default function Fun() {
 
             <Button
               onClick={generateImage}
-              disabled={loadingImage}
+              disabled={loadingImage || keyProblem === "missing"}
               variant="outline"
               className="gap-2 tabular-nums glass glass-hover border-accent/30 text-primary"
             >
@@ -154,7 +169,7 @@ export default function Fun() {
         </Card>
 
         <p className="text-center text-muted-foreground tabular-nums text-xs animate-fade-in" style={{ animationDelay: "300ms", animationFillMode: "forwards" }}>
-          ✨ Poháněno AI • Každý výsledek je unikátní ✨
+          ✨ Claude od Anthropic na tvém vlastním klíči • obrázky kreslí Pollinations.ai ✨
         </p>
       </div>
     </main>

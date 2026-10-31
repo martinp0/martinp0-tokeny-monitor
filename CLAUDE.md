@@ -31,7 +31,7 @@ CI template: `ci/github-actions-ci.yml` (lint, typecheck, test, build). Deploys 
 - **One function** (Vercel Hobby): `api/index.ts` runs the Hono app from `server/app.ts` (`basePath("/api")`). `vercel.json` rewrites `/api/:path*` → `/api?__path=:path*`; this rewrite must stay first. Don't add more files under `api/`.
 - **Cron:** one daily job `/api/cron/daily` (Hobby allows daily only): ČNB USD/CZK rate, Pro auto-sync, budget check (`server/cron.ts`). Protected by `CRON_SECRET` (Vercel sends it as Bearer).
 - **Auth** (`server/auth.ts`): `/api/auth/*` is a same-origin proxy to Neon Auth (`@neon/auth/server` `handleAuthProxyRequest`), so session cookies are first-party. A request is authenticated by (1) those cookies, (2) `Authorization: Bearer <Neon Auth JWT>` (verified against the JWKS), or (3) a personal `orm_…` token (sha256 in `mcp_tokens`; MCP and `/api/usage-summary` only). Cookie-authenticated writes from a foreign `Origin` are rejected.
-- **Env (Vercel → Production):** `DATABASE_URL` (pooled Neon URL), `NEON_AUTH_BASE_URL`, `NEON_AUTH_COOKIE_SECRET` (≥32 chars), `CREDENTIALS_ENCRYPTION_KEY` (32 bytes base64, AES-256-GCM for provider keys), `CRON_SECRET`, `APP_URL`; optional `ANTHROPIC_API_KEY`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_MONTHLY`, `STRIPE_PRICE_YEARLY`, `STRIPE_PORTAL_CONFIGURATION` (bpc_… Tokeny portal), `STRIPE_TRIAL_DAYS`. Never read the marketplace-injected `POSTGRES_*` / `SUPABASE_*` variables (a test enforces `DATABASE_URL`). Never commit real values; `.env.example` lists the names.
+- **Env (Vercel → Production):** `DATABASE_URL` (pooled Neon URL), `NEON_AUTH_BASE_URL`, `NEON_AUTH_COOKIE_SECRET` (≥32 chars), `CREDENTIALS_ENCRYPTION_KEY` (32 bytes base64, AES-256-GCM for provider keys), `CRON_SECRET`, `APP_URL`; optional `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_MONTHLY`, `STRIPE_PRICE_YEARLY`, `STRIPE_PORTAL_CONFIGURATION` (bpc_… Tokeny portal), `STRIPE_TRIAL_DAYS`. Never read the marketplace-injected `POSTGRES_*` / `SUPABASE_*` variables (a test enforces `DATABASE_URL`). Never commit real values; `.env.example` lists the names.
 - Public URLs users save stay on the site: `/api/mcp`, `/api/og-dashboard`, `/shared/:token` (`src/lib/public-urls.ts`).
 - The old Supabase/Lovable setup and its move are historical: `docs/migrate-off-lovable.md`.
 
@@ -67,7 +67,7 @@ The frontend needs no backend keys (everything is same-origin `/api`). Optional:
 | `credentials`, `credentials/:id/sync` | Provider keys (encrypted with `CREDENTIALS_ENCRYPTION_KEY`, only a masked preview is returned) and user-initiated sync (`server/lib/sync-runner.ts`) |
 | `budget-alert`, `mcp-tokens`, `shares` | Pro features (403 `pro_required` for free users) |
 | `subscription`, `billing/checkout`, `billing/portal`, `stripe-webhook` | Stripe Pro tier; `subscriptions` is written only by the webhook |
-| `chat-agent`, `fun-ai` | AI features (`ANTHROPIC_API_KEY`); chat agent is Pro, data tools scoped to the caller |
+| `chat-agent`, `fun-ai`, `ai-key` | AI features with the **user's own** Anthropic key (`ai_keys`, encrypted, BYOK; no server key, never add one); chat agent is Pro, data tools scoped to the caller |
 | `mcp` | Stateless Streamable-HTTP MCP server (`server/mcp.ts`, `mcp-lite`); `Authorization: Bearer orm_…`, Pro only, every tool scoped to the token owner |
 | `usage-summary` | JSON summary for the native apps and widgets (session cookie, JWT or Pro `orm_` token) |
 | `shared/:token`, `og-dashboard` | Public share snapshot / OG image (SVG) |
