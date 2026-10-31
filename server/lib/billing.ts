@@ -244,3 +244,26 @@ export function portalSessionParams(customer: string, returnUrl: string, configu
   const cfg = configuration?.trim();
   return { customer, return_url: returnUrl, ...(cfg && /^bpc_[A-Za-z0-9]+$/.test(cfg) ? { configuration: cfg } : {}) };
 }
+
+/** Version of the terms of service at /terms. Bump when the terms change materially. */
+export const TERMS_VERSION = "2026-10-31";
+
+export interface CheckoutConsent {
+  terms_version: string;
+  consent_at: string;
+  consent_client_at: string;
+  immediate_start: "true";
+}
+
+/**
+ * Consent the consumer gave in the upgrade dialog (terms + request to start the digital service
+ * right away, § 1823 / § 1834 OZ). Checkout is refused without it. The server timestamp is the
+ * authoritative one; the client time is kept only as a hint.
+ */
+export function parseCheckoutConsent(v: unknown, now = new Date()): CheckoutConsent | null {
+  if (!v || typeof v !== "object") return null;
+  const c = v as Record<string, unknown>;
+  if (c.terms !== true || c.immediateStart !== true) return null;
+  const client = typeof c.at === "string" && !Number.isNaN(Date.parse(c.at)) ? new Date(c.at).toISOString() : "";
+  return { terms_version: TERMS_VERSION, consent_at: now.toISOString(), consent_client_at: client, immediate_start: "true" };
+}

@@ -1,7 +1,7 @@
 // Stripe Pro billing: checkout, customer portal, subscription status, webhook, account-deletion hooks.
 import Stripe from "stripe";
 import type { Db } from "./db.js";
-import { handleStripeEvent, parseInterval, portalSessionParams, safeAppUrl, trialDaysFor, type StripeSubscriptionLike } from "./lib/billing.js";
+import { handleStripeEvent, parseCheckoutConsent, parseInterval, portalSessionParams, safeAppUrl, trialDaysFor, type StripeSubscriptionLike } from "./lib/billing.js";
 import type { BillingDeps, StripeSubLite } from "./lib/account-deletion.js";
 import { isProSubscription } from "./lib/plan.js";
 import { getSubscription, upsertSubscription, userExists, userIdByCustomer } from "./repo.js";
@@ -41,11 +41,13 @@ export async function subscriptionStatus(db: Db, userId: string) {
 export async function createCheckout(
   db: Db,
   user: { id: string; email: string | null },
-  body: { interval?: unknown },
+  body: { interval?: unknown; consent?: unknown },
   origin: string | null,
 ): Promise<Result> {
   const interval = parseInterval(body?.interval ?? "month");
   if (!interval) return { status: 400, body: { error: "interval must be 'month' or 'year'" } };
+  const consent = parseCheckoutConsent(body?.consent);
+  if (!consent) return { status: 400, body: { error: "consent_required" } };
   const priceId = priceIds()[interval];
   if (!priceId || !stripeConfigured()) {
     console.error(`checkout: Stripe or STRIPE_PRICE_${interval === "month" ? "MONTHLY" : "YEARLY"} not configured`);
@@ -68,7 +70,7 @@ export async function createCheckout(
   }
   const trialDays = trialDaysFor(process.env.STRIPE_TRIAL_DAYS, !!existing?.stripe_subscription_id);
   const base = safeAppUrl(origin, allowedOrigins(), appUrl());
-  const metadata = { tokeny_user_id: user.id, app: "tokeny" };
+  const metadata = { tokeny_user_id: user.id, app: "tokeny", ...consent };
   const session = await stripe.checkout.sessions.create({
     mode: "subscription",
     customer: customerId,
@@ -78,6 +80,7 @@ export async function createCheckout(
     cancel_url: `${base}/settings?checkout=canceled`,
     allow_promotion_codes: true,
     locale: "cs",
+    custom_text: { submit: { message: `Platí obchodní podmínky Tokeny: ${appUrl()}/terms` } },
     metadata,
     subscription_data: { metadata, ...(trialDays > 0 ? { trial_period_days: trialDays } : {}) },
   });

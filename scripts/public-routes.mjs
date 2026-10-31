@@ -19,7 +19,8 @@ export const PUBLIC_ROUTES = [
   { path: "/blog/multi-provider-monitoring", lastmod: "2026-10-30", changefreq: "monthly", priority: "0.8" },
   { path: "/blog/grok-token-optimization", lastmod: "2026-10-07", changefreq: "monthly", priority: "0.8" },
   { path: "/blog/kolik-stoji-ai-agenti", lastmod: "2026-10-30", changefreq: "monthly", priority: "0.8" },
-  { path: "/privacy", lastmod: "2026-10-30", changefreq: "yearly", priority: "0.3" },
+  { path: "/privacy", lastmod: "2026-10-31", changefreq: "yearly", priority: "0.3" },
+  { path: "/terms", lastmod: "2026-10-31", changefreq: "yearly", priority: "0.3" },
 ];
 
 export function buildSitemap() {
