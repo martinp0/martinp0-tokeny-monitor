@@ -11,6 +11,7 @@
         "npm:@capacitor/core@^8.3.1",
         "npm:@capacitor/ios@^8.3.1",
         "npm:@eslint/js@^9.32.0",
+        "npm:@fontsource/inter@^5.3.0",
         "npm:@fontsource/jetbrains-mono@^5.3.0",
         "npm:@fontsource/space-grotesk@^5.3.0",
         "npm:@hookform/resolvers@^3.10.0",
