@@ -9,35 +9,35 @@
     },
     {
       "source": "/auth",
-      "destination": "/app.html"
+      "destination": "/app"
     },
     {
       "source": "/auth/callback",
-      "destination": "/app.html"
+      "destination": "/app"
     },
     {
       "source": "/reset-password",
-      "destination": "/app.html"
+      "destination": "/app"
     },
     {
       "source": "/dashboard",
-      "destination": "/app.html"
+      "destination": "/app"
     },
     {
       "source": "/settings",
-      "destination": "/app.html"
+      "destination": "/app"
     },
     {
       "source": "/profile",
-      "destination": "/app.html"
+      "destination": "/app"
     },
     {
       "source": "/fun",
-      "destination": "/app.html"
+      "destination": "/app"
     },
     {
       "source": "/shared/:token",
-      "destination": "/app.html"
+      "destination": "/app"
     }
   ],
   "headers": [
