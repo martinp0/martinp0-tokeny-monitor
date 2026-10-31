@@ -1,0 +1,9 @@
+{
+  "_comment": "NOT active. Merged into vercel.json by `node scripts/pohl-uk-redirect.mjs --enable` (see docs/domain-redirect.md). Only enable once login works on tokeny.martinpohl.cz.",
+  "redirect": {
+    "source": "/:path*",
+    "has": [{ "type": "host", "value": "tokeny.pohl.uk" }],
+    "destination": "https://tokeny.martinpohl.cz/:path*",
+    "statusCode": 301
+  }
+}
