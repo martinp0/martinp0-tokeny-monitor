@@ -85,6 +85,37 @@ CREATE TABLE IF NOT EXISTS public.budget_alerts (
   updated_at         timestamptz NOT NULL DEFAULT now()
 );
 
+-- Budget in the user's chosen currency (compared in USD at the ČNB rate), several thresholds,
+-- optional per-provider budgets (provider_source → amount). monthly_budget_usd/threshold_pct are
+-- kept in sync for older readers (usage summary / MCP). notify_email is legacy: no e-mail is sent.
+ALTER TABLE public.budget_alerts ADD COLUMN IF NOT EXISTS budget_amount numeric;
+ALTER TABLE public.budget_alerts ADD COLUMN IF NOT EXISTS budget_currency text NOT NULL DEFAULT 'USD';
+ALTER TABLE public.budget_alerts ADD COLUMN IF NOT EXISTS thresholds integer[] NOT NULL DEFAULT '{50,80,100}';
+ALTER TABLE public.budget_alerts ADD COLUMN IF NOT EXISTS forecast_alert boolean NOT NULL DEFAULT true;
+ALTER TABLE public.budget_alerts ADD COLUMN IF NOT EXISTS provider_budgets jsonb NOT NULL DEFAULT '{}'::jsonb;
+UPDATE public.budget_alerts SET budget_amount = monthly_budget_usd, thresholds = ARRAY[threshold_pct]
+ WHERE budget_amount IS NULL;
+ALTER TABLE public.budget_alerts DROP CONSTRAINT IF EXISTS budget_alerts_currency_check;
+ALTER TABLE public.budget_alerts ADD CONSTRAINT budget_alerts_currency_check CHECK (budget_currency IN ('USD', 'CZK'));
+
+-- ---------------------------------------------------------------- in-app budget alerts (written by the daily cron)
+-- One row per (month, kind, scope, threshold): the unique key is the dedupe, the cron may rerun.
+CREATE TABLE IF NOT EXISTS public.budget_events (
+  id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id       uuid NOT NULL REFERENCES neon_auth."user"(id) ON DELETE CASCADE,
+  period        text NOT NULL,                       -- 'YYYY-MM' (UTC)
+  kind          text NOT NULL CHECK (kind IN ('threshold', 'forecast')),
+  scope         text NOT NULL DEFAULT 'total',       -- 'total' or a provider_source
+  threshold_pct integer NOT NULL DEFAULT 0,          -- 0 for forecast alerts
+  spent_usd     double precision NOT NULL DEFAULT 0,
+  budget_usd    double precision NOT NULL DEFAULT 0,
+  forecast_usd  double precision,
+  read_at       timestamptz,
+  created_at    timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT budget_events_dedupe_key UNIQUE (user_id, period, kind, scope, threshold_pct)
+);
+CREATE INDEX IF NOT EXISTS idx_budget_events_user_created ON public.budget_events (user_id, created_at DESC);
+
 -- ---------------------------------------------------------------- personal API / MCP tokens (sha256 only)
 CREATE TABLE IF NOT EXISTS public.mcp_tokens (
   id           uuid PRIMARY KEY DEFAULT gen_random_uuid(),

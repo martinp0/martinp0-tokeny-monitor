@@ -2,9 +2,10 @@
 import type { Db } from "./db.js";
 import { runCredentialSync } from "./lib/sync-runner.js";
 import {
-  aggregateActivity, budgetAlertsForCron, decryptCredential, dueCredentialsForCron, markBudgetNotified,
+  budgetAlertsForCron, decryptCredential, dueCredentialsForCron, getExchangeRate, insertBudgetEvents, markBudgetNotified,
   markCredentialSync, saveExchangeRate,
 } from "./repo.js";
+import { alertsFor, budgetStatus, FALLBACK_USD_CZK } from "./budget-status.js";
 
 const CNB_URL = "https://www.cnb.cz/cs/financni-trhy/devizovy-trh/kurzy-devizoveho-trhu/kurzy-devizoveho-trhu/denni_kurz.txt";
 
@@ -55,22 +56,24 @@ export async function autoSync(db: Db, budgetMs = 200_000, max = 50) {
   return { due: due.length, processed: results.length, ok: results.filter((r) => r.ok).length };
 }
 
-/** Same rule as the former check-budget: mark once per month when spend crosses the threshold (no e-mail is sent). */
-export async function checkBudgets(db: Db, now = new Date()) {
-  const monthStart = `${now.toISOString().slice(0, 7)}-01`;
+/**
+ * In-app budget alerts for Pro users: thresholds (e.g. 50/80/100 % of the budget, total and per
+ * provider) and "forecast exceeds budget". Deduped per month by budget_events' unique key, so the
+ * cron is safe to rerun. No e-mail is sent (there is no e-mail service).
+ */
+export async function checkBudgets(db: Db, now = new Date(), onlyUserId: string | null = null) {
   let flagged = 0;
-  const alerts = await budgetAlertsForCron(db);
-  for (const a of alerts) {
-    const [agg] = await aggregateActivity(db, a.user_id, { groupBy: "none", from: monthStart });
-    const spent = Number(agg?.cost_total ?? 0);
-    const pct = a.monthly_budget_usd > 0 ? (spent / a.monthly_budget_usd) * 100 : 0;
-    const notifiedThisMonth = a.last_notified_at && new Date(a.last_notified_at).toISOString().slice(0, 7) === now.toISOString().slice(0, 7);
-    if (pct >= a.threshold_pct && !notifiedThisMonth) {
-      await markBudgetNotified(db, a.user_id);
-      flagged++;
+  const rate = (await getExchangeRate(db))?.rate ?? FALLBACK_USD_CZK;
+  const budgets = await budgetAlertsForCron(db, onlyUserId);
+  for (const b of budgets) {
+    const status = await budgetStatus(db, b.user_id, b, now, rate);
+    const inserted = await insertBudgetEvents(db, b.user_id, status.period, alertsFor(b, status));
+    if (inserted > 0) {
+      await markBudgetNotified(db, b.user_id);
+      flagged += inserted;
     }
   }
-  return { alerts: alerts.length, flagged };
+  return { alerts: budgets.length, flagged };
 }
 
 export async function runDaily(db: Db) {

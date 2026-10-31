@@ -27,7 +27,7 @@ AI API účty umí nenápadně růst. Tokeny ti ukáže, **které modely, provid
 - ⏰ **Denní auto-sync** (Pro) — Vercel Cron spouští sync jednou denně v 05:00 UTC, s per-credential toggle v UI
 - 📁 **CSV import** — rychlý import OpenRouter exportu přes drag & drop
 - 💱 **CZK & USD** — automatický kurz z ČNB, přepínání jedním klikem
-- 🚨 **Budget alerty** — hlídání měsíčního rozpočtu a prahů pro upozornění
+- 🚨 **Rozpočet a odhad** (Pro) — měsíční rozpočet v Kč nebo USD (celkem i podle poskytovatele), odhad útraty do konce měsíce s rozpětím a upozornění v aplikaci při 50/80/100 % (kontrola jednou denně, bez e-mailů)
 - ☕ **Real-life srovnání** — kolik káv/piv/pizz odpovídá tvým API nákladům
 - 🤖 **AI agent** — ptej se dashboardu přirozeným jazykem (v obou tarifech, běží na tvém vlastním API klíči Anthropic, OpenAI nebo OpenRouter; žádný sdílený serverový klíč)
 - 🔗 **MCP server** — připoj Claude Desktop, Cursor nebo Zed a ptej se na náklady přímo v chatu

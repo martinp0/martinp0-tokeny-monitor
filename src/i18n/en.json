@@ -173,7 +173,7 @@
         },
         "alerts": {
           "title": "Budget alerts",
-          "desc": "Set a monthly limit and get an email as you approach it."
+          "desc": "With Pro, set a monthly budget and see a month-end spend forecast. The app alerts you as you approach the budget."
         },
         "anomalies": {
           "title": "Anomaly detection",
@@ -225,7 +225,7 @@
         },
         {
           "q": "How much does it cost?",
-          "a": "The core dashboard is free. The Pro plan (99 CZK per month or 990 CZK per year) adds automatic sync, unlimited alerts, cost forecasting, exports, sharing and the MCP server. The AI assistant is in both plans and runs on your own API key (Anthropic, OpenAI or OpenRouter), so you pay that provider directly for its tokens; Tokeny charges nothing for them. The free plan stays."
+          "a": "The core dashboard is free. The Pro plan (99 CZK per month or 990 CZK per year) adds daily automatic sync, a monthly budget with in-app alerts (total and per provider), a month-end spend forecast, exports, sharing and the MCP server. The AI assistant is in both plans and runs on your own API key (Anthropic, OpenAI or OpenRouter), so you pay that provider directly for its tokens; Tokeny charges nothing for them. The free plan stays."
         },
         {
           "q": "What is the MCP server?",
@@ -300,8 +300,8 @@
       "unlimitedProviders": "OpenRouter, Anthropic and OpenAI together",
       "fullHistory": "Unlimited history",
       "autoSync": "Daily automatic sync",
-      "budgetAlerts": "Budget alerts in the app",
-      "forecast": "Month-end cost forecast",
+      "budgetAlerts": "Monthly budget with in-app alerts (total and per provider)",
+      "forecast": "Month-end spend forecast with a range",
       "aiAgent": "AI assistant over your data (bring your own Anthropic, OpenAI or OpenRouter key)",
       "exports": "PDF and PNG export",
       "sharing": "Shared dashboards",
@@ -375,5 +375,64 @@
     "claudeDesktop": {
       "hint": "Claude Desktop connects to remote servers through mcp-remote (needs Node.js). Add to claude_desktop_config.json:"
     }
+  },
+  "budget": {
+    "title": "Budget & forecast",
+    "spent": "Spent this month",
+    "of": "of {{budget}}",
+    "noBudget": "No budget set yet.",
+    "setBudget": "Set a budget",
+    "edit": "Edit budget",
+    "forecast": "Month-end forecast",
+    "range": "{{low}} – {{high}} (~80% range)",
+    "confidence": {
+      "none": "Not enough data",
+      "low": "Low confidence",
+      "medium": "Medium confidence",
+      "high": "High confidence"
+    },
+    "noForecast": "The forecast needs at least one full day of data. Check back tomorrow.",
+    "methodTitle": "How the forecast works",
+    "method": "Weighted average daily spend over the last {{n}} full days (recent days weigh more, 7-day half-life) × days left ({{remaining}}) + what is already spent. The ~80% range comes from how much daily spend varies; fewer days make it wider. Days are UTC, data is from the last sync.",
+    "methodNone": "The forecast needs at least one full day of data. Until then we only show what is spent.",
+    "over": "At this pace you will exceed the budget by about {{amount}}.",
+    "under": "At this pace about {{amount}} of the budget will be left.",
+    "overNow": "Budget exceeded by {{amount}}.",
+    "day": "Day {{day}} of {{days}}",
+    "providers": "By provider",
+    "noBudgetShort": "no budget",
+    "teaserTitle": "Budget and month-end forecast",
+    "teaserDesc": "With Pro you see what you will spend by the end of the month, and the app alerts you as you approach your budget.",
+    "teaserCta": "Try Pro",
+    "loadError": "Could not load the budget.",
+    "legendActual": "Actual",
+    "legendForecast": "Forecast",
+    "settings": {
+      "title": "Budget & alerts",
+      "amount": "Monthly budget",
+      "currency": "Currency",
+      "thresholds": "Alert at",
+      "thresholdsHint": "Pick up to 6 thresholds, in % of the budget.",
+      "forecastAlert": "Alert when the month-end forecast exceeds the budget",
+      "providerBudgets": "Budget per provider (optional)",
+      "providerHint": "Empty = no separate budget.",
+      "enabled": "Alerts on",
+      "save": "Save",
+      "saved": "Saved",
+      "remove": "Delete budget",
+      "removed": "Budget deleted",
+      "inApp": "Alerts appear in the app under the bell on the dashboard. We check once a day after the sync. No e-mails yet.",
+      "invalid": "Enter a positive amount."
+    }
+  },
+  "alerts": {
+    "title": "Alerts",
+    "empty": "No alerts yet.",
+    "markAll": "Mark all as read",
+    "total": "Total",
+    "threshold": "{{scope}}: {{pct}}% of budget – {{spent}} of {{budget}}",
+    "forecast": "{{scope}}: forecast {{forecast}} exceeds the {{budget}} budget",
+    "note": "Checked once a day. No e-mails yet.",
+    "open": "Open alerts ({{count}} unread)"
   }
 }

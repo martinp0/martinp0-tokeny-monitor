@@ -173,7 +173,7 @@
         },
         "alerts": {
           "title": "Hlídání rozpočtu",
-          "desc": "Nastav měsíční limit a dostaneš e-mail, jakmile se k němu blížíš."
+          "desc": "S Pro nastavíš měsíční rozpočet a uvidíš odhad útraty do konce měsíce. Když se k rozpočtu blížíš, upozorní tě aplikace."
         },
         "anomalies": {
           "title": "Detekce anomálií",
@@ -225,7 +225,7 @@
         },
         {
           "q": "Kolik to stojí?",
-          "a": "Základní přehled je zdarma. Tarif Pro (99 Kč měsíčně nebo 990 Kč ročně) přidává automatickou synchronizaci, neomezené alerty, predikci nákladů, exporty, sdílení a MCP server. AI asistent je v obou tarifech a běží na tvém vlastním API klíči (Anthropic, OpenAI nebo OpenRouter), takže AI tokeny platíš přímo zvolenému poskytovateli; Tokeny si za ně nic neúčtuje. Free tarif zůstane."
+          "a": "Základní přehled je zdarma. Tarif Pro (99 Kč měsíčně nebo 990 Kč ročně) přidává denní automatickou synchronizaci, měsíční rozpočet s upozorněním v aplikaci (celkem i podle poskytovatele), odhad útraty do konce měsíce, exporty, sdílení a MCP server. AI asistent je v obou tarifech a běží na tvém vlastním API klíči (Anthropic, OpenAI nebo OpenRouter), takže AI tokeny platíš přímo zvolenému poskytovateli; Tokeny si za ně nic neúčtuje. Free tarif zůstane."
         },
         {
           "q": "Co je MCP server?",
@@ -300,8 +300,8 @@
       "unlimitedProviders": "OpenRouter, Anthropic i OpenAI najednou",
       "fullHistory": "Celá historie bez omezení",
       "autoSync": "Automatická synchronizace jednou denně",
-      "budgetAlerts": "Rozpočtové alerty v aplikaci",
-      "forecast": "Predikce nákladů do konce měsíce",
+      "budgetAlerts": "Měsíční rozpočet s upozorněním v aplikaci (celkem i podle poskytovatele)",
+      "forecast": "Odhad útraty do konce měsíce s rozpětím",
       "aiAgent": "AI asistent nad tvými daty (vlastní klíč Anthropic, OpenAI nebo OpenRouter)",
       "exports": "Export do PDF a PNG",
       "sharing": "Sdílené dashboardy",
@@ -375,5 +375,64 @@
     "claudeDesktop": {
       "hint": "Claude Desktop připojí vzdálený server přes mcp-remote (potřebuje Node.js). Vlož do claude_desktop_config.json:"
     }
+  },
+  "budget": {
+    "title": "Rozpočet a odhad",
+    "spent": "Utraceno tento měsíc",
+    "of": "z {{budget}}",
+    "noBudget": "Rozpočet zatím není nastavený.",
+    "setBudget": "Nastavit rozpočet",
+    "edit": "Upravit rozpočet",
+    "forecast": "Odhad na konec měsíce",
+    "range": "{{low}} – {{high}} (rozpětí ~80 %)",
+    "confidence": {
+      "none": "Málo dat",
+      "low": "Nízká jistota",
+      "medium": "Střední jistota",
+      "high": "Vysoká jistota"
+    },
+    "noForecast": "Na odhad zatím chybí aspoň jeden celý den dat. Zkus to zítra.",
+    "methodTitle": "Jak odhad počítáme",
+    "method": "Vážený průměr denní útraty za posledních {{n}} celých dní (novější dny mají větší váhu, poločas 7 dní) × zbývající dny ({{remaining}}) + co už je utracené. Rozpětí ~80 % vychází z kolísání denní útraty; s méně dny je širší. Dny počítáme v UTC, data jsou z poslední synchronizace.",
+    "methodNone": "Odhad potřebuje aspoň jeden celý den dat. Do té doby ukazujeme jen to, co je utracené.",
+    "over": "Podle odhadu rozpočet překročíš asi o {{amount}}.",
+    "under": "Podle odhadu zůstane rezerva asi {{amount}}.",
+    "overNow": "Rozpočet je překročený o {{amount}}.",
+    "day": "Den {{day}} z {{days}}",
+    "providers": "Podle poskytovatele",
+    "noBudgetShort": "bez rozpočtu",
+    "teaserTitle": "Rozpočet a odhad do konce měsíce",
+    "teaserDesc": "S Pro uvidíš, kolik utratíš do konce měsíce, a v aplikaci tě upozorníme, když se blížíš k rozpočtu.",
+    "teaserCta": "Vyzkoušet Pro",
+    "loadError": "Rozpočet se nepodařilo načíst.",
+    "legendActual": "Skutečnost",
+    "legendForecast": "Odhad",
+    "settings": {
+      "title": "Rozpočet a upozornění",
+      "amount": "Měsíční rozpočet",
+      "currency": "Měna",
+      "thresholds": "Upozornit při",
+      "thresholdsHint": "Vyber až 6 hranic v % rozpočtu.",
+      "forecastAlert": "Upozornit, když odhad na konec měsíce překročí rozpočet",
+      "providerBudgets": "Rozpočet podle poskytovatele (volitelné)",
+      "providerHint": "Prázdné pole = bez vlastního rozpočtu.",
+      "enabled": "Upozornění zapnutá",
+      "save": "Uložit",
+      "saved": "Uloženo",
+      "remove": "Smazat rozpočet",
+      "removed": "Rozpočet smazán",
+      "inApp": "Upozornění uvidíš v aplikaci pod zvonečkem na dashboardu. Kontrolujeme jednou denně po synchronizaci. E-maily zatím neposíláme.",
+      "invalid": "Zadej kladnou částku."
+    }
+  },
+  "alerts": {
+    "title": "Upozornění",
+    "empty": "Zatím žádná upozornění.",
+    "markAll": "Označit vše jako přečtené",
+    "total": "Celkem",
+    "threshold": "{{scope}}: {{pct}} % rozpočtu – {{spent}} z {{budget}}",
+    "forecast": "{{scope}}: odhad {{forecast}} překročí rozpočet {{budget}}",
+    "note": "Kontrolujeme jednou denně. E-mailem zatím neposíláme.",
+    "open": "Otevřít upozornění ({{count}} nepřečtených)"
   }
 }

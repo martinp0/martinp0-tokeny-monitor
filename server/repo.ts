@@ -246,31 +246,121 @@ export async function aggregateActivity(
 
 // ---------------------------------------------------------------- budget alerts
 
-export async function getBudgetAlert(db: Db, userId: string) {
-  const { rows } = await db.query(
-    `select id, monthly_budget_usd::float8 as monthly_budget_usd, notify_email, threshold_pct, enabled,
-            last_notified_at, created_at, updated_at
-       from budget_alerts where user_id = $1`,
-    [userId],
-  );
+const BUDGET_COLS = `id, monthly_budget_usd::float8 as monthly_budget_usd, threshold_pct, enabled,
+  coalesce(budget_amount, monthly_budget_usd)::float8 as budget_amount, budget_currency, thresholds, forecast_alert,
+  provider_budgets, last_notified_at, created_at, updated_at`;
+
+export interface BudgetRow {
+  id: string;
+  monthly_budget_usd: number;
+  threshold_pct: number;
+  enabled: boolean;
+  budget_amount: number;
+  budget_currency: "USD" | "CZK";
+  thresholds: number[];
+  forecast_alert: boolean;
+  provider_budgets: Record<string, number>;
+  last_notified_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+/** The caller's budget settings (notify_email is legacy and never returned). */
+export async function getBudgetAlert(db: Db, userId: string): Promise<BudgetRow | null> {
+  const { rows } = await db.query<BudgetRow>(`select ${BUDGET_COLS} from budget_alerts where user_id = $1`, [userId]);
   return rows[0] ?? null;
 }
 
 export async function saveBudgetAlert(
   db: Db,
   userId: string,
-  a: { monthly_budget_usd: number; threshold_pct: number; notify_email: string | null; enabled: boolean },
-) {
-  const { rows } = await db.query(
-    `insert into budget_alerts (user_id, monthly_budget_usd, threshold_pct, notify_email, enabled)
-     values ($1, $2, $3, $4, $5)
-     on conflict (user_id) do update set monthly_budget_usd = $2, threshold_pct = $3, notify_email = $4,
-       enabled = $5, updated_at = now()
-     returning id, monthly_budget_usd::float8 as monthly_budget_usd, notify_email, threshold_pct, enabled,
-       last_notified_at, created_at, updated_at`,
-    [userId, a.monthly_budget_usd, a.threshold_pct, a.notify_email, a.enabled],
+  a: {
+    budget_amount: number; budget_currency: "USD" | "CZK"; thresholds: number[]; forecast_alert: boolean;
+    provider_budgets: Record<string, number>; enabled: boolean; monthly_budget_usd: number;
+  },
+): Promise<BudgetRow> {
+  const { rows } = await db.query<BudgetRow>(
+    `insert into budget_alerts (user_id, monthly_budget_usd, threshold_pct, notify_email, enabled,
+                                budget_amount, budget_currency, thresholds, forecast_alert, provider_budgets)
+     values ($1, $2, $3, null, $4, $5, $6, $7::int[], $8, $9::jsonb)
+     on conflict (user_id) do update set monthly_budget_usd = $2, threshold_pct = $3, notify_email = null,
+       enabled = $4, budget_amount = $5, budget_currency = $6, thresholds = $7::int[], forecast_alert = $8,
+       provider_budgets = $9::jsonb, updated_at = now()
+     returning ${BUDGET_COLS}`,
+    [userId, a.monthly_budget_usd, Math.min(...a.thresholds, 100), a.enabled, a.budget_amount, a.budget_currency,
+      a.thresholds, a.forecast_alert, JSON.stringify(a.provider_budgets)],
   );
   return rows[0];
+}
+
+/** Cost per UTC day and provider_source since `from` (YYYY-MM-DD), plus first-ever usage day per source. */
+export async function dailyCostsBySource(db: Db, userId: string, from: string) {
+  const [{ rows: days }, { rows: firsts }] = await Promise.all([
+    db.query<{ day: string; source: string; cost: number }>(
+      `select left(created_at, 10) as day, provider_source as source, coalesce(sum(cost_total), 0)::float8 as cost
+         from activity_rows where user_id = $1 and created_at >= $2 group by 1, 2`,
+      [userId, from],
+    ),
+    db.query<{ source: string; first_day: string }>(
+      `select provider_source as source, left(min(created_at), 10) as first_day
+         from activity_rows where user_id = $1 group by 1`,
+      [userId],
+    ),
+  ]);
+  return { days, firsts };
+}
+
+export interface BudgetEvent {
+  id: string;
+  period: string;
+  kind: "threshold" | "forecast";
+  scope: string;
+  threshold_pct: number;
+  spent_usd: number;
+  budget_usd: number;
+  forecast_usd: number | null;
+  read_at: string | null;
+  created_at: string;
+}
+
+/** Inserts alerts; the unique key dedupes per period. Returns how many were new. */
+export async function insertBudgetEvents(
+  db: Db,
+  userId: string,
+  period: string,
+  events: Array<{ kind: string; scope: string; threshold_pct: number; spent_usd: number; budget_usd: number; forecast_usd: number | null }>,
+): Promise<number> {
+  let n = 0;
+  for (const e of events) {
+    const r = await db.query(
+      `insert into budget_events (user_id, period, kind, scope, threshold_pct, spent_usd, budget_usd, forecast_usd)
+       values ($1, $2, $3, $4, $5, $6, $7, $8)
+       on conflict on constraint budget_events_dedupe_key do nothing returning id`,
+      [userId, period, e.kind, e.scope, e.threshold_pct, e.spent_usd, e.budget_usd, e.forecast_usd],
+    );
+    n += r.rows.length;
+  }
+  return n;
+}
+
+export async function listBudgetEvents(db: Db, userId: string, limit = 50): Promise<{ alerts: BudgetEvent[]; unread: number }> {
+  const [{ rows }, { rows: c }] = await Promise.all([
+    db.query<BudgetEvent>(
+      `select id, period, kind, scope, threshold_pct, spent_usd, budget_usd, forecast_usd, read_at, created_at
+         from budget_events where user_id = $1 order by created_at desc, threshold_pct desc limit $2`,
+      [userId, limit],
+    ),
+    db.query<{ n: number }>("select count(*)::int as n from budget_events where user_id = $1 and read_at is null", [userId]),
+  ]);
+  return { alerts: rows, unread: Number(c[0]?.n ?? 0) };
+}
+
+/** Marks the caller's alerts read (all when `ids` is null). Ids of other users are ignored. */
+export async function markBudgetEventsRead(db: Db, userId: string, ids: string[] | null): Promise<number> {
+  const r = ids
+    ? await db.query("update budget_events set read_at = now() where user_id = $1 and read_at is null and id = any($2::uuid[]) returning id", [userId, ids])
+    : await db.query("update budget_events set read_at = now() where user_id = $1 and read_at is null returning id", [userId]);
+  return r.rows.length;
 }
 
 export async function deleteBudgetAlert(db: Db, userId: string) {
@@ -527,10 +617,11 @@ export async function deleteUserCascade(db: Db, userId: string): Promise<void> {
 
 // ---------------------------------------------------------------- budget check (cron)
 
-export async function budgetAlertsForCron(db: Db) {
-  const { rows } = await db.query<{ id: string; user_id: string; monthly_budget_usd: number; threshold_pct: number; last_notified_at: string | null }>(
-    `select id, user_id, monthly_budget_usd::float8 as monthly_budget_usd, threshold_pct, last_notified_at
-       from budget_alerts where enabled and public.is_pro(user_id)`,
+export async function budgetAlertsForCron(db: Db, onlyUserId: string | null = null) {
+  const { rows } = await db.query<BudgetRow & { user_id: string }>(
+    `select user_id, ${BUDGET_COLS} from budget_alerts
+      where enabled and public.is_pro(user_id) and ($1::uuid is null or user_id = $1)`,
+    [onlyUserId],
   );
   return rows;
 }

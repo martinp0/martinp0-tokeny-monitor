@@ -29,7 +29,7 @@ CI template: `ci/github-actions-ci.yml` (lint, typecheck, test, build). Deploys 
 - **Neon project** `tokeny` (`purple-lab-69702333`, aws-eu-central-1, Free plan). Schema: `db/schema.sql` (single idempotent file, applied with `scripts/db-migrate.mjs`). Users live in `neon_auth."user"` (managed by Neon Auth); every table's `user_id` references it `ON DELETE CASCADE`.
 - **No RLS, no Data API.** The only database client is the server, connecting with `DATABASE_URL`. **Every** query that touches user data is in `server/repo.ts` and takes the caller's user id explicitly; functions that cross users say so in their name (`…ForCron`, `…ByShareToken`, `…ByCustomer`, `userIdByMcpToken`). `src/test/server-isolation.test.ts` proves two users can't see each other's rows through any route. Keep it that way when adding endpoints.
 - **One function** (Vercel Hobby): `api/index.ts` runs the Hono app from `server/app.ts` (`basePath("/api")`). `vercel.json` rewrites `/api/:path*` → `/api?__path=:path*`; this rewrite must stay first. Don't add more files under `api/`.
-- **Cron:** one daily job `/api/cron/daily` (Hobby allows daily only): ČNB USD/CZK rate, Pro auto-sync, budget check (`server/cron.ts`). Protected by `CRON_SECRET` (Vercel sends it as Bearer).
+- **Cron:** one daily job `/api/cron/daily` (Hobby allows daily only): ČNB USD/CZK rate, Pro auto-sync, budget check → in-app alerts in `budget_events`, deduped per month by its unique key (`server/cron.ts`, `server/budget-status.ts`). No e-mail is sent (no e-mail service). Protected by `CRON_SECRET` (Vercel sends it as Bearer).
 - **Auth** (`server/auth.ts`): `/api/auth/*` is a same-origin proxy to Neon Auth (`@neon/auth/server` `handleAuthProxyRequest`), so session cookies are first-party. A request is authenticated by (1) those cookies, (2) `Authorization: Bearer <Neon Auth JWT>` (verified against the JWKS), or (3) a personal `orm_…` token (sha256 in `mcp_tokens`; MCP and `/api/usage-summary` only). Cookie-authenticated writes from a foreign `Origin` are rejected.
 - **Env (Vercel → Production):** `DATABASE_URL` (pooled Neon URL), `NEON_AUTH_BASE_URL`, `NEON_AUTH_COOKIE_SECRET` (≥32 chars), `CREDENTIALS_ENCRYPTION_KEY` (32 bytes base64, AES-256-GCM for provider keys), `CRON_SECRET`, `APP_URL`; optional `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_MONTHLY`, `STRIPE_PRICE_YEARLY`, `STRIPE_PORTAL_CONFIGURATION` (bpc_… Tokeny portal), `STRIPE_TRIAL_DAYS`. Never read the marketplace-injected `POSTGRES_*` / `SUPABASE_*` variables (a test enforces `DATABASE_URL`). Never commit real values; `.env.example` lists the names.
 - Public URLs users save stay on the site: `/api/mcp`, `/api/og-dashboard`, `/shared/:token` (`src/lib/public-urls.ts`).
@@ -65,7 +65,7 @@ The frontend needs no backend keys (everything is same-origin `/api`). Optional:
 | `me`, `profile`, `account/delete` | Profile; account deletion cancels Stripe first, then deletes the Neon Auth user (cascades to all rows) |
 | `activity`, `activity/import` | Paged usage rows (free: last 30 days); CSV import in batches of 500, upsert on `(user_id, generation_id)` |
 | `credentials`, `credentials/:id/sync` | Provider keys (encrypted with `CREDENTIALS_ENCRYPTION_KEY`, only a masked preview is returned) and user-initiated sync (`server/lib/sync-runner.ts`) |
-| `budget-alert`, `mcp-tokens`, `shares` | Pro features (403 `pro_required` for free users) |
+| `budget-alert`, `budget`, `alerts`, `alerts/read`, `mcp-tokens`, `shares` | Pro features (403 `pro_required` for free users). `budget` = progress + month-end forecast (`server/lib/forecast.ts`, weighted run-rate, pure + tested); budgets in USD or CZK, optional per provider (`server/lib/budget.ts`) |
 | `subscription`, `billing/checkout`, `billing/portal`, `stripe-webhook` | Stripe Pro tier; `subscriptions` is written only by the webhook |
 | `chat-agent`, `fun-ai`, `ai-key` | AI features with the **user's own** Anthropic / OpenAI / OpenRouter key (`ai_keys` encrypted + `ai_settings` provider/model, BYOK; adapters + tool calling in `server/ai-providers.ts`; no server key, never add one); open to every plan (`ai-settings`, `ai-models` too), data tools scoped to the caller |
 | `mcp` | Stateless Streamable-HTTP MCP server (`server/mcp.ts`, `mcp-lite`); `Authorization: Bearer orm_…`, Pro only, every tool scoped to the token owner |
@@ -80,7 +80,7 @@ Pure, unit-tested logic lives in `server/lib/` (`plan.ts`, `billing.ts`, `sync-c
 - **`activity_rows`**: central fact table. Unique key is **`(user_id, generation_id)`** (synthetic sync ids are identical across users). `created_at` is TEXT (ISO-ish). Aggregate in SQL (`repo.aggregateActivity`). `provider_source` ∈ `{openrouter, anthropic, openai}`. `request_count` is 1 for per-generation rows, N for Admin API bucket rows.
 - **`provider_credentials`**: API keys encrypted by the server (AES-256-GCM); only `key_preview` is ever returned.
 - **`mcp_tokens`**: personal `orm_` tokens; only the `sha256` hash is stored.
-- **`budget_alerts`**, **`shared_dashboards`**, **`subscriptions`**, **`profiles`**, **`exchange_rates`**.
+- **`budget_alerts`** (budget config), **`budget_events`** (in-app alerts), **`shared_dashboards`**, **`subscriptions`**, **`profiles`**, **`exchange_rates`**.
 - `public.is_pro(user_id)` mirrors `server/lib/plan.ts`; keep them in sync.
 
 ### Key Conventions
