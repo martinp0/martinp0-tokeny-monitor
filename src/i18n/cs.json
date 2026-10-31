@@ -260,6 +260,7 @@
       "blog": "Blog",
       "login": "Přihlášení",
       "privacy": "Ochrana osobních údajů",
+      "terms": "Obchodní podmínky",
       "coffee": "Kup mi kafe",
       "rights": "Vytvořil Martin Pohl"
     }
@@ -283,6 +284,11 @@
     "upgrade": "Přejít na Pro",
     "notify": "Začít zdarma",
     "vatNote": "Ceny jsou konečné, nejsem plátce DPH. Předplatné zrušíš kdykoli v Nastavení.",
+    "terms": "Obchodní podmínky",
+    "consentBefore": "Souhlasím s ",
+    "consentLink": "obchodními podmínkami",
+    "consentAfter": " a žádám o zpřístupnění Pro ihned. Beru na vědomí, že když od smlouvy odstoupím do 14 dnů, zaplatím poměrnou část ceny za už poskytnutou dobu, a že po úplném poskytnutí služby právo na odstoupení zaniká.",
+    "consentRequired": "Pro pokračování potvrď souhlas s obchodními podmínkami.",
     "features": {
       "dashboard": "Dashboard s grafy a filtry",
       "oneProvider": "1 napojený poskytovatel",
@@ -293,8 +299,8 @@
       "everythingFree": "Vše z tarifu Free",
       "unlimitedProviders": "OpenRouter, Anthropic i OpenAI najednou",
       "fullHistory": "Celá historie bez omezení",
-      "autoSync": "Automatická synchronizace každou hodinu",
-      "budgetAlerts": "Rozpočtové alerty e-mailem",
+      "autoSync": "Automatická synchronizace jednou denně",
+      "budgetAlerts": "Rozpočtové alerty v aplikaci",
       "forecast": "Predikce nákladů do konce měsíce",
       "aiAgent": "AI asistent nad tvými daty",
       "exports": "Export do PDF a PNG",

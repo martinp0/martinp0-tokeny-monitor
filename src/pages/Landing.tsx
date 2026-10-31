@@ -277,6 +277,7 @@ export default function Landing() {
             </FooterLink>
             <FooterLink href="https://martinpohl.cz" external>martinpohl.cz</FooterLink>
             <FooterLink to="/privacy">{t("landing.footer.privacy")}</FooterLink>
+            <FooterLink to="/terms">{t("landing.footer.terms")}</FooterLink>
             <FooterLink href="https://buymeacoffee.com/martinpohlp" external>
               <Coffee className="h-4 w-4" aria-hidden /> {t("landing.footer.coffee")}
             </FooterLink>

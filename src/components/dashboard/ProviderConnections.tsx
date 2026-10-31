@@ -272,7 +272,7 @@ export function ProviderConnections() {
           <p className="text-xs text-muted-foreground">
             Free: 1 poskytovatel, ruční sync, posledních 30 dní.{" "}
             <button type="button" className="text-primary underline-offset-2 hover:underline" onClick={() => setUpgradeFeature("auto_sync")}>
-              Pro synchronizuje automaticky každou hodinu.
+              Pro synchronizuje automaticky jednou denně.
             </button>
           </p>
         )}

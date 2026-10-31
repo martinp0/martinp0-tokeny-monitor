@@ -3,6 +3,8 @@ import {
   HANDLED_EVENTS,
   handleStripeEvent,
   invoiceSubscriptionId,
+  TERMS_VERSION,
+  parseCheckoutConsent,
   parseInterval,
   portalSessionParams,
   safeAppUrl,
@@ -270,5 +272,26 @@ describe("portalSessionParams", () => {
     expect(portalSessionParams("cus_1", ret, undefined)).toEqual({ customer: "cus_1", return_url: ret });
     expect(portalSessionParams("cus_1", ret, "")).not.toHaveProperty("configuration");
     expect(portalSessionParams("cus_1", ret, "price_123")).not.toHaveProperty("configuration");
+  });
+});
+
+describe("parseCheckoutConsent", () => {
+  const now = new Date("2026-10-31T10:00:00.000Z");
+  it("requires both the terms and the immediate-start consent", () => {
+    expect(parseCheckoutConsent(undefined, now)).toBeNull();
+    expect(parseCheckoutConsent({ terms: true }, now)).toBeNull();
+    expect(parseCheckoutConsent({ immediateStart: true }, now)).toBeNull();
+    expect(parseCheckoutConsent({ terms: "true", immediateStart: true }, now)).toBeNull();
+  });
+  it("records the server time, terms version and a normalised client time", () => {
+    expect(parseCheckoutConsent({ terms: true, immediateStart: true, at: "2026-10-31T09:59:58Z" }, now)).toEqual({
+      terms_version: TERMS_VERSION,
+      consent_at: "2026-10-31T10:00:00.000Z",
+      consent_client_at: "2026-10-31T09:59:58.000Z",
+      immediate_start: "true",
+    });
+  });
+  it("ignores an invalid client time", () => {
+    expect(parseCheckoutConsent({ terms: true, immediateStart: true, at: "nope" }, now)?.consent_client_at).toBe("");
   });
 });

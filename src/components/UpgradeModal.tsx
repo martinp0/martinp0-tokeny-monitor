@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Check } from "lucide-react";
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
   Dialog,
@@ -9,6 +10,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { useSubscription } from "@/hooks/useSubscription";
 import {
@@ -33,8 +35,12 @@ export function UpgradeModal({ open, onOpenChange, feature, defaultInterval = "y
   const { startCheckout, hasCustomer } = useSubscription();
   const { t, i18n } = useTranslation();
   const [interval, setBillingInterval] = useState<BillingInterval>(defaultInterval);
+  const [consent, setConsent] = useState(false);
   useEffect(() => {
-    if (open) setBillingInterval(defaultInterval);
+    if (open) {
+      setBillingInterval(defaultInterval);
+      setConsent(false);
+    }
   }, [open, defaultInterval]);
   const [loading, setLoading] = useState(false);
   const locale = i18n.language?.startsWith("en") ? "en-GB" : "cs-CZ";
@@ -47,7 +53,7 @@ export function UpgradeModal({ open, onOpenChange, feature, defaultInterval = "y
 
   async function handleUpgrade() {
     setLoading(true);
-    await startCheckout(interval);
+    await startCheckout(interval, consent);
     setLoading(false);
   }
 
@@ -94,7 +100,26 @@ export function UpgradeModal({ open, onOpenChange, feature, defaultInterval = "y
           ))}
         </ul>
 
-        <Button size="lg" className="w-full" onClick={handleUpgrade} disabled={loading || !PRO_CHECKOUT_ENABLED}>
+        {PRO_CHECKOUT_ENABLED && (
+          <div className="flex items-start gap-2.5 rounded-2xl border border-border p-3">
+            <Checkbox
+              id="upgrade-consent"
+              checked={consent}
+              onCheckedChange={(v) => setConsent(v === true)}
+              className="mt-0.5"
+              aria-required="true"
+            />
+            <label htmlFor="upgrade-consent" className="text-xs leading-snug text-muted-foreground">
+              {t("pricing.consentBefore")}
+              <Link to="/terms" target="_blank" rel="noopener" className="underline text-foreground">
+                {t("pricing.consentLink")}
+              </Link>
+              {t("pricing.consentAfter")}
+            </label>
+          </div>
+        )}
+
+        <Button size="lg" className="w-full" onClick={handleUpgrade} disabled={loading || !PRO_CHECKOUT_ENABLED || !consent}>
           {!PRO_CHECKOUT_ENABLED
             ? t("pricing.soon")
             : loading

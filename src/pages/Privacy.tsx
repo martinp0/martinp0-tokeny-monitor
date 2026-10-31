@@ -6,16 +6,17 @@ import { PublicHeader } from "@/components/PublicHeader";
 /**
  * Privacy policy (Czech + English on one prerendered page, so both are indexable and nothing
  * changes on hydration). Describes what the code in this repo actually stores and sends.
- * TODO(martin): confirm the items marked in the PR (IČO, contact e-mail, Supabase region,
- * transfer mechanisms, retention of e-mail logs) before relying on this page.
+ * Operator facts (IČO, sídlo) are taken from the public ARES record; the contact e-mail is the
+ * one published on martinpohl.cz. TODO(martin): have the page reviewed before relying on it.
  */
 
-const UPDATED = { cs: "30. 10. 2026", en: "30 October 2026" };
+const UPDATED = { cs: "31. 10. 2026", en: "31 October 2026" };
 const OPERATOR_NAME = "Bc. Martin Pohl";
-/** TODO(martin): IČO of the sole proprietorship. Shown only when set. */
-const OPERATOR_ICO: string | null = null;
-/** TODO(martin): a contact e-mail for privacy requests. Shown only when set. */
-const CONTACT_EMAIL: string | null = null;
+/** IČO and registered address (sídlo) as published in ARES. */
+const OPERATOR_ICO: string | null = "17256712";
+const OPERATOR_SEAT = "Hrnčířská 221, Zdiměřice, 252 42 Jesenice";
+/** Contact e-mail published on martinpohl.cz. */
+const CONTACT_EMAIL: string | null = "hello@martinpohl.cz";
 const CONTACT_WEB = "https://martinpohl.cz";
 
 type Block = { h: string; p?: string[]; ul?: string[] };
@@ -39,21 +40,20 @@ const CS: Copy = {
     {
       h: "1. Kdo údaje zpracovává",
       p: [
-        `Správcem je ${OPERATOR_NAME}, fyzická osoba podnikající (OSVČ), Praha${OPERATOR_ICO ? `, IČO ${OPERATOR_ICO}` : ""}.`,
+        `Správcem je ${OPERATOR_NAME}, fyzická osoba podnikající (OSVČ), se sídlem ${OPERATOR_SEAT}${OPERATOR_ICO ? `, IČO ${OPERATOR_ICO}` : ""}.`,
         `Kontakt pro všechny dotazy k osobním údajům: ${contactCs}.`,
       ],
     },
     {
       h: "2. Jaké údaje ukládáme",
       ul: [
-        "Účet: e-mail, ID uživatele a údaje o přihlášení (heslo ukládá Supabase Auth pouze jako hash). Při přihlášení přes Google nebo Apple dostaneme od nich e-mail a identifikátor účtu; u Apple to může být anonymní přeposílací adresa.",
+        "Účet: e-mail, ID uživatele a údaje o přihlášení (přihlášení zajišťuje Neon Auth, heslo ukládá pouze jako hash). Při přihlášení přes Google nebo Apple dostaneme od nich e-mail a identifikátor účtu; u Apple to může být anonymní přeposílací adresa.",
         "Profil: zobrazované jméno a odkaz na avatar, pokud je vyplníte.",
-        "API klíče poskytovatelů (OpenRouter, Anthropic, OpenAI), které sami připojíte. Na serveru je ukládáme zašifrované (Supabase Vault, autentizované šifrování s klíčem uloženým mimo databázi). Dešifrují se jen v serverové funkci ve chvíli synchronizace; prohlížeč ani aplikace je nikdy nedostanou, vidíte jen poslední 4 znaky. Doporučujeme připojovat klíče jen s oprávněním ke čtení nákladů, kde to poskytovatel umožňuje.",
+        "API klíče poskytovatelů (OpenRouter, Anthropic, OpenAI), které sami připojíte. Na serveru je ukládáme zašifrované (autentizované šifrování AES-256-GCM s klíčem uloženým mimo databázi). Dešifrují se jen v serverové funkci ve chvíli synchronizace; prohlížeč ani aplikace je nikdy nedostanou, vidíte jen poslední 4 znaky. Doporučujeme připojovat klíče jen s oprávněním ke čtení nákladů, kde to poskytovatel umožňuje.",
         "Údaje o využití AI, které stáhneme od poskytovatelů pomocí vašich klíčů: čas, model, poskytovatel, počty tokenů, cena, doba generování, název aplikace a název API klíče u poskytovatele. Neukládáme obsah vašich promptů ani odpovědí.",
         "Nastavení: měsíční rozpočet, práh upozornění a případně e-mail pro upozornění.",
         "Tokeny pro MCP server (ukládáme jen jejich hash) a sdílené odkazy na dashboard, pokud je vytvoříte.",
         "Předplatné Pro: ID zákazníka a předplatného ve Stripe, stav a období předplatného. Údaje o platební kartě zadáváte přímo u Stripe, k nám se nedostanou.",
-        "Záznamy o odeslaných e-mailech (adresa příjemce, typ zprávy, stav doručení), abychom neposílali duplicity a respektovali odhlášení.",
         "Technické záznamy hostingu a serverových funkcí (např. IP adresa, čas a adresa požadavku), které vedou poskytovatelé infrastruktury.",
       ],
     },
@@ -70,10 +70,9 @@ const CS: Copy = {
       h: "4. Komu údaje předáváme",
       p: ["Jen zpracovatelům, bez kterých služba nefunguje:"],
       ul: [
-        "Supabase: databáze, přihlášení a serverové funkce.",
-        "Vercel: hosting webu.",
+        "Neon: databáze a přihlášení (Neon Auth), včetně e-mailů pro ověření účtu a obnovu hesla.",
+        "Vercel: hosting webu a serverové funkce.",
         "Stripe: platby předplatného Pro.",
-        "Resend: odesílání e-mailů (potvrzení účtu, obnova hesla).",
         "Anthropic: AI asistent v dashboardu (funkce Pro). Odesíláme mu vaše zprávy asistentovi a souhrny vašich nákladů potřebné k odpovědi. Používá se jen tehdy, když asistentovi napíšete.",
         "Google a Apple: jen pokud se přes ně přihlásíte.",
         "OpenRouter, Anthropic a OpenAI: voláme jejich API s vaším klíčem, abychom stáhli vaše náklady. Nic dalšího jim neposíláme.",
@@ -83,7 +82,7 @@ const CS: Copy = {
     {
       h: "5. Kde jsou údaje uložené",
       p: [
-        "Databáze běží u Supabase. Někteří z uvedených poskytovatelů (např. Vercel, Stripe, Resend, Anthropic) mohou údaje zpracovávat i v USA. V takovém případě se předání opírá o standardní smluvní doložky EU nebo o rámec EU–USA pro ochranu osobních údajů, které tito poskytovatelé nabízejí.",
+        "Databáze běží u Neon v regionu EU (Frankfurt). Někteří z uvedených poskytovatelů (např. Neon, Vercel, Stripe, Anthropic) mohou údaje zpracovávat i v USA. V takovém případě se předání opírá o standardní smluvní doložky EU nebo o rámec EU–USA pro ochranu osobních údajů, které tito poskytovatelé nabízejí.",
       ],
     },
     {
@@ -114,7 +113,10 @@ const CS: Copy = {
     },
     {
       h: "10. Změny",
-      p: ["Když se zpracování změní, aktualizujeme tuto stránku a datum nahoře. Podstatné změny oznámíme e-mailem nebo na webu."],
+      p: [
+        "Když se zpracování změní, aktualizujeme tuto stránku a datum nahoře. Podstatné změny oznámíme e-mailem nebo na webu.",
+        "Smluvní podmínky služby najdete v obchodních podmínkách na tokeny.martinpohl.cz/terms.",
+      ],
     },
   ],
 };
@@ -128,21 +130,20 @@ const EN: Copy = {
     {
       h: "1. Who is responsible",
       p: [
-        `The controller is ${OPERATOR_NAME}, a sole trader (OSVČ) based in Prague, Czech Republic${OPERATOR_ICO ? `, company ID (IČO) ${OPERATOR_ICO}` : ""}.`,
+        `The controller is ${OPERATOR_NAME}, a sole trader (OSVČ) registered at ${OPERATOR_SEAT}, Czech Republic${OPERATOR_ICO ? `, company ID (IČO) ${OPERATOR_ICO}` : ""}.`,
         `Contact for anything about your personal data: ${contactEn}.`,
       ],
     },
     {
       h: "2. What we store",
       ul: [
-        "Account: e-mail, user ID and sign-in data (Supabase Auth stores passwords only as a hash). If you sign in with Google or Apple, we receive your e-mail and account identifier from them; with Apple this can be a private relay address.",
+        "Account: e-mail, user ID and sign-in data (sign-in is handled by Neon Auth, which stores passwords only as a hash). If you sign in with Google or Apple, we receive your e-mail and account identifier from them; with Apple this can be a private relay address.",
         "Profile: display name and avatar link, if you set them.",
-        "Provider API keys (OpenRouter, Anthropic, OpenAI) that you connect. They are encrypted at rest on the server (Supabase Vault, authenticated encryption with a key kept outside the database). They are decrypted only inside a server function when a sync runs; the browser and the apps never receive them, you only see the last 4 characters. Where the provider allows it, connect a key that can only read usage and costs.",
+        "Provider API keys (OpenRouter, Anthropic, OpenAI) that you connect. They are encrypted at rest on the server (AES-256-GCM authenticated encryption with a key kept outside the database). They are decrypted only inside a server function when a sync runs; the browser and the apps never receive them, you only see the last 4 characters. Where the provider allows it, connect a key that can only read usage and costs.",
         "AI usage data we fetch from your providers with your keys: time, model, provider, token counts, cost, generation time, app name and the key's name at the provider. We do not store the content of your prompts or responses.",
         "Settings: monthly budget, alert threshold and, optionally, an e-mail address for alerts.",
         "MCP server tokens (only their hash is stored) and shared dashboard links, if you create them.",
         "Pro subscription: Stripe customer and subscription IDs, status and billing period. You enter card details directly with Stripe; they never reach us.",
-        "A log of e-mails sent (recipient address, message type, delivery status), so we do not send duplicates and respect unsubscribes.",
         "Technical logs kept by our hosting and server-function providers (for example IP address, time and requested URL).",
       ],
     },
@@ -159,10 +160,9 @@ const EN: Copy = {
       h: "4. Who we share data with",
       p: ["Only with processors the service cannot run without:"],
       ul: [
-        "Supabase: database, authentication and server functions.",
-        "Vercel: website hosting.",
+        "Neon: database and sign-in (Neon Auth), including account verification and password reset e-mails.",
+        "Vercel: website hosting and server functions.",
         "Stripe: Pro subscription payments.",
-        "Resend: sending e-mails (account confirmation, password reset).",
         "Anthropic: the AI assistant in the dashboard (a Pro feature). It receives your messages to the assistant and the cost summaries needed to answer. Used only when you write to the assistant.",
         "Google and Apple: only if you sign in with them.",
         "OpenRouter, Anthropic and OpenAI: we call their APIs with your key to fetch your costs. We send them nothing else.",
@@ -172,7 +172,7 @@ const EN: Copy = {
     {
       h: "5. Where data is stored",
       p: [
-        "The database runs on Supabase. Some of the providers above (for example Vercel, Stripe, Resend and Anthropic) may also process data in the USA. Such transfers rely on the EU Standard Contractual Clauses or the EU–US Data Privacy Framework offered by those providers.",
+        "The database runs on Neon in the EU (Frankfurt). Some of the providers above (for example Neon, Vercel, Stripe and Anthropic) may also process data in the USA. Such transfers rely on the EU Standard Contractual Clauses or the EU–US Data Privacy Framework offered by those providers.",
       ],
     },
     {
@@ -203,7 +203,10 @@ const EN: Copy = {
     },
     {
       h: "10. Changes",
-      p: ["When processing changes, we update this page and the date at the top. Significant changes will be announced by e-mail or on the website."],
+      p: [
+        "When processing changes, we update this page and the date at the top. Significant changes will be announced by e-mail or on the website.",
+        "The contract terms for the service are in the terms of service at tokeny.martinpohl.cz/terms.",
+      ],
     },
   ],
 };
@@ -264,7 +267,10 @@ export default function Privacy() {
       </article>
 
       <footer className="border-t border-border/40 py-8 text-center text-sm text-muted-foreground">
-        <p>© {new Date().getFullYear()} <Link to="/" className="hover:text-foreground">Tokeny</Link></p>
+        <p>
+          © {new Date().getFullYear()} <Link to="/" className="hover:text-foreground">Tokeny</Link> ·{" "}
+          <Link to="/terms" className="hover:text-foreground">Obchodní podmínky / Terms</Link>
+        </p>
       </footer>
     </div>
   );

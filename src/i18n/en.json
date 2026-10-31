@@ -260,6 +260,7 @@
       "blog": "Blog",
       "login": "Sign in",
       "privacy": "Privacy policy",
+      "terms": "Terms of service",
       "coffee": "Buy me a coffee",
       "rights": "Made by Martin Pohl"
     }
@@ -283,6 +284,11 @@
     "upgrade": "Upgrade to Pro",
     "notify": "Start for free",
     "vatNote": "Prices are final (seller is not a VAT payer). Cancel any time in Settings.",
+    "terms": "Terms of service",
+    "consentBefore": "I agree to the ",
+    "consentLink": "terms of service",
+    "consentAfter": " and ask for Pro to start right away. I understand that if I withdraw within 14 days I pay a proportionate part of the price for the time already provided, and that the right of withdrawal ends once the service has been fully provided.",
+    "consentRequired": "Please confirm you agree to the terms to continue.",
     "features": {
       "dashboard": "Dashboard with charts and filters",
       "oneProvider": "1 connected provider",
@@ -293,8 +299,8 @@
       "everythingFree": "Everything in Free",
       "unlimitedProviders": "OpenRouter, Anthropic and OpenAI together",
       "fullHistory": "Unlimited history",
-      "autoSync": "Hourly automatic sync",
-      "budgetAlerts": "Budget alerts by e-mail",
+      "autoSync": "Daily automatic sync",
+      "budgetAlerts": "Budget alerts in the app",
       "forecast": "Month-end cost forecast",
       "aiAgent": "AI assistant over your data",
       "exports": "PDF and PNG export",

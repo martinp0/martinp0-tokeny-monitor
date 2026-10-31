@@ -38,10 +38,16 @@ async function openPortal(): Promise<void> {
   }
 }
 
-async function startCheckout(interval: BillingInterval = "month"): Promise<void> {
+/** `consented` = the user ticked the terms + immediate-start checkbox in the upgrade dialog. */
+async function startCheckout(interval: BillingInterval = "month", consented = false): Promise<void> {
+  if (!consented) {
+    toast.error(i18n.t("pricing.consentRequired"));
+    return;
+  }
   let url: string | undefined;
   try {
-    url = (await api<{ url?: string }>("/billing/checkout", { body: { interval } })).url;
+    const consent = { terms: true, immediateStart: true, at: new Date().toISOString() };
+    url = (await api<{ url?: string }>("/billing/checkout", { body: { interval, consent } })).url;
   } catch (e) {
     // Already subscribed (e.g. second tab) → manage the existing subscription instead.
     if (e instanceof ApiError && e.body?.error === "already_pro") return openPortal();

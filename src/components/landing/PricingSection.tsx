@@ -86,7 +86,12 @@ export function PricingSection({ ctaHref, signedIn = false }: { ctaHref: string;
           </Button>
         </div>
       </div>
-      <p className="text-center text-sm text-muted-foreground mt-6">{t("pricing.vatNote")}</p>
+      <p className="text-center text-sm text-muted-foreground mt-6">
+        {t("pricing.vatNote")}{" "}
+        <Link to="/terms" className="underline hover:text-foreground">
+          {t("pricing.terms")}
+        </Link>
+      </p>
     </section>
   );
 }
