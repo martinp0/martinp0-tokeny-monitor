@@ -72,7 +72,12 @@
   "support": {
     "title": "Podpoř vývoj",
     "titleHighlight": "kávou",
-    "desc": "Tokeny je zdarma a open-source. Pokud ti šetří čas nebo peníze, můžeš poděkovat symbolickým kafem. Každá podpora motivuje k dalšímu vylepšování."
+    "desc": "Tokeny je zdarma a open-source. Když ti ušetří čas nebo peníze, kafe na Buy Me a Coffee pokryje servery a čas na další verze.",
+    "button": "Podpořit kafem"
+  },
+  "blogSupport": {
+    "lead": "Psal jsem to po večerech. Pokud ti článek pomohl,",
+    "link": "podpoř mě kafem ☕"
   },
   "cta": {
     "title": "Připraven/a převzít",

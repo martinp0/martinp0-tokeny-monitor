@@ -4,8 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, ArrowRight, BookOpen, Calculator, Calendar, FileText } from "lucide-react";
 import { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import ShareButtons from "@/components/ShareButtons";
 import { PublicHeader } from "@/components/PublicHeader";
+import { csCopy } from "@/lib/cs-typography";
+import { isNativeAppSurface, supportHref } from "@/lib/support";
 
 interface BlogPostLayoutProps {
   title: string;
@@ -20,7 +23,9 @@ interface BlogPostLayoutProps {
 }
 
 export default function BlogPostLayout({ title, description, slug, date, dateLabel, tag, keywords, children }: BlogPostLayoutProps) {
+  const { t } = useTranslation();
   const url = `https://tokeny.martinpohl.cz/blog/${slug}`;
+  const showSupport = !isNativeAppSurface();
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Helmet>
@@ -161,8 +166,21 @@ export default function BlogPostLayout({ title, description, slug, date, dateLab
           </div>
         </div>
 
-        <div className="mt-10 pt-6 border-t border-border/40 flex justify-center">
+        <div className="mt-10 pt-6 border-t border-border/40 flex flex-col items-center">
           <ShareButtons url={url} title={title} />
+          {showSupport && (
+            <p data-testid="blog-support-line" className="mt-4 text-center text-sm leading-relaxed text-muted-foreground">
+              {csCopy(t("blogSupport.lead"))}{" "}
+              <a
+                href={supportHref("blog")}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-foreground underline decoration-border underline-offset-4 hover:decoration-foreground"
+              >
+                {csCopy(t("blogSupport.link"))}
+              </a>
+            </p>
+          )}
         </div>
       </article>
 
